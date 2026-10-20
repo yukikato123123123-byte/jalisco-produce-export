@@ -1,19 +1,37 @@
-# Jalisco Produce Export
+# Jalisco Produce Export · Fresh nopal
 
-A B2B agricultural export concept for Eduardo to review. It demonstrates how potential supply from Jalisco, Mexico, could be presented to produce buyers and brokers in Texas and Illinois. It is a concept prototype, not an operational marketplace, supplier offer, or verified export business.
+A bilingual B2B producer-dossier and logistics-map prototype for Eduardo, a fresh nopal producer in El Grullo, Jalisco, Mexico, exploring Texas and Illinois markets. This is a presentation and inquiry demonstration, not an operational export marketplace or a verified supplier/shipping offer.
 
-## Stack and local setup
+## Workspace and GitHub reconciliation
 
-React, TypeScript, Vite, Leaflet, and CSS. No backend, database, authentication, payments, email service, or new dependencies were added for the business workflow.
+At the start of the nopal migration review, the GitHub default branch was `main`, and both local HEAD and `origin/main` were at `ea3649d` (the earlier B2B sample-workflow commit). The later dossier, four-tab UI, bilingual localization, map shortcuts, and focused tests were present in this workspace as modified/untracked files, rather than in another branch or on GitHub `main`. That working implementation has been preserved and extended in this source version. Use the repository history and `git status` for current commit and delivery state. No public deployment is part of this update.
 
-Use Node.js **22.12+** and npm:
+## Reported facts and evidence boundaries
+
+According to the current producer information supplied in the brief:
+
+- Product: **fresh nopal**.
+- Producer location: **El Grullo, Jalisco, Mexico**. No exact farm location is provided.
+- Latest reported harvest: **486 cartons and slightly more than 10 metric tonnes**.
+- Intended U.S. markets: **Texas and Illinois**.
+- Eduardo reports contacts for refrigerated transport and prospective customs brokers.
+
+These are producer-reported facts, not independently audited commercial evidence. The latest harvest is not a recurring-capacity or stock-availability commitment. There is no exact total weight or net carton weight, so the application does not compute a per-carton average, an exact harvest total, or a packing reconciliation. The numeric 10 in the model is strictly a lower bound, not an exact weight.
+
+Variety, grade, carton weights/dimensions, packaging standard, pallet pattern, season, recurring capacity, prices, buyers, freight quotes, delivery times, routes, border crossings, documentation, certification, phytosanitary clearance, and legal export/import eligibility remain **Pending confirmation** or **Evidence required**. Unknown numeric values use `null`, never zero or synthetic estimates. Earlier fictional product/pricing/transport examples have been removed from current commercial data rather than reused for nopal. No simulated monetary or transit estimates remain.
+
+## Local setup and checks
+
+Stack: React, TypeScript, Vite, Leaflet, CSS, and responsive SVG/CSS graphics. No additional packages were installed.
+
+Requires Node.js **22.12+** and npm:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open Vite's printed `http://localhost:5173/` URL (the port may vary). For local checks and a preview of the production build:
+Open Vite's printed localhost URL. Available checks:
 
 ```sh
 npm run lint
@@ -22,86 +40,62 @@ npm run build
 npm run preview
 ```
 
-`npm test` uses Node's built-in test API and TypeScript stripping; no test framework is installed. Tests cover carton/pallet reconciliation, separate pricing and freight units, sample workflow states, and inquiry validation (including required fields, supported choices, quantity precision, and text limits). They do not verify browser rendering or map interactions.
+`build` runs TypeScript checking (`tsc --noEmit`) and the Vite production build. `test` uses Node's built-in test API and TypeScript stripping with the already-installed dependencies. Chart render tests use Vite's TSX transform and React server rendering with HTTP/WebSocket listening disabled; they do not open or simulate a browser.
 
-## Main sections and interactions
+## Four-view presentation
 
-- **Hero and concept notice:** illustrative local imagery, sample harvest volume, and a prominent unverified-data notice.
-- **Product and supply:** demonstration producer profile, fresh avocado, sample Hass variety and grade, packaging specifications, seasonal window, and explicit net-weight reconciliation.
-- **Interactive logistics map:** Regional Overview fits the existing approximate Jalisco, Texas, and Illinois points. Jalisco Origin zooms to the existing approximate origin point, hiding destinations and curves. Controls switch views, toggle curves, zoom, and reset. Markers expose geographic-detail popups. Resize handling and unmount cleanup preserve a single map instance.
-- **Readiness overview:** four sample review states link to the full documentation checklist. No verified compliance or eligibility is claimed.
-- **Pricing comparison:** three simulated price examples, with named places and qualifications about terms and cost inclusions.
-- **Logistics scenarios:** two fictional truck-planning examples, explicitly separate from actual map routing or carrier quotes.
-- **Documentation:** nine expandable review areas explain the evidence and follow-up needed.
-- **Buyer inquiry:** client-side validation, a local on-screen preview, and a clear-form action. Navigation and price cards link here.
+Producer is the default. Persistent semantic tab buttons support click, Arrow keys, Home, and End, with selected state, roving focus, and linked tab panels. Panels stay mounted while hidden so the map and form retain their state. No router or separate HTML pages were added.
 
-On narrow screens, content stacks, controls wrap, specification grids simplify, and the inquiry form becomes one column. Labels, keyboard focus, status text, and validation messages accompany visual cues.
+- **Producer / Productor:** reported harvest and location, visible **Supply & Market Overview** graphics, producer dossier, commercial review states, and packaging summary.
+- **Logistics / Logística:** existing interactive regional map, origin view, destination shortcuts, full-route reset, and target-market planning cards. Reported transport/customs contacts are distinguished from actual appointments, quotes, and bookings.
+- **Commercial / Comercial:** quotation information still needed, unknown price fields, packaging/specification review, and the local demo inquiry.
+- **Readiness / Preparación:** compact review statuses and expandable supporting-evidence requirements, without claims of completion or eligibility.
 
-## Sample-data policy
+### Visible Supply & Market Overview
 
-All invented commercial information lives in `src/sampleData.ts` wherever practical. It includes typed product, supply, pricing, logistics, and readiness data. `src/inquiry.ts` holds pure client-side validation; `src/components/` contains the business sections and inquiry form. These sources can be replaced with information Eduardo actually verifies.
+`src/components/SupplyMarketOverview.tsx` is mounted directly in the default Producer panel, above the dossier; it is not inside a disclosure or a hidden chart-only page. Three responsive figures are rendered:
 
-Every product, quantity, price, transport budget, transit range, carrier placeholder, and workflow state is **sample, illustrative, or simulated**. None is implied to have been supplied or approved by Eduardo. The producer profile is fictional; Eduardo's role, authority, and contact details are unverified. There are no real company identities, buyer commitments, certification claims, carrier partnerships, permits, or inspection records.
+1. **Harvest & cartons:** two associated metric nodes show the 486 reported cartons and the approximate weight (`>10`, explicitly qualified as slightly more than 10 metric tonnes). Their sizes are decorative, not proportional quantities, and their connection is not a packing conversion. Exact total and carton net weights are labeled unknown.
+2. **Texas vs Illinois:** a destination-relationship graphic and qualitative comparison matrix show the intended markets plus the buyer and commercial/transport evidence still needed. There are no fabricated buyer counts, demand, sales, rates, freight costs, distances, or transit times.
+3. **Export-readiness review:** an open-marker status diagram for buyer discovery, product/packaging specifications, quotation, transport arrangements, and phytosanitary/export-import review. No category is marked complete and no numerical completion percentage is computed.
 
-The fresh avocado / Hass / “export grade” descriptions are illustrative only. “Export grade” does not establish a grading standard or legal export/import eligibility. Imagery is not evidence of the producer's product.
+Figures have captions, SVG titles/descriptions where appropriate, and visible textual status equivalents. CSS stacks them at smaller widths. Their data references the same centralized report and unknown-value model as the rest of the presentation.
 
-### Supply and packaging examples
+## Data and localization architecture
 
-| Field | Illustrative value |
-| --- | --- |
-| Harvest allocation | 10 metric tonnes; no supply commitment |
-| Carton count | 486 cartons |
-| Net carton weight | 20.6 kg |
-| Carton dimensions | 60 × 40 × 25 cm (length × width × height) |
-| Pallet pattern | 27 cartons × 18 pallets = 486 cartons |
-| Example seasonal window | October–December; not a commitment |
-| Continuity | One planning allocation; no verified recurring capacity |
+- `src/sampleData.ts`: typed producer/product, approximate harvest, unknown specifications, commercial/logistics review, chart models, readiness states, and existing map coordinates. `sampleData.overview.harvest` references the shared supply object.
+- `src/components/`: dossier, packaging, commercial planning, inquiry, reusable status badge, and visible overview graphics.
+- `src/i18n.ts`: centralized English/Spanish text, including chart labels/descriptions, facts, pending states, map disclosures, form options, errors, and accessibility text.
+- `src/localization.tsx` and `src/localizeNode.ts`: React language state and presentation translation, without translating user entries or changing canonical form values.
+- `src/presentation.ts`: tab keyboard behavior and safe preference persistence.
+- `src/mapBehavior.ts`: existing responsive map focus/refresh controller.
 
-**486 × 20.6 kg = 10,011.6 kg = 10.0116 metric tonnes**, which is **11.6 kg more** than the independent 10-tonne harvest example. The UI shows this discrepancy explicitly. Neither quantity is confirmed available. Totals use integer grams; gross shipping weights and actual load capacity are not established.
+English is the first-use default. EN/ES switches instantly and updates document language/title. Only the language preference is stored under `jalisco-produce-export.language`; blocked storage is handled gracefully. Inquiry values remain in memory only. Tests check coverage of static interface phrases and centralized descriptions in both languages.
 
-### Simulated prices and logistics
+The verification-state model retains `sample`, `pending`, `verified`, and `quoted`. Producer-reported fields carry explicit report labels while supporting evidence remains pending. The map's route is illustrative. No field claims verified evidence or an actual quotation.
 
-| Price example | Invented price |
-| --- | --- |
-| FOB Manzanillo, Mexico | US$2.40/kg |
-| Delivered to an unspecified Texas destination | US$3.15/kg |
-| Delivered to an unspecified Illinois destination | US$3.55/kg |
+## Map behavior and geographic limitations
 
-Each price card says **SIMULATED PRICE — NOT A QUOTATION**. These are not researched market rates or Eduardo's prices. Actual terms require agreement on commodity, grade, volume, date, named place, applicable Incoterms/version, shipment details, and included costs. Delivered examples do not establish a delivery Incoterm or inclusions for customs-related costs, inspection, duties, taxes, unloading, or other charges. The FOB port example is independent of the truck scenarios. No landed-cost model links these invented prices to the freight budgets.
+The original representative points are retained: Jalisco `[20.66, -103.35]`, Texas `[31, -99]`, and Illinois `[40, -89]`. **The Jalisco point does not locate El Grullo or a farm.** El Grullo is the reported municipality in the dossier, not a newly fabricated map coordinate. The map explicitly discloses this distinction.
 
-| Fictional logistics example | Simulated budget | Invented transit range |
-| --- | --- | --- |
-| Jalisco → hypothetical Laredo crossing → a Texas destination | US$3,800/load | 3–5 days |
-| Jalisco → hypothetical Laredo crossing → a Chicago-area destination | US$5,900/load | 5–7 days |
+The same Leaflet instance persists through tab and language switches. Initial visible layout fits all three regional points with padding. Texas/Illinois shortcuts smoothly focus the existing points at zoom 6, with reduced-motion support. Jalisco Origin uses zoom 8 on the representative regional point. Show Full Route restores all points and schematic connections. The +/− controls, wheel zoom, pinch zoom, marker popups, connection toggle, and attribution are preserved. Visibility/ResizeObserver handling invalidates stale dimensions before reframing after tab reveal or viewport changes.
 
-Both use the explicit placeholder **Example Carrier (fictional sample)** and an illustrative refrigerated truck mode. These are **SIMULATED LOGISTICS — NO CARRIER QUOTE OR SHIPMENT HAS BEEN VERIFIED**. They are not bookings, road-routing results, real carrier quotes, or verified transit estimates. No distance, load capacity, destination address, temperature setting, real border plan, or actual transport scope is established. No shipment has been arranged through the prototype.
+Curves are sampled decorative Bezier polylines, not verified driving routes, border plans, or shipping lanes. No distances or route-derived timing are calculated. Existing destination/marker positions have not been converted into exact buyer or delivery locations.
 
-## Map provider, geography, and hosting limitations
+Tiles remain **Stadia Maps Alidade Smooth Dark**, with visible Stadia Maps, OpenMapTiles, and OpenStreetMap credits. The [style documentation](https://docs.stadiamaps.com/map-styles/alidade-smooth-dark/) gives the tile URL and attribution. [Authentication documentation](https://docs.stadiamaps.com/authentication/) permits key-free local browser development on localhost/127.0.0.1, subject to rate limits. The [provider FAQ](https://stadiamaps.com/faqs/) describes development/demo use and commercial restrictions. Non-local hosting needs provider authentication/licensing review; no key, account, subscription, or public hosting configuration was added. Internet access is required for tiles.
 
-The Leaflet map uses **Stadia Maps Alidade Smooth Dark** raster tiles with visible Stadia Maps, OpenMapTiles, and OpenStreetMap attribution. No CSS filtering is applied to tiles. The [style documentation](https://docs.stadiamaps.com/map-styles/alidade-smooth-dark/) specifies the URL and attribution. The provider's [authentication documentation](https://docs.stadiamaps.com/authentication/) allows local browser development on `localhost` or `127.0.0.1` without an API key or account, subject to strict rate limits. Its [FAQ](https://stadiamaps.com/faqs/) addresses development/testing and demonstration use; commercial production has different requirements.
+## Imagery
 
-Internet access is required. Tile errors show a notice. LAN addresses, forwarded preview domains, and public hosting require provider authentication/setup; this prototype does not configure it. No API key, paid plan, subscription, or account was created. Do not assume unrestricted production tile-service access.
+`src/assets/nopal-illustration.svg` is local illustrative artwork, not a photograph of Eduardo's produce or farm. Packaging uses a dimension-free neutral carton schematic. The earlier user-supplied design-reference asset is retained unused; it is no longer referenced by application styles or emitted as a displayed asset. No external image service was added.
 
-Only existing approximate regional points are used, not farm or warehouse locations. Jalisco Origin uses zoom 8, not a verified production-area extent. Connections are 65-point quadratic Bezier curves in Web Mercator, rendered as layered Leaflet polylines. Decorative control points are not waypoints. The map does **not** depict actual roads, the hypothetical Laredo crossing, or a verified shipping lane. No Jalisco boundary, road distance, farm address, or exact field coordinate is fabricated.
+## Inquiry limitations
 
-`src/assets/design-reference.png` is the retained user-supplied reference. CSS crops its still-life photograph for the hero and product card. It is illustrative, not producer photography. A separate high-resolution photo can replace it later. No external image service is used.
+The form collects company, email, intended destination, fresh nopal, desired quantity, packaging requirements, delivery terms, and a message. Existing client-side validation and the explicit local demo preview remain. Changing tabs/languages preserves in-session entries; editing clears the preview and reset clears the form. **No message is sent, no inquiry is saved, and no quotation or booking is created.** There is no backend, email service, API submission, local-storage inquiry persistence, database, or invented contact address.
 
-## Inquiry and backend limitations
+## Verification and remaining review
 
-The form collects buyer/company, email, destination, sample product, quantity in kilograms (up to three decimals), packaging requirements, delivery terms, and questions. It validates inputs locally, focuses invalid fields, and shows a clearly labeled demo preview after validation. Editing clears the preview; reset clears the form and validation state.
+Tests cover reported/unknown data, honest chart states, English/Spanish labels, actual React chart markup in both languages, preserved navigation/language/map controllers, and inquiry validation. Server-rendered markup checks are not browser visual tests.
 
-**Nothing is sent or stored.** There is no submission endpoint, network request for inquiries, email delivery, inquiry ID, quotation, booking, local-storage persistence, or database. The browser holds the form values only for the current page session; reloading clears them. No invented email address or contact detail for Eduardo is shown.
+No browser-testing tool is available in this workspace. Manually inspect desktop/mobile chart readability, all four tabs and both languages, map initial extent, origin/destination/full-route interactions, wheel/pinch zoom, tab/resize sizing, label placement, attribution, form errors, preview, reset, and language persistence.
 
-## What Eduardo must confirm for real business use
-
-- Commodity, variety, actual grade/specifications, producer identity, authority to sell, and origin documentation.
-- Harvest volume, availability calendar, recurring supply, offered carton count, net/gross weights, dimensions, pallet configuration, labeling, and load suitability.
-- Lot traceability, applicable certifications and supporting evidence, export/import documents, and current commodity-specific phytosanitary requirements for the shipment circumstances.
-- Dated prices, named places, applicable commercial terms, payment terms, and all inclusions/exclusions.
-- Actual buyers, final destination addresses, carrier quotations, border process, road route, cold-chain plan, handling, and realistic transit expectations.
-- Approved business contact information and an authorized inquiry-delivery workflow with appropriate data handling.
-- Hosting and tile-provider licensing/authentication before sharing beyond local development.
-
-## Verification limits
-
-Build, lint, and focused unit checks can run locally. No browser tool is installed/configured in the current workspace, so no visual or end-to-end browser verification is claimed. Manually check both map views, zoom/reset/connection controls, tile attribution, desktop/mobile layout, documentation expansion, inquiry errors, successful demo preview, editing, and clearing the form. No public deployment is part of this task.
+Before real commercial use, Eduardo must confirm specifications, exact weights, availability, identity/origin records, buyers, commercial terms, transport/customs arrangements, and applicable shipment-specific export/import/phytosanitary requirements with appropriate evidence and qualified trade partners. Public deployment is outside this source update and requires separate review and authorization.

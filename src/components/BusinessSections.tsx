@@ -1,39 +1,54 @@
-import { sampleData as data, supplyTotals } from '../sampleData';
+import { sampleData as data } from '../sampleData';
+import { Localized } from '../localization';
+import { StatusBadge } from './StatusBadge';
 
 export const formatNumber = (value: number, digits = 1) => new Intl.NumberFormat('en-US', { maximumFractionDigits: digits }).format(value);
-const usd = (value: number, digits = 2) => `US$${new Intl.NumberFormat('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value)}`;
 
 function SectionHeading({ step, title, description, id }: { step: string; title: string; description: string; id: string }) {
   return <div className="business-heading"><div><p className="eyebrow">{step}</p><h2 id={id}>{title}</h2></div><p>{description}</p></div>;
 }
 
-export function ProductSupply() {
-  const { product, supply } = data;
-  const specs = [
-    ['Sample harvest volume', `${formatNumber(supply.harvestTonnes)} metric tonnes`, 'Independent illustrative allocation; no supply commitment.'],
-    ['Sample carton count', `${formatNumber(supply.cartonCount)} cartons`, 'Illustrative pack-out count; not confirmed inventory.'],
-    ['Sample net carton weight', `${formatNumber(supply.cartonNetKg)} kg`, 'Net product only; gross shipping weight not established.'],
-    ['Example carton dimensions', `${supply.cartonDimensionsCm.join(' × ')} cm`, 'Length × width × height; illustrative pack specification.'],
-    ['Illustrative pallet configuration', `${supply.cartonsPerPallet} cartons × ${supply.palletCount} pallets`, `${formatNumber(supplyTotals.palletCartons)} cartons total; pallet suitability and gross load to review.`],
-    ['Example seasonal availability', supply.harvestWindow, supply.continuity],
-  ];
-  return <section id="supply" className="business-section" aria-labelledby="product-heading">
-    <SectionHeading id="product-heading" step="01 / PRODUCT & SUPPLY" title="A complete listing. An illustrative starting point." description="NOT VERIFIED WITH PRODUCER · Specifications demonstrate the listing workflow; they are not an offer of available stock."/>
-    <div className="product-supply-grid">
-      <article className="product-profile panel"><div className="product-image" role="img" aria-label="Illustrative avocado photograph cropped from the supplied reference; not the producer's produce"><span>ILLUSTRATIVE IMAGERY ONLY</span></div><div className="product-profile-content"><span className="badge">SAMPLE DATA</span><h3>{product.name}</h3><dl><div><dt>Variety</dt><dd>{product.variety}</dd></div><div><dt>Grade</dt><dd>{product.grade}</dd></div><div><dt>Origin</dt><dd>{product.origin}</dd></div></dl><p>{product.note}</p><div className="producer-description"><strong>{data.producer.name}</strong><p>{data.producer.description}</p></div></div></article>
-      <article className="supply-specs panel"><div className="spec-heading"><h3>Supply & packaging example</h3><span className="badge">ILLUSTRATIVE EXAMPLE</span></div><dl className="spec-grid">{specs.map(([label, value, note]) => <div key={label}><dt>{label}</dt><dd>{value}</dd><p>{note}</p></div>)}</dl><div className="calculation-note"><strong>Weight reconciliation · sample quantities</strong><p>{formatNumber(supply.cartonCount)} cartons × {formatNumber(supply.cartonNetKg)} kg = <b>{formatNumber(supplyTotals.impliedNetKg)} kg</b> ({formatNumber(supplyTotals.impliedNetTonnes, 4)} metric tonnes).</p><p>This is {formatNumber(supplyTotals.differenceKg)} kg above the separate {formatNumber(supply.harvestTonnes)}-tonne harvest example. These remain independent illustrative values; no producer has committed either quantity.</p></div></article>
-    </div>
-  </section>;
+export function ProducerDossier() {
+  return <Localized><section id="supply" className="business-section dossier-grid" aria-label="Producer dossier and commercial readiness">
+    <article className="panel dossier-card" aria-labelledby="producer-heading">
+      <div className="dossier-card-heading"><h2 id="producer-heading">Producer Profile</h2><span className="dossier-index">01 / ORIGIN & SUPPLY</span></div>
+      <dl className="dossier-fields">{data.producerFields.map(field => <div key={field.label}><dt>{field.label}</dt><dd><span>{field.value}</span><StatusBadge state={field.state} label={field.badgeLabel}/>{field.note && <small>{field.note}</small>}</dd></div>)}</dl>
+      <details className="dossier-footnote"><summary>About this producer presentation</summary><p>{data.producer.description}</p><p>{data.product.note}</p></details>
+    </article>
+    <article className="panel dossier-card commercial-card" aria-labelledby="commercial-heading">
+      <div className="dossier-card-heading"><h2 id="commercial-heading">Commercial Readiness</h2><span className="dossier-index">REVIEW STATUS</span></div>
+      <dl className="commercial-fields">{data.commercialReadiness.map(field => <div key={field.label}><dt>{field.label}</dt><dd><StatusBadge state={field.state} label={field.value === 'Pending confirmation' || field.value === 'Evidence required' || field.value === 'Review required' ? field.value : undefined}/>{!['Pending confirmation', 'Evidence required', 'Review required'].includes(field.value) && <span>{field.value}</span>}</dd></div>)}</dl>
+      <p className="dossier-note">No current field is verified or backed by an actual quotation. <a href="#documents">Review evidence checklist ↗</a></p>
+    </article>
+  </section></Localized>;
+}
+
+export function PackagingSection() {
+  const specs = ['Net carton weight', 'Carton dimensions', 'Pallet configuration', 'Packaging standard', 'Harvest season', 'Recurring supply capacity'];
+  return <Localized><section id="packaging" className="business-section" aria-labelledby="packaging-heading">
+    <SectionHeading id="packaging-heading" step="PACKAGING & SUPPLY" title="Confirm the pack before quoting." description="486 cartons were reported for the latest harvest. Net weight, dimensions, packaging standard, and recurring capacity have not been supplied."/>
+    <div className="packaging-layout panel"><div className="carton-illustration"><svg viewBox="0 0 400 250" role="img" aria-label="Neutral carton schematic; dimensions and packing standard are unknown"><path d="m65 92 168-58 110 61v70l-167 64-111-71Z" fill="#133b42" stroke="#4e8f8f"/><path d="m65 92 111 70 167-67M176 162v67M142 66l112 65" stroke="#4e8f8f"/><text x="135" y="198" fill="#a5ddd0" fontSize="11">ILLUSTRATION</text></svg><strong>Packaging under review</strong><small>Neutral illustration · not actual producer packaging</small></div><div className="packaging-content"><dl className="packaging-specs">{specs.map(label => <div key={label}><dt>{label}</dt><dd>Pending confirmation</dd></div>)}</dl><p className="section-disclosure">Slightly more than 10 metric tonnes is an approximate reported total, not an exact weight. No per-carton weight or pack-out conversion is calculated.</p></div></div>
+  </section></Localized>;
 }
 
 export function PricingSection() {
-  return <section id="pricing" className="business-section" aria-labelledby="pricing-heading"><SectionHeading id="pricing-heading" step="03 / INDICATIVE PRICING" title="Compare commercial possibilities." description="Independent simulated examples, not researched market rates. No live quotation or landed-cost calculation."/><div className="pricing-grid">{data.pricing.map(price => <article key={price.id} className="price-card panel"><p className="example-label">SIMULATED PRICE — NOT A QUOTATION</p><h3>{price.label}</h3><p className="price-value">{usd(price.usdPerKg)}<span>/ kg</span></p><p className="named-place">{price.namedPlace}</p><p>{price.scope}</p><a href="#contact">Explore a demo inquiry <span aria-hidden="true">↗</span></a></article>)}</div><p className="section-disclosure">{data.pricingNotice}</p></section>;
+  return <Localized><section id="pricing" className="business-section" aria-labelledby="pricing-heading">
+    <SectionHeading id="pricing-heading" step="COMMERCIAL TERMS" title="Build the quotation with confirmed details." description="No nopal price, buyer commitment, or freight quotation has been supplied."/>
+    <div className="pricing-grid">{data.pricing.map(price => <article key={price.id} className="price-card panel"><p className="example-label"><StatusBadge state={price.state} label="EVIDENCE REQUIRED"/></p><h3>{price.label}</h3><p className="unknown-price">Pending confirmation</p><p className="named-place">{price.namedPlace}</p><details className="price-scope"><summary>Information needed</summary><p>{price.scope}</p></details><a href="#contact">Request producer information <span aria-hidden="true">↗</span></a></article>)}</div><p className="section-disclosure">{data.pricingNotice}</p>
+  </section></Localized>;
 }
 
 export function LogisticsScenarios() {
-  return <section id="scenarios" className="business-section" aria-labelledby="scenarios-heading"><SectionHeading id="scenarios-heading" step="04 / LOGISTICS PLANNING" title="Two markets. Two simulated scenarios." description="Narrative planning examples only. The interactive map remains schematic and does not show road geometry or a Laredo waypoint."/><p className="scenario-warning">{data.logisticsNotice}</p><div className="scenario-grid">{data.logistics.map(scenario => <article key={scenario.id} className="scenario-card panel"><div className="scenario-title"><h3>{scenario.market}</h3><span className="badge">NOT A BOOKING</span></div><p className="scenario-route">{scenario.routeConcept}</p><dl className="scenario-metrics"><div><dt>Simulated transport budget</dt><dd>{usd(scenario.usdPerLoad, 0)}<small>/ load</small></dd></div><div><dt>Simulated transit range</dt><dd>{scenario.transitDays.join('–')}<small>days</small></dd></div></dl><dl className="scenario-details"><div><dt>Example mode</dt><dd>{scenario.mode}</dd></div><div><dt>Hypothetical crossing</dt><dd>{scenario.crossing}</dd></div><div><dt>Fictional carrier placeholder</dt><dd>{scenario.carrier}</dd></div></dl><p>{scenario.scope}</p></article>)}</div><p className="section-disclosure">{data.logisticsExplanation}</p></section>;
+  return <Localized><section id="scenarios" className="business-section compact-scenarios" aria-labelledby="scenarios-heading">
+    <div className="scenario-section-heading"><h2 id="scenarios-heading">Target-market planning</h2><span>Reported contacts are not carrier quotations or confirmed transport arrangements.</span></div>
+    <div className="scenario-grid">{data.logistics.map(scenario => <article key={scenario.id} className="scenario-card panel"><div className="scenario-title"><div><p className="eyebrow">TARGET MARKET</p><h3>{scenario.market}</h3></div><StatusBadge state={scenario.state} label="PENDING CONFIRMATION"/></div><p className="scenario-mode">{scenario.mode}</p><dl className="scenario-metrics"><div><dt>Transport quotation</dt><dd className="unknown-metric">Pending confirmation</dd></div><div><dt>Delivery time</dt><dd className="unknown-metric">Pending confirmation</dd></div></dl><details className="scenario-assumptions"><summary>Reported contacts & next steps</summary><p>{scenario.scope}</p><p>{scenario.routeConcept}</p></details></article>)}</div>
+  </section></Localized>;
 }
 
 export function DocumentationSection() {
-  return <section id="documents" className="business-section" aria-labelledby="documents-heading"><SectionHeading id="documents-heading" step="05 / DOCUMENTATION & READINESS" title="Make the review process visible." description="Sample workflow states only. No item has verified evidence, and no legal export or import eligibility is claimed."/><div className="documentation panel"><h3>Review checklist <span>{data.readiness.length} review areas · no verified evidence</span></h3>{data.readiness.map((item, index) => <details className="review-item" key={item.label}><summary><span className="review-number">{String(index + 1).padStart(2, '0')}</span><span>{item.label}</span><span className="workflow-status">{item.status}</span></summary><p>{item.evidence}</p></details>)}<p className="support-note">Actual requirements must be checked for the confirmed commodity, origin, destination, date, and shipment circumstances with qualified trade partners. No permits, certificates, inspection records, or compliance approvals are provided by this prototype.</p></div></section>;
+  return <Localized><section id="documents" className="business-section" aria-labelledby="documents-heading">
+    <SectionHeading id="documents-heading" step="05 / EXPORT READINESS" title="Readiness at a glance." description="Operational review states; no verified eligibility, permits, certificates, or compliance approvals are represented."/>
+    <div className="readiness-overview panel">{data.readinessOverview.map(field => <div key={field.label}><span>{field.label}</span><StatusBadge state={field.state} label={field.value}/></div>)}</div>
+    <details className="documentation panel documentation-details"><summary>Documentation & supporting evidence <span>{data.readiness.length} review areas</span></summary>{data.readiness.map((item, index) => <details className="review-item" key={item.label}><summary><span className="review-number">{String(index + 1).padStart(2, '0')}</span><span>{item.label}</span><StatusBadge state={item.state}/></summary><p>{item.evidence}</p></details>)}<p className="support-note">Requirements depend on the confirmed commodity, origin, destination, and shipment circumstances. Review with qualified trade partners before commercial use.</p></details>
+  </section></Localized>;
 }

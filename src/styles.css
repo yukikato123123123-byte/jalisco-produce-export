@@ -35,7 +35,7 @@ section, details { scroll-margin-top: 18px; }
 .hero { position: relative; min-height: 335px; padding: 33px 3.4% 32px; overflow: hidden; isolation: isolate; border-bottom: 1px solid var(--border); }
 /* The photo is a CSS crop of the provided local reference, not a new remote asset.
    Its reference hero occupies y=75..410 of the 1024px image. */
-.hero-image { position: absolute; inset: 0 0 0 40%; z-index: -2; background-image: url('./assets/design-reference.png'); background-size: auto 305.67%; background-position: right 10.88%; background-repeat: no-repeat; background-color: #061c21; }
+.hero-image { position: absolute; inset: 0 0 0 40%; z-index: -2; background-image: url('./assets/nopal-illustration.svg'); background-size: auto 305.67%; background-position: right 10.88%; background-repeat: no-repeat; background-color: #061c21; }
 .hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #031321 0%, #031321 34%, #031321ec 43%, #03132150 62%, transparent 79%); }
 .hero-content { position: relative; max-width: 720px; }
 .eyebrow { font-size: 12px; letter-spacing: 1.8px; font-weight: 600; color: #bad2f1; margin-bottom: 9px; }
@@ -145,7 +145,7 @@ footer { max-width: 1800px; padding: 22px 2.6%; margin: auto; display: flex; gap
 .business-heading .eyebrow, .logistics-intro .eyebrow { color: #66c9b8; font-size: 10px; letter-spacing: 1.5px; margin-bottom: 10px; }
 .business-heading>p { color: #9eb9d2; font-size: 12px; line-height: 1.8; max-width: 420px; margin: 0; }
 .product-supply-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.65fr); gap: 16px; }
-.product-profile { overflow: hidden; }.product-image { position: relative; height: 180px; background: #061c21 url('./assets/design-reference.png') right 10.88% / auto 305.67% no-repeat; }
+.product-profile { overflow: hidden; }.product-image { position: relative; height: 180px; background: #061c21 url('./assets/nopal-illustration.svg') right 10.88% / auto 305.67% no-repeat; }
 .product-image span { position: absolute; bottom: 10px; left: 15px; background: #031321e8; color: #bfd4df; padding: 4px 8px; border-radius: 3px; font-size: 8px; letter-spacing: .7px; }
 .product-profile-content { padding: 22px; }.product-profile-content h3 { font-size: 27px; font-weight: 550; margin: 12px 0 18px; }
 .product-profile dl { margin: 0; }.product-profile dl>div { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 15px; margin-bottom: 9px; font-size: 12px; }.product-profile dt { color: #86a7be; }.product-profile dd { margin: 0; color: #c1d9ec; }
@@ -171,3 +171,132 @@ input, select, textarea { font: inherit; font-size: 13px; background: #051725; c
 @media (max-width: 1050px) { .business-heading { align-items: flex-start; flex-direction: column; gap: 12px; }.business-heading>p { max-width: none; }.product-supply-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); }.spec-grid { gap: 0 20px; }.spec-grid dd { font-size: 17px; }.pricing-grid { gap: 12px; }.price-card { padding: 19px; }.price-card h3 { font-size: 17px; }.scenario-details>div { grid-template-columns: 1fr; gap: 4px; }.inquiry-intro { padding: 23px; }.inquiry-layout form { padding: 23px; } }
 @media (max-width: 760px) { .product-supply-grid, .scenario-grid, .inquiry-layout { grid-template-columns: 1fr; }.pricing-grid { grid-template-columns: 1fr; }.price-card { padding: 23px; }.price-card .price-value { font-size: 36px; }.business-section { margin-bottom: 32px; }.product-image { height: 200px; }.spec-grid dd { font-size: 20px; }.inquiry-intro { border-right: 0; border-bottom: 1px solid #28505a; }.inquiry-intro h3 br { display: none; }.inquiry-intro ul { margin: 15px 0; }.scenario-details>div { grid-template-columns: 145px minmax(0, 1fr); }.contact-identity { margin-top: 20px; }.inquiry-confirmation dl>div { grid-template-columns: 1fr; gap: 4px; } }
 @media (max-width: 600px) { .prototype-notice { align-items: flex-start; flex-direction: column; gap: 10px; padding: 15px; margin-bottom: 25px; }.prototype-notice p { font-size: 11px; }.business-heading h2 { font-size: 24px; }.header nav { gap: 0; justify-content: space-between; }.header nav a { font-size: 11px; }.hero-stats { gap: 18px; }.export-stat { padding-left: 0; }.hero-stat strong { font-size: 19px; }.hero-stat strong small { font-size: 14px; }.supply-specs { padding: 19px; }.spec-grid { gap: 0 16px; }.spec-grid dd { font-size: 17px; }.scenario-card { padding: 19px; }.scenario-details>div { grid-template-columns: 1fr; gap: 4px; }.scenario-metrics dd { font-size: 24px; }.documentation { padding: 18px; }.review-item summary { flex-wrap: wrap; gap: 7px 12px; font-size: 12px; }.review-item summary>span:nth-child(2) { flex: 1; }.workflow-status { margin-left: 28px; text-align: left; max-width: 100%; }.review-item>p { padding-left: 28px; }.form-grid { grid-template-columns: 1fr; }.inquiry-layout form { padding: 19px; }.inquiry-intro { padding: 22px; }.form-grid .full-width { grid-column: auto; }.scenario-metrics { gap: 12px; }.inquiry-section .business-heading>p { font-size: 12px; } }
+
+/* Producer dossier presentation: reported values, compact states, and map focus. */
+.panel { background: #071b29; border-radius: 4px; }
+.hero { min-height: 365px; padding-top: 35px; padding-bottom: 28px; }
+.hero-content { max-width: none; }
+.hero-eyebrow { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 22px; margin-bottom: 15px; }
+.hero-eyebrow .eyebrow { margin: 0; font-size: 11px; }
+.prototype-flag { color: #9cb8c9; font-size: 8px; letter-spacing: .9px; border: 1px solid #345366; border-radius: 3px; padding: 4px 7px; }
+.hero h1 { font-size: clamp(34px, 3.4vw, 55px); max-width: 880px; margin-bottom: 15px; }
+.hero h1 .hero-country { color: #82b4a9; font-weight: 400; }
+.hero-copy { font-size: 15px; max-width: 650px; margin-bottom: 24px; }
+.hero-metrics { display: grid; grid-template-columns: 1fr 1fr 1.05fr 1.1fr; gap: 0; max-width: 1100px; margin: 0; background: #041825d9; border-top: 1px solid #2a4857; border-bottom: 1px solid #2a4857; }
+.hero-metrics>div { padding: 17px 22px; min-width: 0; }
+.hero-metrics>div+div { border-left: 1px solid #2a4857; }
+.hero-metrics dd { margin: 0 0 5px; font-size: clamp(19px, 1.8vw, 28px); font-weight: 550; color: #e5f4f2; line-height: 1.4; }
+.hero-metrics dd small { font-size: 11px; font-weight: 400; color: #bfd5df; }
+.hero-metrics dd span { font-size: .6em; color: #bad3db; }
+.hero-metrics dt { font-size: 10px; color: #91b3c6; }
+.hero-source-note { color: #9ab7c9; font-size: 10px; max-width: 860px; line-height: 1.7; margin: 12px 0 9px; }
+.hero-dossier-link { color: #70d9bd; font-size: 11px; }
+.dossier-context { color: #8faec2; font-size: 11px; line-height: 1.7; margin: 4px 2px 22px; max-width: 1150px; }
+.verification-badge { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 4px 7px; font-size: 9px; line-height: 1.4; letter-spacing: .45px; border: 1px solid; border-radius: 3px; text-transform: uppercase; font-weight: 500; vertical-align: middle; max-width: 100%; text-align: center; }
+.state-sample { background: #113539; border-color: #32605e; color: #99d8cc; }
+.state-pending { background: #2e302b; border-color: #53594e; color: #d1c599; }
+.state-verified { background: #103b30; border-color: #40896d; color: #a0e7c7; }
+.state-quoted { background: #162f4b; border-color: #44688e; color: #b6d2f6; }
+.dossier-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; }
+.dossier-card { padding: 22px 25px; }
+.dossier-card-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-bottom: 17px; border-bottom: 1px solid var(--border); }
+.dossier-card-heading h2 { font-size: 17px; text-transform: uppercase; margin: 0; letter-spacing: .7px; }
+.dossier-index { font-size: 8px; letter-spacing: 1.2px; color: #779cac; }
+.dossier-fields, .commercial-fields { margin: 0; }
+.dossier-fields>div { display: grid; grid-template-columns: 105px minmax(0, 1fr); gap: 18px; padding: 13px 0; border-bottom: 1px solid #1e3848; }
+.dossier-fields dt { color: #90afc5; font-size: 11px; padding-top: 2px; }
+.dossier-fields dd { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 5px 12px; margin: 0; font-size: 13px; color: #d1e3ed; }
+.dossier-fields small { grid-column: 1/-1; font-size: 10px; color: #7d9fb3; line-height: 1.7; }
+.dossier-footnote { color: #87aabf; font-size: 10px; padding-top: 15px; }
+.dossier-footnote summary, .weight-reconciliation summary, .scenario-assumptions summary, .price-scope summary { cursor: pointer; color: #94c4ca; font-size: 11px; }
+.dossier-footnote p { line-height: 1.8; margin: 10px 0 0; }
+.commercial-fields>div { padding: 14px 0; display: grid; grid-template-columns: minmax(100px, .8fr) minmax(0, 1fr); gap: 14px; border-bottom: 1px solid #1e3848; }
+.commercial-fields dt { font-size: 12px; color: #c1d5e6; }
+.commercial-fields dd { margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.commercial-fields dd>span:last-child:not(.verification-badge) { color: #829fb5; font-size: 10px; }
+.dossier-note { font-size: 10px; line-height: 1.8; color: #87a7be; margin: 15px 0 0; }.dossier-note a { color: #6cc9b7; }
+.map-presentation { margin-bottom: 18px; }.map-card { padding: 20px 12px 0; }
+.map-heading { justify-content: space-between; align-items: center; padding: 0 10px 4px; }
+.map-heading h2 { font-size: 20px; letter-spacing: .5px; }.map-subtitle { font-size: 13px; color: #a7c1d5; margin: 0; padding: 0 10px 16px; }
+.map-toolbar { padding-bottom: 12px; }.map { height: clamp(425px, 36vw, 620px); }
+.scenario-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin: 0 0 13px; }.scenario-section-heading h2 { font-size: 14px; margin: 0; color: #d0e4ee; }.scenario-section-heading>span { font-size: 10px; color: #83a5bc; }
+.compact-scenarios .scenario-card { padding: 20px 23px; }.scenario-title .eyebrow { font-size: 8px; margin: 0 0 5px; color: #7ea7b4; }.scenario-title h3 { font-size: 18px; letter-spacing: 1px; }.scenario-mode { color: #9fbacc; font-size: 12px; margin: 12px 0 17px; }
+.compact-scenarios .scenario-metrics { padding: 14px 0; }.compact-scenarios .scenario-metrics dd { font-size: 26px; }.scenario-assumptions { padding-top: 13px; }.scenario-assumptions p { font-size: 11px; color: #87a8bc; line-height: 1.8; margin: 12px 0 0; }
+.price-scope { margin: 0 0 20px; }.price-card p:not(.example-label,.price-value) { line-height: 1.7; }.price-card .example-label { font-size: 9px; }.section-disclosure { max-width: 1250px; font-size: 10px; }
+.packaging-layout { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.6fr); gap: 0; overflow: hidden; }
+.carton-illustration { background: #0a2330; padding: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid var(--border); }
+.carton-illustration svg { width: 100%; max-width: 350px; height: auto; }.carton-illustration strong { font-size: 15px; color: #c6dedf; font-weight: 500; }.carton-illustration small { font-size: 9px; color: #7ea9b6; margin-top: 5px; text-align: center; }
+.packaging-content { padding: 25px; }.packaging-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 30px; margin: 0; }.packaging-specs>div { padding-bottom: 17px; border-bottom: 1px solid var(--border); min-width: 0; }.packaging-specs dt { color: #88acbe; font-size: 10px; }.packaging-specs dd { margin: 8px 0 0; font-size: 18px; color: #c5dfe8; }
+.weight-reconciliation { padding-top: 20px; }.weight-reconciliation p { color: #90afc4; font-size: 11px; line-height: 1.8; margin-top: 13px; }
+.readiness-overview { display: grid; grid-template-columns: 1fr 1fr; padding: 8px 24px; column-gap: 35px; margin-bottom: 12px; }
+.readiness-overview>div { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-width: 0; padding: 16px 0; border-bottom: 1px solid #1e3848; }
+.readiness-overview>div>span:first-child { color: #b5cfe1; font-size: 12px; }
+.documentation-details { padding: 0 24px; }.documentation-details>summary { color: #a9c8dc; cursor: pointer; font-size: 12px; padding: 17px 0; }.documentation-details>summary>span { float: right; color: #769ab2; font-size: 10px; }.review-item .verification-badge { margin-left: auto; }
+.business-heading h2 { font-size: clamp(22px, 2vw, 28px); }.business-heading>p { font-size: 11px; }.inquiry-intro { background: #0a2631; }
+.dossier-card, .price-card, .scenario-card, .packaging-content, .inquiry-intro { overflow-wrap: anywhere; }
+@media (max-width: 1000px) { .dossier-grid { grid-template-columns: 1fr 1fr; }.dossier-card { padding: 20px; }.dossier-fields>div { grid-template-columns: 85px minmax(0, 1fr); gap: 12px; }.dossier-fields dd { font-size: 12px; gap: 8px; }.dossier-fields .verification-badge { font-size: 8px; }.hero-metrics>div { padding: 16px; }.hero-metrics dd { font-size: 21px; }.scenario-section-heading { flex-direction: column; align-items: flex-start; gap: 6px; }.commercial-fields>div { gap: 10px; } }
+@media (max-width: 760px) { .dossier-grid, .packaging-layout { grid-template-columns: 1fr; }.hero-metrics { grid-template-columns: 1fr 1fr; }.hero-metrics>div:nth-child(3) { border-left: 0; }.hero-metrics>div:nth-child(n+3) { border-top: 1px solid #2a4857; }.hero-metrics { max-width: 540px; }.hero h1 { max-width: 550px; }.readiness-overview { grid-template-columns: 1fr; }.carton-illustration { border-right: 0; border-bottom: 1px solid var(--border); padding: 20px; }.carton-illustration svg { max-width: 300px; }.hero-source-note { max-width: 540px; }.map { height: 450px; } }
+@media (max-width: 600px) { .hero { padding-top: 24px; padding-bottom: 0; min-height: 0; }.hero-content { padding-bottom: 20px; }.hero h1 { font-size: 37px; line-height: 1.12; }.hero h1 .hero-country { white-space: nowrap; font-size: .75em; }.hero-eyebrow { gap: 10px; }.hero-eyebrow .eyebrow { font-size: 9px; }.hero-copy { font-size: 13px; }.hero-metrics>div { padding: 14px 11px; }.hero-metrics dd { font-size: 20px; }.hero-metrics dd small { font-size: 9px; }.hero-metrics dt { font-size: 9px; }.hero-source-note { font-size: 9px; }.dossier-context { font-size: 10px; margin-bottom: 18px; }.dossier-card { padding: 18px; }.dossier-card-heading h2 { font-size: 15px; }.dossier-fields dd { font-size: 12px; }.commercial-fields>div { grid-template-columns: 1fr 1fr; }.map-card { padding: 16px 7px 0; }.map-heading { gap: 8px; padding: 0 5px 6px; }.map-heading h2 { font-size: 16px; }.map-heading .verification-badge { font-size: 8px; }.map-subtitle { padding: 0 5px 13px; font-size: 11px; }.map { height: 400px; }.compact-scenarios .scenario-card { padding: 18px; }.packaging-content { padding: 20px; }.packaging-specs { gap: 17px; }.packaging-specs dd { font-size: 16px; }.readiness-overview { padding: 5px 18px; }.documentation-details { padding: 0 18px; }.review-item .verification-badge { margin-left: 28px; }.documentation-details>summary>span { float: none; display: block; margin-top: 5px; }.inquiry-section .business-heading .eyebrow { font-size: 10px; } }
+
+/* Persistent presentation navigation; hidden panels stay mounted for Leaflet/form state. */
+[hidden] { display: none !important; }
+.presentation-header { position: sticky; top: 0; z-index: 1100; display: grid; grid-template-columns: minmax(0, 1fr) auto; padding-top: 10px; padding-bottom: 0; gap: 6px 20px; background: #031321fa; }
+.presentation-header .brand strong { font-size: 16px; }.presentation-header .brand-mark { width: 45px; height: 45px; }
+.presentation-header .header-actions { display: flex; gap: 15px; }
+.header .presentation-tabs { display: grid; grid-column: 1/-1; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; width: 100%; border-top: 1px solid #183a4d; }
+.presentation-tabs button { min-height: 46px; border: 0; border-bottom: 2px solid transparent; background: none; color: #9abacf; font-size: 12px; letter-spacing: 1px; padding: 10px; }
+.presentation-tabs button[aria-selected='true'] { border-bottom-color: #28dbaf; color: #c4ffeb; background: #0b2a33; }
+.presentation-tabs button:hover { color: #edfff7; background: #0c2532; }
+.language-selector { display: flex; border: 1px solid #35586c; border-radius: 3px; }
+.language-selector button { background: transparent; border: 0; color: #9fbcd0; min-width: 44px; min-height: 44px; font-size: 12px; }
+.language-selector button[aria-pressed='true'] { background: #144239; color: #b2f5de; }
+.view-notice { padding-top: 16px; padding-bottom: 16px; display: flex; align-items: baseline; gap: 15px; }
+.view-notice .prototype-flag { flex-shrink: 0; }.view-notice .dossier-context { margin: 0; font-size: 10px; }
+[role='tabpanel'] { min-width: 0; outline-offset: -2px; }
+[role='tabpanel'] section, [role='tabpanel'] details, #contact { scroll-margin-top: 155px; }
+#panel-producer .hero { min-height: 0; padding-top: 22px; padding-bottom: 22px; }
+#panel-producer .hero h1 { font-size: clamp(31px,3vw,44px); }
+#panel-producer .hero-copy { margin-bottom: 16px; font-size: 13px; }
+#panel-producer .hero-metrics>div { padding-top: 12px; padding-bottom: 12px; }
+#panel-producer .dossier-grid { margin: 16px 0 12px; }
+#panel-producer .dossier-fields>div, #panel-producer .commercial-fields>div { padding-top: 10px; padding-bottom: 10px; }
+.producer-packaging-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding: 15px 20px; font-size: 12px; color: #a2bfcc; }.producer-packaging-summary strong { font-size: 14px; color: #c3e5df; }.producer-packaging-summary a { color: #6ad6ba; margin-left: auto; }
+.inquiry-opener { margin-bottom: 25px; cursor: pointer; }.inquiry-section { margin-top: 12px; }
+.map-toolbar { flex-wrap: wrap; }.map-toolbar button, .destination-shortcuts button { min-height: 44px; padding: 9px 13px; font-size: 11px; touch-action: manipulation; }
+.destination-shortcuts { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 9px 12px; }
+.destination-shortcuts button { background: #0d2b39; color: #a9d4db; border: 1px solid #345e6d; border-radius: 3px; }
+.destination-shortcuts button[aria-pressed='true'] { background: #12483d; color: #a6f0d9; border-color: #3c987d; }
+.map-actions .full-route-button { background: #103e37; color: #9ce5d0; border-color: #377e6a; }
+.map-card .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; font-size: 23px; }
+.map-card .map { height: clamp(360px,48vh,570px); }
+.map-card .leaflet-control-attribution { max-width: 100%; line-height: 1.5; }
+.map-card .leaflet-tooltip { max-width: 135px; white-space: normal; }
+#panel-logistics .scenario-card { padding-top: 15px; padding-bottom: 15px; }
+@media (max-width: 760px) { .presentation-header .brand strong { font-size: 12px; letter-spacing: 1px; }.presentation-header .brand { gap: 8px; }.presentation-header .brand small { font-size: 7px; letter-spacing: 2px; }.presentation-header .header-actions { gap: 10px; }.presentation-header .quote-button { font-size: 10px; max-width: 170px; white-space: normal; }.view-notice { flex-direction: column; gap: 8px; }.view-notice .dossier-context { font-size: 10px; }.presentation-tabs button { font-size: 10px; letter-spacing: .3px; }.producer-packaging-summary a { margin-left: 0; } }
+@media (max-width: 540px) { .presentation-header { grid-template-columns: minmax(0,1fr) auto; padding: 8px 14px 0; }.presentation-header .brand-mark { width: 30px; height: 36px; }.presentation-header .brand strong { font-size: 10px; letter-spacing: .6px; }.presentation-header .brand small { font-size: 6px; letter-spacing: 1px; }.presentation-header .header-actions { gap: 0; width: auto; }.presentation-header .header-actions>.quote-button { display: none; }.language-selector button { min-width: 44px; min-height: 44px; }.header .presentation-tabs { grid-template-columns: repeat(2,minmax(0,1fr)); }.presentation-tabs button { font-size: 11px; min-height: 44px; }.map-view-selector { flex-wrap: wrap; }.map-view-selector button { flex-basis: 45%; }.map-actions { flex-wrap: wrap; gap: 8px; }.map-actions button { flex: 1; }.destination-shortcuts { gap: 8px; padding: 0 5px 12px; }.destination-shortcuts button { flex: 1; }.map-card .map { height: 390px; }.map-heading .verification-badge { font-size: 8px; } }
+
+.hero-image { background-size: cover; background-position: center; }.product-image { background-size: cover; background-position: center; }
+
+/* Supply graphics represent reported values and unknowns, never invented scores. */
+.supply-market-overview { margin-top: 20px; }
+.overview-charts { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+.overview-chart { margin: 0; padding: 20px; min-width: 0; overflow-wrap: anywhere; }
+.overview-chart figcaption { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-bottom: 1px solid #254354; padding-bottom: 14px; margin-bottom: 14px; }
+.overview-chart h3 { font-size: 16px; font-weight: 550; margin: 0; color: #d4e9ed; }
+.chart-index { font-size: 10px; color: #61c4a9; }.chart-source { flex-basis: 100%; padding-left: 21px; font-size: 10px; color: #85a9b8; }
+.overview-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.harvest-node { fill: #0d3038; stroke: #2d5b60; }.harvest-link { fill: none; stroke: #567f82; stroke-dasharray: 4 4; }
+.chart-large { fill: #b9f1d9; font-size: 38px; font-weight: 600; }.chart-small { fill: #a6cbd5; font-size: 12px; }.chart-tiny { fill: #8daebc; font-size: 10px; }
+.chart-note { font-size: 10px; color: #8aaebc; line-height: 1.7; margin: 10px 0 0; }
+.chart-evidence { display: flex; flex-direction: column; gap: 5px; margin-top: 16px; padding-top: 13px; border-top: 1px solid #254354; font-size: 10px; color: #8aabbc; }.chart-evidence strong { font-size: 11px; font-weight: 500; color: #d5c89f; }
+.market-branches { fill: none; stroke: #409c8e; stroke-width: 1.5; }.market-node { fill: #60d8b4; }.chart-market-label { fill: #c7e4eb; font-size: 14px; font-weight: 550; }
+.market-evidence-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; border-top: 1px solid #254354; padding-top: 12px; }.market-evidence-matrix>div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }.market-evidence-matrix strong { color: #bad8e4; font-size: 12px; }.market-evidence-matrix span { font-size: 9px; color: #86a8bc; margin-top: 4px; }.market-evidence-matrix small { font-size: 10px; color: #d1c69f; }
+.readiness-stages { list-style: none; padding: 0; margin: 0; }.readiness-stages li { position: relative; display: grid; grid-template-columns: 13px minmax(0,1fr); gap: 3px 11px; padding: 9px 0; min-width: 0; }.readiness-stages li:not(:last-child)::after { content: ''; position: absolute; top: 25px; bottom: -9px; left: 4px; border-left: 1px dashed #3d5a61; }.unconfirmed-stage { width: 9px; height: 9px; border: 1px solid #a6aa84; border-radius: 50%; margin-top: 5px; z-index: 1; background: #071b29; }.readiness-stages li>span { font-size: 11px; color: #b4cedb; }.readiness-stages li>strong { grid-column: 2; font-size: 9px; font-weight: 450; color: #d4c79e; }
+.price-card .unknown-price { font-size: 20px; line-height: 1.5; color: #d1c499; margin: 14px 0 20px; }
+.compact-scenarios .scenario-metrics .unknown-metric { font-size: 15px; line-height: 1.5; color: #c8c39f; }
+@media(max-width:1100px) { .overview-charts { grid-template-columns: repeat(2,minmax(0,1fr)); }.overview-charts .readiness-chart { grid-column: 1/-1; }.readiness-stages { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px 20px; }.readiness-stages li::after { display: none; } }
+@media(max-width:650px) { .overview-charts { grid-template-columns: minmax(0,1fr); }.overview-chart { padding: 18px; }.overview-charts .readiness-chart { grid-column: auto; }.readiness-stages { display: block; }.readiness-stages li:not(:last-child)::after { display: block; }.hero-image { background-size: cover; background-position: center; }.overview-chart svg { max-width: 450px; margin: auto; } }
+
+.overview-chart .chart-small { font-size: 16px; }.overview-chart .chart-tiny { font-size: 12px; }
+
+.illustration-caption { position: absolute; right: 20px; bottom: 12px; font-size: 9px; letter-spacing: .5px; color: #8db5ad; }

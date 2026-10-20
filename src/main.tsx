@@ -1,40 +1,23 @@
 import { StrictMode, useEffect, useRef, useState } from 'react';
+import type { MouseEvent, KeyboardEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
 import { sampleData as data } from './sampleData';
-import { ProductSupply, PricingSection, LogisticsScenarios, DocumentationSection, formatNumber } from './components/BusinessSections';
+import { ProducerDossier, PackagingSection, PricingSection, LogisticsScenarios, DocumentationSection, formatNumber } from './components/BusinessSections';
+import { StatusBadge } from './components/StatusBadge';
+import { SupplyMarketOverview } from './components/SupplyMarketOverview';
 import { BuyerInquiry } from './components/BuyerInquiry';
 
-type MapView = 'regional' | 'origin';
-type IconName = 'leaf' | 'box' | 'document' | 'shield' | 'dollar' | 'info';
-
-function Icon({ name, className = '' }: { name: IconName; className?: string }) {
-  const paths: Record<IconName, React.ReactNode> = {
-    leaf: <><path d="M5 18C0 9 10 8 12 11c1-5 5-7 10-8 0 10-2 17-10 15M12 22v-9m0 4 6-7M12 18l-6-5"/></>,
-    box: <><path d="m3 7 9-5 9 5v11l-9 5-9-5Zm0 0 9 5 9-5M12 12v11M7 4l10 6v5"/></>,
-    document: <><path d="M6 2h9l5 5v15H6Zm9 0v6h5M9 12h8M9 16h8"/></>,
-    shield: <path d="M12 2c3 3 6 3 9 4v6c0 6-6 9-9 11-3-2-9-5-9-11V6c3-1 6-1 9-4Z"/>,
-    dollar: <><path d="M18 6c-5-5-13-1-11 3 1 3 11 2 11 7 0 5-8 6-12 2M12 1v23"/></>,
-    info: <><circle cx="12" cy="12" r="9"/><path d="M12 10v7m0-11v1"/></>,
-  };
-  return <svg className={className} viewBox="0 0 25 25" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
-}
-
+import { LanguageProvider, Localized, useLanguage } from './localization';
+import { translate } from './i18n';
+import { nextView, viewLabels, views } from './presentation';
+import type { PresentationView } from './presentation';
+import { focusMap, refreshMap } from './mapBehavior';
+import type { MapFocus } from './mapBehavior';
 function BrandMark() {
   return <svg className="brand-mark" viewBox="0 0 60 55" aria-hidden="true"><path fill="currentColor" d="M40 2c-8 0-14 6-14 14 0 10 14 31 14 31s14-21 14-31C54 8 48 2 40 2Zm0 8a6 6 0 1 1 0 12 6 6 0 0 1 0-12ZM3 14c18 4 24 16 26 31C11 40 5 31 3 14Z"/><path d="m10 23 19 22" stroke="#052332" strokeWidth="1.5"/></svg>;
-}
-
-function frameMap(map: L.Map, view: MapView) {
-  map.stop();
-  if (view === 'origin') {
-    map.setView(data.locations[0].coordinates, 8, { animate: false });
-  } else {
-    map.fitBounds(L.latLngBounds(data.locations.map(point => point.coordinates)), {
-      paddingTopLeft: [65, 52], paddingBottomRight: [95, 55], animate: false,
-    });
-  }
 }
 
 // Quadratic Bezier sampled in Web Mercator. The control point is decorative,
@@ -50,26 +33,29 @@ function schematicCurve(start: [number, number], end: [number, number]): L.LatLn
   });
 }
 
-function MarketMap() {
+function MarketMap({ active }: { active: boolean }) {
+  const { language } = useLanguage();
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const [tileError, setTileError] = useState(false);
   const [showConnections, setShowConnections] = useState(true);
-  const [view, setView] = useState<MapView>('regional');
-  const viewRef = useRef<MapView>('regional');
+  const [focus, setFocus] = useState<MapFocus>('regional');
+  const focusRef = useRef<MapFocus>('regional');
+  const view = focus === 'origin' ? 'origin' : 'regional';
+  const markerLabels = useRef<{ marker: L.Marker; label: HTMLElement; popup: HTMLElement; index: number }[]>([]);
   const connections = useRef<L.LayerGroup | null>(null);
   const destinations = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
     if (!container.current) return;
-    const map = L.map(container.current, { scrollWheelZoom: false, zoomSnap: 0.25, zoomControl: false });
+    const map = L.map(container.current, { center: data.locations[0].coordinates, zoom: 4, scrollWheelZoom: true, touchZoom: true, zoomSnap: 0.25, zoomControl: false });
     mapRef.current = map;
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     // Verified provider URL and local-development policy: see README.
     // No API key or account is used. Non-local hosting requires provider setup.
     L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
       maxZoom: 20,
-      attribution: '&copy; <a href="https://stadiamaps.com/attribution/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      attribution: '&copy; <a href="https://stadiamaps.com/attribution/">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).on('tileerror', () => setTileError(true)).addTo(map);
     connections.current = L.layerGroup();
     destinations.current = L.layerGroup();
@@ -85,36 +71,37 @@ function MarketMap() {
         title: point.name, alt: `${point.name}, approximate region`,
       }).addTo(index === 0 ? map : destinations.current!);
       const label = document.createElement('span');
-      label.textContent = point.name.split(',')[0].toUpperCase();
+      label.textContent = index === 0 ? 'JALISCO ORIGIN' : point.name.split(',')[0].toUpperCase();
       marker.bindTooltip(label, { permanent: true, direction: index === 0 ? 'bottom' : 'right', offset: index === 0 ? [30, 0] : [12, -24] });
       const popup = document.createElement('div');
       popup.textContent = `${point.name} — ${point.role}. Representative point only; no verified facility or buyer.`;
       marker.bindPopup(popup);
+      markerLabels.current.push({ marker, label, popup, index });
     });
     const observer = new ResizeObserver(() => {
-      map.invalidateSize({ pan: false });
-      frameMap(map, viewRef.current);
+      if (container.current?.clientWidth && container.current.clientHeight) refreshMap(map, focusRef.current);
     });
     observer.observe(container.current);
-    frameMap(map, viewRef.current);
+    if (container.current.clientWidth) refreshMap(map, focusRef.current);
     return () => {
       observer.disconnect();
       map.remove();
       mapRef.current = null;
       connections.current = null;
       destinations.current = null;
+      markerLabels.current = [];
     };
   }, []);
 
   useEffect(() => {
-    viewRef.current = view;
+    focusRef.current = focus;
     const map = mapRef.current;
     if (!map) return;
     map.closePopup();
     if (view === 'regional') destinations.current?.addTo(map);
     else destinations.current?.remove();
-    frameMap(map, view);
-  }, [view]);
+    if (container.current?.clientWidth) focusMap(map, focus, !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }, [focus, view]);
 
   useEffect(() => {
     if (!mapRef.current || !connections.current) return;
@@ -122,17 +109,54 @@ function MarketMap() {
     else connections.current.remove();
   }, [showConnections, view]);
 
-  return <section className="map-card panel" id="markets" aria-labelledby="map-heading">
-    <div className="map-heading"><h2 id="map-heading">Logistics Overview</h2><span className="badge">SCHEMATIC · NOT VERIFIED</span></div>
+  useEffect(() => {
+    if (!active) return;
+    const frame = requestAnimationFrame(() => {
+      if (mapRef.current && container.current?.clientWidth) refreshMap(mapRef.current, focusRef.current);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [active]);
+
+  useEffect(() => {
+    const t = (text: string) => translate(text, language);
+    markerLabels.current.forEach(({ marker, label, popup, index }) => {
+      const point = data.locations[index];
+      label.textContent = t(index === 0 ? 'JALISCO ORIGIN' : point.name.split(',')[0].toUpperCase());
+      popup.textContent = `${t(point.name)} — ${t(point.role)}. ${t('Representative point only; no verified facility or buyer.')}`;
+      marker.options.title = `${t(point.name)}, ${t('approximate region')}`;
+      marker.options.alt = marker.options.title;
+      marker.getElement()?.setAttribute('title', marker.options.title);
+      marker.getElement()?.setAttribute('aria-label', marker.options.title);
+    });
+    for (const [selector, text] of [['.leaflet-control-zoom-in', 'Zoom in'], ['.leaflet-control-zoom-out', 'Zoom out']]) {
+      const control = mapRef.current?.getContainer().querySelector(selector);
+      control?.setAttribute('title', t(text));
+      control?.setAttribute('aria-label', t(text));
+    }
+  }, [language]);
+
+  function selectFocus(next: MapFocus) {
+    focusRef.current = next;
+    if (next === focus && mapRef.current) focusMap(mapRef.current, next, !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    setFocus(next);
+  }
+
+  return <Localized><section className="map-card panel" id="markets" aria-labelledby="map-heading">
+    <div className="map-heading"><h2 id="map-heading">Logistics Overview</h2><StatusBadge state={data.routeState.state} label={data.routeState.label}/></div>
+    <p className="map-subtitle">Jalisco → U.S. Target Markets</p>
     <div className="map-toolbar">
       <div className="map-view-selector" role="group" aria-label="Map view">
-        <button aria-pressed={view === 'regional'} onClick={() => setView('regional')}>Regional Overview</button>
-        <button aria-pressed={view === 'origin'} onClick={() => setView('origin')}>Jalisco Origin</button>
+        <button aria-pressed={view === 'regional'} onClick={() => selectFocus('regional')}>Regional Overview</button>
+        <button aria-pressed={view === 'origin'} onClick={() => selectFocus('origin')}>Jalisco Origin</button>
       </div>
       <div className="map-actions">
-        {view === 'regional' && <button onClick={() => setShowConnections(value => !value)} aria-pressed={showConnections}>{showConnections ? 'Hide' : 'Show'} connections</button>}
-        <button onClick={() => mapRef.current && frameMap(mapRef.current, view)}>Reset view ↗</button>
+        {view === 'regional' && <button onClick={() => setShowConnections(value => !value)} aria-pressed={showConnections}>{showConnections ? 'Hide connections' : 'Show connections'}</button>}
+        <button className="full-route-button" onClick={() => { setShowConnections(true); selectFocus('regional'); }}>Show Full Route</button>
       </div>
+    </div>
+    <div className="destination-shortcuts" role="group" aria-label="Destination shortcuts">
+      <button aria-pressed={focus === 'texas'} onClick={() => selectFocus('texas')}>Focus on Texas</button>
+      <button aria-pressed={focus === 'illinois'} onClick={() => selectFocus('illinois')}>Focus on Illinois</button>
     </div>
     <div className="map-stage">
       <div ref={container} className="map" role="region" aria-label={view === 'regional' ? 'Interactive regional map of Jalisco, Texas, and Illinois' : 'Interactive Jalisco regional origin map, not a verified farm location'}/>
@@ -141,47 +165,74 @@ function MarketMap() {
     {tileError && <p role="status" className="tile-warning">Map tiles could not load. Open this prototype on localhost or 127.0.0.1 with internet access. Provider rate limits may apply.</p>}
     <div className="map-legend" aria-label="Map legend"><span><i className="legend-pin origin-key" aria-hidden="true"/> Origin (Jalisco)</span>{view === 'regional' && <><span><i className="legend-pin destination-key" aria-hidden="true"/> Intended markets (Texas, Illinois)</span><span><i className="route-symbol" aria-hidden="true"/> Schematic connection</span></>}</div>
     <p className="route-disclosure">Illustrative connections — actual transport routes not verified.</p>
-    <p className="map-context" aria-live="polite">{view === 'regional' ? data.routeNotice : 'Jalisco regional origin view · Existing approximate point only; farm coordinates and producer addresses are not verified.'}</p>
-  </section>;
-}
-
-function ReadinessPanel() {
-  const icons: IconName[] = ['leaf', 'box', 'dollar', 'shield'];
-  return <aside className="readiness panel" id="readiness" aria-labelledby="readiness-heading"><h2 id="readiness-heading">Export Readiness</h2><ul>{data.brokerReadiness.map((item, index) => <li key={item.label}><span className="icon-ring"><Icon name={icons[index]}/></span><div><strong>{item.label}</strong><p><i className={`status-dot ${index === 3 ? 'conditional' : ''}`} aria-hidden="true"/>{item.status}</p></div></li>)}</ul><a className="checklist-link" href="#documents">Review all documentation areas ↗</a><p className="readiness-note"><Icon name="info"/><span>Sample workflow only · No verified compliance evidence. Farm coordinates and transport routes are unverified.</span></p></aside>;
+    <p className="map-context" aria-live="polite">{view === 'regional' ? data.routeNotice : 'Representative Jalisco point only · This marker does not locate El Grullo or a verified farm.'}</p>
+  </section></Localized>;
 }
 
 function App() {
-  return <>
-    <header className="header">
+  const [active, setActive] = useState<PresentationView>('producer');
+  const [inquiryOpen, setInquiryOpen] = useState(false);
+  const { language, setLanguage } = useLanguage();
+
+  function activate(view: PresentationView) {
+    setActive(view);
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
+  }
+  function openInquiry() {
+    setActive('commercial');
+    setInquiryOpen(true);
+    requestAnimationFrame(() => document.getElementById('contact')?.scrollIntoView({ block: 'start', behavior: 'auto' }));
+  }
+  function handleSectionLink(event: MouseEvent<HTMLDivElement>) {
+    if (!(event.target instanceof Element)) return;
+    const anchor = event.target.closest('a[href^="#"]');
+    const target = anchor?.getAttribute('href');
+    if (!target) return;
+    const destinations: Record<string, PresentationView> = { '#overview': 'producer', '#supply': 'producer', '#packaging': 'commercial', '#pricing': 'commercial', '#markets': 'logistics', '#documents': 'readiness' };
+    if (target === '#contact') { event.preventDefault(); openInquiry(); }
+    else if (destinations[target]) { event.preventDefault(); activate(destinations[target]); }
+  }
+  function handleTabKey(event: KeyboardEvent<HTMLButtonElement>, view: PresentationView) {
+    if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const next = nextView(view, event.key);
+    activate(next);
+    document.getElementById(`tab-${next}`)?.focus();
+  }
+  return <Localized><div onClick={handleSectionLink}>
+    <header className="header presentation-header">
       <a href="#overview" className="brand" aria-label="Jalisco Produce Export home"><BrandMark/><span><strong>Jalisco Produce Export</strong><small>SUPPLY · ORIGIN · LOGISTICS</small></span></a>
-      <nav aria-label="Main navigation"><a href="#overview" className="overview-link">Overview</a><a href="#supply">Products</a><a href="#markets">Logistics</a><a href="#pricing">Pricing</a><a href="#documents">Documents</a></nav>
-      <div className="header-actions"><span className="buyer-preview"><i/>Buyer preview</span><a className="quote-button" href="#contact">Demo buyer inquiry</a></div>
+      <div className="header-actions"><div className="language-selector" role="group" aria-label="Language"><button lang="en" aria-label="English" aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button><button lang="es" aria-label="Español" aria-pressed={language === 'es'} onClick={() => setLanguage('es')}>ES</button></div><button className="quote-button" onClick={openInquiry}>Request producer information</button></div>
+      <nav className="presentation-tabs" role="tablist" aria-label="Presentation views">{views.map(view => <button key={view} id={`tab-${view}`} role="tab" aria-selected={active === view} aria-controls={`panel-${view}`} tabIndex={active === view ? 0 : -1} onClick={() => activate(view)} onKeyDown={event => handleTabKey(event, view)}>{viewLabels[view]}</button>)}</nav>
     </header>
     <main>
-      <section id="overview" className="hero">
-        <div className="hero-image" role="img" aria-label="Illustrative avocado and lime still life from the supplied design reference; not verified producer photography"/>
-        <div className="hero-content">
-          <p className="eyebrow">MEXICO <span aria-hidden="true">⟶</span> UNITED STATES</p>
-          <h1>From Jalisco’s fields<br/>to <span>your market.</span></h1>
-          <p className="hero-copy">Explore an illustrative avocado supply program for U.S. produce buyers.</p>
-          <div className="hero-stats">
-            <div className="hero-stat"><span className="icon-ring"><Icon name="leaf"/></span><div><p>Sample harvest volume</p><span className="badge">SAMPLE DATA · UNVERIFIED</span><strong>{formatNumber(data.supply.harvestTonnes)} metric tonnes <small>/ harvest</small></strong></div></div>
-            <div className="hero-stat export-stat"><span className="icon-ring"><Icon name="document"/></span><div><p>Export planning</p><span className="export-status">Demonstration workflow</span><small className="hero-qualification">No verified export eligibility</small></div></div>
+      <div className="dashboard view-notice"><span className="prototype-flag">PROTOTYPE · ILLUSTRATIVE DATA</span><p className="dossier-context">{data.notice}</p></div>
+      <div id="panel-producer" role="tabpanel" aria-labelledby="tab-producer" hidden={active !== 'producer'} tabIndex={0}>
+        <section id="overview" className="hero">
+          <div className="hero-image" role="img" aria-label="Illustrative nopal artwork; not a photograph of Eduardo’s product or farm"><span className="illustration-caption">Illustrative nopal artwork</span></div>
+          <div className="hero-content">
+            <div className="hero-eyebrow"><p className="eyebrow">JALISCO → U.S. PRODUCE SUPPLY</p></div>
+            <h1>Fresh nopal<span className="hero-country"> · El Grullo</span></h1>
+            <p className="hero-copy">Producer dossier & logistics outlook for U.S. produce brokers.</p>
+            <dl className="hero-metrics">
+              <div><dd>&gt;{formatNumber(data.supply.harvestTonnesLowerBound)} MT <small>REPORTED</small></dd><dt>Latest reported harvest</dt></div>
+              <div><dd>{formatNumber(data.supply.cartonCount)} <small>CARTONS</small></dd><dt>Latest reported cartons</dt></div>
+              <div><dd>EL GRULLO<span>, JALISCO</span></dd><dt>Producer-reported location</dt></div>
+              <div><dd>TEXAS <span>/ ILLINOIS</span></dd><dt>U.S. target markets</dt></div>
+            </dl>
+            <p className="hero-source-note">Latest harvest: 486 cartons, slightly more than 10 metric tonnes, as reported by Eduardo. Exact weights and recurring capacity remain pending confirmation.</p>
           </div>
-        </div>
-      </section>
+        </section>
+        <div className="dashboard"><SupplyMarketOverview language={language}/><ProducerDossier/><div className="producer-packaging-summary panel"><span>Packaging summary</span><strong>Pending confirmation</strong><StatusBadge state="pending"/><a href="#packaging">View packaging details</a></div></div>
+      </div>
       <div className="dashboard">
-        <aside className="prototype-notice"><span className="badge">SAMPLE DATA</span><p>{data.notice}</p></aside>
-        <ProductSupply/>
-        <div className="business-section"><div className="logistics-intro"><p className="eyebrow">02 / REGIONAL LOGISTICS</p><p>Explore the origin and intended market regions. These curves are schematic; hypothetical transport scenarios appear below.</p></div><div className="logistics-layout"><MarketMap/><ReadinessPanel/></div></div>
-        <PricingSection/>
-        <LogisticsScenarios/>
-        <DocumentationSection/>
-        <BuyerInquiry/>
+        <div id="panel-logistics" role="tabpanel" aria-labelledby="tab-logistics" hidden={active !== 'logistics'} tabIndex={0}><div className="business-section map-presentation"><MarketMap active={active === 'logistics'}/></div><LogisticsScenarios/></div>
+        <div id="panel-commercial" role="tabpanel" aria-labelledby="tab-commercial" hidden={active !== 'commercial'} tabIndex={0}><PricingSection/><PackagingSection/><button className="quote-button inquiry-opener" aria-expanded={inquiryOpen} aria-controls="inquiry-content" onClick={() => setInquiryOpen(value => !value)}>Request producer information</button><div id="inquiry-content" hidden={!inquiryOpen}><BuyerInquiry/></div></div>
+        <div id="panel-readiness" role="tabpanel" aria-labelledby="tab-readiness" hidden={active !== 'readiness'} tabIndex={0}><DocumentationSection/></div>
       </div>
     </main>
     <footer><span>Jalisco Produce Export · Concept for Eduardo’s review</span><span>Sample data · No commercial offer or shipment booking</span><a href="#overview">Back to top ↑</a></footer>
-  </>;
+  </div></Localized>;
 }
 
-createRoot(document.getElementById('root')!).render(<StrictMode><App/></StrictMode>);
+createRoot(document.getElementById('root')!).render(<StrictMode><LanguageProvider><App/></LanguageProvider></StrictMode>);

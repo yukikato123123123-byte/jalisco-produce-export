@@ -18,7 +18,7 @@ export function validateInquiry(values: InquiryValues): InquiryErrors {
   if (values.company.trim().length < 2 || values.company.length > 120) errors.company = 'Enter a buyer or company name of 2–120 characters.';
   if (values.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) errors.email = 'Enter a valid contact email address.';
   if (!sampleData.inquiry.destinations.includes(values.destination)) errors.destination = 'Select a destination market.';
-  if (!sampleData.inquiry.products.includes(values.product)) errors.product = 'Select the sample product.';
+  if (!sampleData.inquiry.products.includes(values.product)) errors.product = 'Select the product.';
   const quantity = Number(values.quantityKg);
   const grams = quantity * 1000;
   if (!values.quantityKg.trim() || !Number.isFinite(quantity) || quantity < 0.001 || !Number.isSafeInteger(Math.round(grams)) || Math.abs(grams - Math.round(grams)) > 0.000001) errors.quantityKg = 'Enter at least 0.001 kg, with up to three decimal places.';

@@ -1,16 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500" fill="none">
-  <defs><linearGradient id="pad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#40a182"/><stop offset="1" stop-color="#165548"/></linearGradient></defs>
-  <path fill="#071d28" d="M0 0h900v500H0z"/>
-  <ellipse cx="592" cy="443" rx="210" ry="17" fill="#092d31"/>
-  <g stroke="#7ac6a7" stroke-width="2">
-    <path d="M575 445c-16-41-31-89-22-142 8-54 62-71 93-34 33 40 8 123-27 176" fill="url(#pad)"/>
-    <path d="M569 335c-51-6-104-43-112-97-7-42 17-78 48-68 48 15 73 99 64 165Z" fill="url(#pad)"/>
-    <path d="M619 310c-5-70 17-145 57-161 34-13 61 25 53 69-9 54-56 85-110 92Z" fill="url(#pad)"/>
-    <path d="M615 256c-36-34-67-102-42-150 19-37 57-36 77 3 23 46-1 108-35 147Z" fill="url(#pad)"/>
-    <path d="M483 223c-39-20-76-68-62-105 14-35 46-23 65 7 21 32 16 67-3 98Z" fill="url(#pad)"/>
-  </g>
-  <g stroke="#a3d7ab" stroke-width="2" opacity=".7">
-    <path d="m580 333 4-8m24 22 4-8m-29 51 4-8m29 20 4-8m-34 37 4-8m31-51 4-8m-105-109 3-8m-25-21 3-8m38 8 3-8m-30-19 3-8m106-47 3-8m-21-21 3-8m30 1 3-8m-18-27 3-8m65 57 3-8m15 38 3-8m-35 10 3-8m-188-81 3-8m-19-18 3-8m11 44 3-8"/>
-  </g>
-  <path d="M306 444h491" stroke="#244a4b" stroke-width="2"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" fill="none">
+  <defs>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#66815a"/><stop offset=".5" stop-color="#325e40"/><stop offset="1" stop-color="#1c4332"/></linearGradient>
+    <pattern id="areoles" width="28" height="32" patternUnits="userSpaceOnUse"><path d="m12 9 2 6m-6-2 7 1m-2-4 5 6" stroke="#c0c79b" stroke-width=".7"/><circle cx="13" cy="14" r="1.4" fill="#d8d7ad"/></pattern>
+    <path id="a" d="M494 581c-40-50-71-135-48-191 22-54 77-58 110-14 39 54 15 151-32 205Z"/>
+    <path id="b" d="M467 419c-67-12-145-71-152-134-6-55 41-80 83-47 52 42 76 123 69 181Z"/>
+    <path id="c" d="M537 392c-6-72 33-159 84-175 45-14 81 28 65 80-18 58-84 91-149 95Z"/>
+    <path id="d" d="M506 344c-49-49-81-133-59-188 21-53 72-58 103-10 35 56 13 143-44 198Z"/>
+    <path id="e" d="M351 280c-51-22-101-76-99-121 2-39 34-56 64-30 37 32 53 101 35 151Z"/>
+    <path id="f" d="M639 234c-18-44-9-108 22-135 27-25 60-6 59 30-1 45-35 89-81 105Z"/>
+  </defs>
+  <path fill="#f6f0e3" d="M0 0h960v640H0z"/>
+  <circle cx="530" cy="300" r="248" stroke="#d5c6a6"/>
+  <circle cx="530" cy="300" r="232" stroke="#e3d8c0"/>
+  <circle cx="710" cy="150" r="71" fill="#d5ad88" opacity=".5"/>
+  <path d="M183 583h648M530 37v23m0 483v23M267 300h24m481 0h25" stroke="#beae8b"/>
+  <g fill="url(#leaf)" stroke="#214a35" stroke-width="2"><use href="#a"/><use href="#b"/><use href="#c"/><use href="#d"/><use href="#e"/><use href="#f"/></g>
+  <g fill="url(#areoles)" opacity=".85"><use href="#a"/><use href="#b"/><use href="#c"/><use href="#d"/><use href="#e"/><use href="#f"/></g>
+  <g stroke="#b7c197" stroke-width="1" opacity=".65"><path d="M502 562c-12-54-22-108-9-159M447 395c-27-38-58-86-91-123M553 371c32-31 66-65 91-108M507 318c-15-44-18-102-12-150M347 253l-59-91M653 207l32-78"/></g>
+  <g fill="#a5583d"><ellipse cx="486" cy="131" rx="10" ry="17" transform="rotate(-12 486 131)"/><ellipse cx="685" cy="95" rx="9" ry="15" transform="rotate(18 685 95)"/><ellipse cx="277" cy="132" rx="8" ry="13" transform="rotate(-40 277 132)"/></g>
+  <path d="m219 539 20-12m-14 23 20-12m508-34 20-12m-14 23 20-12" stroke="#a5583d"/>
 </svg>

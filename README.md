@@ -18,7 +18,7 @@ According to the current producer information supplied in the brief:
 
 These are producer-reported facts, not independently audited commercial evidence. The latest harvest is not a recurring-capacity or stock-availability commitment. There is no exact total weight or net carton weight, so the application does not compute a per-carton average, an exact harvest total, or a packing reconciliation. The numeric 10 in the model is strictly a lower bound, not an exact weight.
 
-Variety, grade, carton weights/dimensions, packaging standard, pallet pattern, season, recurring capacity, prices, buyers, freight quotes, delivery times, routes, border crossings, documentation, certification, phytosanitary clearance, and legal export/import eligibility remain **Pending confirmation** or **Evidence required**. Unknown numeric values use `null`, never zero or synthetic estimates. Earlier fictional product/pricing/transport examples have been removed from current commercial data rather than reused for nopal. No simulated monetary or transit estimates remain.
+Variety, grade, carton weights/dimensions, packaging standard, pallet pattern, season, recurring capacity, prices, buyers, freight quotes, delivery times, routes, border crossings, documentation, certification, phytosanitary clearance, and legal export/import eligibility remain **Pending confirmation** or **Evidence required**. Unknown numeric values use `null`, never zero or synthetic estimates. Earlier fictional product/pricing/transport examples have been removed from current commercial data rather than reused for nopal. The actual producer/commercial model contains no simulated monetary or transit estimates. Separately, `src/demoData.ts` now supplies explicitly fictional chart examples; these never populate producer pricing, logistics records, or inquiry previews.
 
 ## Local setup and checks
 
@@ -53,16 +53,20 @@ Producer is the default. Persistent semantic tab buttons support click, Arrow ke
 
 ### Visible Supply & Market Overview
 
-`src/components/SupplyMarketOverview.tsx` is mounted directly in the default Producer panel, above the dossier; it is not inside a disclosure or a hidden chart-only page. Three responsive figures are rendered:
+`src/components/SupplyMarketOverview.tsx` is mounted directly in the default Producer panel, above the dossier; it is not inside a disclosure or a hidden chart-only page. Four responsive figures are rendered, with evidence and fictional scenarios visually separated:
 
-1. **Harvest & cartons:** two associated metric nodes show the 486 reported cartons and the approximate weight (`>10`, explicitly qualified as slightly more than 10 metric tonnes). Their sizes are decorative, not proportional quantities, and their connection is not a packing conversion. Exact total and carton net weights are labeled unknown.
-2. **Texas vs Illinois:** a destination-relationship graphic and qualitative comparison matrix show the intended markets plus the buyer and commercial/transport evidence still needed. There are no fabricated buyer counts, demand, sales, rates, freight costs, distances, or transit times.
-3. **Export-readiness review:** an open-marker status diagram for buyer discovery, product/packaging specifications, quotation, transport arrangements, and phytosanitary/export-import review. No category is marked complete and no numerical completion percentage is computed.
+1. **Harvest & cartons:** 486 cartons and `>10` metric tonnes, with the original “slightly more than 10 metric tonnes” wording and producer-reported attribution. Exact total and carton net weights remain unknown; no conversion is calculated.
+2. **Export-readiness review:** packaging, pricing, refrigerated transport, export documentation, and customs arrangements use explicit Reported, Pending Verification, or Demo Only states. Reported contacts do not imply verified appointments, documentation, or clearance. No percentage or legal/export approval is shown.
+3. **Illustrative price comparison:** zero-based horizontal bars compare Texas **1.20 USD/kg** and Illinois **1.55 USD/kg**, entirely invented. Assumptions specify the same unspecified grade/packaging, exclude freight/duties/taxes/fees, and disclaim a landed-cost calculation.
+4. **Illustrative logistics comparison:** independent zero-based plots show fictional estimated elapsed transit (**3 vs 5 days**) and simulated refrigerated transport budgets (**3,200 vs 5,100 USD per vehicle**). These represent one hypothetical vehicle with unspecified capacity, temperature, collection point, and address. Customs, inspections, duties, taxes, and delays are excluded. No carrier, border crossing, or route is selected.
 
-Figures have captions, SVG titles/descriptions where appropriate, and visible textual status equivalents. CSS stacks them at smaller widths. Their data references the same centralized report and unknown-value model as the rest of the presentation.
+The demo section and each fictional figure display **DEMO DATA — NOT A REAL OFFER OR QUOTE**. These values are arbitrary UI examples, not researched market rates or carrier estimates. Price and logistics examples are independent and cannot be combined into a quotation. All chart headings, units, tooltips, review notes, assumptions, and disclaimers have English/Spanish presentation text.
+
+Charts use visible numeric axes, direct destination labels, contrasting green/terracotta bars, SVG titles/descriptions, and full textual value equivalents. Layouts stack on smaller screens. The visual system uses deep cactus green, warm cream, sand, serif editorial headings, and original local botanical nopal artwork. No chart, font, or image dependencies were added.
 
 ## Data and localization architecture
 
+- `src/demoData.ts`: isolated fictional price/logistics values, axes, assumptions, and mandatory disclaimers; never merged into producer data.
 - `src/sampleData.ts`: typed producer/product, approximate harvest, unknown specifications, commercial/logistics review, chart models, readiness states, and existing map coordinates. `sampleData.overview.harvest` references the shared supply object.
 - `src/components/`: dossier, packaging, commercial planning, inquiry, reusable status badge, and visible overview graphics.
 - `src/i18n.ts`: centralized English/Spanish text, including chart labels/descriptions, facts, pending states, map disclosures, form options, errors, and accessibility text.
@@ -94,7 +98,7 @@ The form collects company, email, intended destination, fresh nopal, desired qua
 
 ## Verification and remaining review
 
-Tests cover reported/unknown data, honest chart states, English/Spanish labels, actual React chart markup in both languages, preserved navigation/language/map controllers, and inquiry validation. Server-rendered markup checks are not browser visual tests.
+Tests cover reported/unknown data, honest chart states, English/Spanish labels and tooltips, actual React chart markup and demo warnings in both languages, fictional/producer-data separation, preserved navigation/language/map controllers, and inquiry validation. Server-rendered markup checks are not browser visual tests.
 
 No browser-testing tool is available in this workspace. Manually inspect desktop/mobile chart readability, all four tabs and both languages, map initial extent, origin/destination/full-route interactions, wheel/pinch zoom, tab/resize sizing, label placement, attribution, form errors, preview, reset, and language persistence.
 

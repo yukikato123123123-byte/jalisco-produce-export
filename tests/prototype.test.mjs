@@ -76,3 +76,5 @@ test('verification model supports four states without claiming current verificat
 import './presentation.test.mjs';
 
 import './charts.test.mjs';
+
+import './gis.test.mjs';

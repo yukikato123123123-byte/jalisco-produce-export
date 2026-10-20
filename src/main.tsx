@@ -4,6 +4,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
 import { sampleData as data } from './sampleData';
+import { ProductSupply, PricingSection, LogisticsScenarios, DocumentationSection, formatNumber } from './components/BusinessSections';
+import { BuyerInquiry } from './components/BuyerInquiry';
 
 type MapView = 'regional' | 'origin';
 type IconName = 'leaf' | 'box' | 'document' | 'shield' | 'dollar' | 'info';
@@ -139,27 +141,46 @@ function MarketMap() {
     {tileError && <p role="status" className="tile-warning">Map tiles could not load. Open this prototype on localhost or 127.0.0.1 with internet access. Provider rate limits may apply.</p>}
     <div className="map-legend" aria-label="Map legend"><span><i className="legend-pin origin-key" aria-hidden="true"/> Origin (Jalisco)</span>{view === 'regional' && <><span><i className="legend-pin destination-key" aria-hidden="true"/> Intended markets (Texas, Illinois)</span><span><i className="route-symbol" aria-hidden="true"/> Schematic connection</span></>}</div>
     <p className="route-disclosure">Illustrative connections — actual transport routes not verified.</p>
-    <p className="map-context" aria-live="polite">{view === 'regional' ? 'Approximate regional points only · No confirmed buyers, roads, border crossings, rates, or transit times.' : 'Jalisco regional origin view · Existing approximate point only; farm coordinates and producer addresses are not verified.'}</p>
+    <p className="map-context" aria-live="polite">{view === 'regional' ? data.routeNotice : 'Jalisco regional origin view · Existing approximate point only; farm coordinates and producer addresses are not verified.'}</p>
   </section>;
 }
 
 function ReadinessPanel() {
   const icons: IconName[] = ['leaf', 'box', 'dollar', 'shield'];
-  return <aside className="readiness panel" id="readiness" aria-labelledby="readiness-heading"><h2 id="readiness-heading">Export Readiness</h2><ul>{data.brokerReadiness.map((item, index) => <li key={item.label}><span className="icon-ring"><Icon name={icons[index]}/></span><div><strong>{item.label}</strong><p><i className={`status-dot ${index === 3 ? 'conditional' : ''}`} aria-hidden="true"/>{item.status}</p></div></li>)}</ul><p className="readiness-note"><Icon name="info"/><span>Regional origin only · Farm coordinates and shipping routes not verified.</span></p></aside>;
+  return <aside className="readiness panel" id="readiness" aria-labelledby="readiness-heading"><h2 id="readiness-heading">Export Readiness</h2><ul>{data.brokerReadiness.map((item, index) => <li key={item.label}><span className="icon-ring"><Icon name={icons[index]}/></span><div><strong>{item.label}</strong><p><i className={`status-dot ${index === 3 ? 'conditional' : ''}`} aria-hidden="true"/>{item.status}</p></div></li>)}</ul><a className="checklist-link" href="#documents">Review all documentation areas ↗</a><p className="readiness-note"><Icon name="info"/><span>Sample workflow only · No verified compliance evidence. Farm coordinates and transport routes are unverified.</span></p></aside>;
 }
 
 function App() {
   return <>
-    <header className="header"><a href="#overview" className="brand" aria-label="Jalisco Produce Export home"><BrandMark/><span><strong>Jalisco Produce Export</strong><small>SUPPLY · ORIGIN · LOGISTICS</small></span></a><nav aria-label="Main navigation"><a href="#overview" className="overview-link">Overview</a><a href="#supply">Products</a><a href="#markets">Logistics</a><a href="#documents">Documents</a></nav><div className="header-actions"><span className="buyer-preview"><i/>Buyer preview</span><a className="quote-button" href="#contact">Request a Quote</a></div></header>
+    <header className="header">
+      <a href="#overview" className="brand" aria-label="Jalisco Produce Export home"><BrandMark/><span><strong>Jalisco Produce Export</strong><small>SUPPLY · ORIGIN · LOGISTICS</small></span></a>
+      <nav aria-label="Main navigation"><a href="#overview" className="overview-link">Overview</a><a href="#supply">Products</a><a href="#markets">Logistics</a><a href="#pricing">Pricing</a><a href="#documents">Documents</a></nav>
+      <div className="header-actions"><span className="buyer-preview"><i/>Buyer preview</span><a className="quote-button" href="#contact">Demo buyer inquiry</a></div>
+    </header>
     <main>
-      <section id="overview" className="hero"><div className="hero-image" role="img" aria-label="Illustrative avocado and lime still life from the supplied design reference; not verified producer photography"/><div className="hero-content"><p className="eyebrow">MEXICO <span aria-hidden="true">⟶</span> UNITED STATES</p><h1>From Jalisco’s fields<br/>to <span>your market.</span></h1><p className="hero-copy">A clearer view of origin, supply readiness, and export planning.</p><div className="hero-stats"><div className="hero-stat"><span className="icon-ring"><Icon name="leaf"/></span><div><p>Reported harvest volume</p><span className="badge">REPORTED · UNVERIFIED</span><strong>{data.supply[0].value} <small>/ harvest</small></strong></div></div><div className="hero-stat export-stat"><span className="icon-ring"><Icon name="document"/></span><div><p>Export status</p><span className="export-status">Details pending verification</span></div></div></div></div></section>
-      <div className="dashboard"><div className="logistics-layout"><MarketMap/><ReadinessPanel/></div>
-        <p className="sample-note"><Icon name="info"/>Prototype · All commercial details are unverified. Reported volume is not confirmed inventory. Imagery is illustrative.</p>
-        <details id="supply" className="support-panel panel"><summary>Producer, product & packaging information <span>Unverified sample data</span></summary><div className="supply-content"><div><h3>{data.product.name}</h3><p>{data.product.variety}</p><p>{data.product.note}</p><strong>{data.producer.name}</strong><p>{data.producer.region}</p><p>{data.producer.description}</p></div><div className="supply-details">{data.supply.map(item => <article key={item.label}><p>{item.label}</p><h3>{item.value}</h3><small>{item.note}</small></article>)}</div></div><p className="support-note">Volume and box count are independent placeholders. Net box weight and their relationship have not been verified.</p></details>
-        <details id="documents" className="support-panel panel"><summary>Documentation & verification checklist <span>No items verified</span></summary><ul className="document-list">{data.readiness.map(item => <li key={item}><span>{item}</span><small>Pending</small></li>)}</ul><p className="support-note">Review applicable requirements with qualified trade partners once the commodity is confirmed. This checklist does not establish export eligibility.</p></details>
-        <section id="contact" className="contact panel"><div><p className="eyebrow">NEXT CONVERSATION</p><h2>Contact & quotations</h2><p>{data.contact.quote}</p></div><div><strong>{data.contact.name}</strong><p>{data.contact.status}</p><span className="badge muted-badge">Quotation requests are not yet available</span></div></section>
+      <section id="overview" className="hero">
+        <div className="hero-image" role="img" aria-label="Illustrative avocado and lime still life from the supplied design reference; not verified producer photography"/>
+        <div className="hero-content">
+          <p className="eyebrow">MEXICO <span aria-hidden="true">⟶</span> UNITED STATES</p>
+          <h1>From Jalisco’s fields<br/>to <span>your market.</span></h1>
+          <p className="hero-copy">Explore an illustrative avocado supply program for U.S. produce buyers.</p>
+          <div className="hero-stats">
+            <div className="hero-stat"><span className="icon-ring"><Icon name="leaf"/></span><div><p>Sample harvest volume</p><span className="badge">SAMPLE DATA · UNVERIFIED</span><strong>{formatNumber(data.supply.harvestTonnes)} metric tonnes <small>/ harvest</small></strong></div></div>
+            <div className="hero-stat export-stat"><span className="icon-ring"><Icon name="document"/></span><div><p>Export planning</p><span className="export-status">Demonstration workflow</span><small className="hero-qualification">No verified export eligibility</small></div></div>
+          </div>
+        </div>
+      </section>
+      <div className="dashboard">
+        <aside className="prototype-notice"><span className="badge">SAMPLE DATA</span><p>{data.notice}</p></aside>
+        <ProductSupply/>
+        <div className="business-section"><div className="logistics-intro"><p className="eyebrow">02 / REGIONAL LOGISTICS</p><p>Explore the origin and intended market regions. These curves are schematic; hypothetical transport scenarios appear below.</p></div><div className="logistics-layout"><MarketMap/><ReadinessPanel/></div></div>
+        <PricingSection/>
+        <LogisticsScenarios/>
+        <DocumentationSection/>
+        <BuyerInquiry/>
       </div>
-    </main><footer><span>Jalisco Produce Export · Buyer preview</span><span>Sample data · No commercial offer</span><a href="#overview">Back to top ↑</a></footer>
+    </main>
+    <footer><span>Jalisco Produce Export · Concept for Eduardo’s review</span><span>Sample data · No commercial offer or shipment booking</span><a href="#overview">Back to top ↑</a></footer>
   </>;
 }
 

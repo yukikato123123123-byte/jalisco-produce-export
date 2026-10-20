@@ -38,13 +38,6 @@ export function PricingSection() {
   </section></Localized>;
 }
 
-export function LogisticsScenarios() {
-  return <Localized><section id="scenarios" className="business-section compact-scenarios" aria-labelledby="scenarios-heading">
-    <div className="scenario-section-heading"><h2 id="scenarios-heading">Target-market planning</h2><span>Reported contacts are not carrier quotations or confirmed transport arrangements.</span></div>
-    <div className="scenario-grid">{data.logistics.map(scenario => <article key={scenario.id} className="scenario-card panel"><div className="scenario-title"><div><p className="eyebrow">TARGET MARKET</p><h3>{scenario.market}</h3></div><StatusBadge state={scenario.state} label="PENDING CONFIRMATION"/></div><p className="scenario-mode">{scenario.mode}</p><dl className="scenario-metrics"><div><dt>Transport quotation</dt><dd className="unknown-metric">Pending confirmation</dd></div><div><dt>Delivery time</dt><dd className="unknown-metric">Pending confirmation</dd></div></dl><details className="scenario-assumptions"><summary>Reported contacts & next steps</summary><p>{scenario.scope}</p><p>{scenario.routeConcept}</p></details></article>)}</div>
-  </section></Localized>;
-}
-
 export function DocumentationSection() {
   return <Localized><section id="documents" className="business-section" aria-labelledby="documents-heading">
     <SectionHeading id="documents-heading" step="05 / EXPORT READINESS" title="Readiness at a glance." description="Operational review states; no verified eligibility, permits, certificates, or compliance approvals are represented."/>

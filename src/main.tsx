@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
 import { sampleData as data } from './sampleData';
-import { ProducerDossier, PackagingSection, PricingSection, LogisticsScenarios, DocumentationSection, formatNumber } from './components/BusinessSections';
+import { ProducerDossier, PackagingSection, PricingSection, DocumentationSection, formatNumber } from './components/BusinessSections';
 import { StatusBadge } from './components/StatusBadge';
 import { SupplyMarketOverview } from './components/SupplyMarketOverview';
 import { BuyerInquiry } from './components/BuyerInquiry';
@@ -74,7 +74,7 @@ function App() {
         <div className="dashboard"><SupplyMarketOverview language={language}/><ProducerDossier/><div className="producer-packaging-summary panel"><span>Packaging summary</span><strong>Pending confirmation</strong><StatusBadge state="pending"/><a href="#packaging">View packaging details</a></div></div>
       </div>
       <div className="dashboard">
-        <div id="panel-logistics" role="tabpanel" aria-labelledby="tab-logistics" hidden={active !== 'logistics'} tabIndex={0}><div className="business-section map-presentation"><MarketMap active={active === 'logistics'}/></div><LogisticsScenarios/></div>
+        <div id="panel-logistics" role="tabpanel" aria-labelledby="tab-logistics" hidden={active !== 'logistics'} tabIndex={0}><div className="business-section map-presentation"><MarketMap active={active === 'logistics'}/></div></div>
         <div id="panel-commercial" role="tabpanel" aria-labelledby="tab-commercial" hidden={active !== 'commercial'} tabIndex={0}><PricingSection/><PackagingSection/><button className="quote-button inquiry-opener" aria-expanded={inquiryOpen} aria-controls="inquiry-content" onClick={() => setInquiryOpen(value => !value)}>Request producer information</button><div id="inquiry-content" hidden={!inquiryOpen}><BuyerInquiry/></div></div>
         <div id="panel-readiness" role="tabpanel" aria-labelledby="tab-readiness" hidden={active !== 'readiness'} tabIndex={0}><DocumentationSection/></div>
       </div>

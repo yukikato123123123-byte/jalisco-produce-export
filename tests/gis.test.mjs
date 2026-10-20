@@ -6,6 +6,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 import { pointSymbolSvg, routeDecoration } from '../src/gisSymbols.ts';
+import { logisticsBasemap } from '../src/mapBasemap.ts';
 import { demoLocations, demoRoutes, gisNotice, gisDisclaimer, layerDefinitions, locationById, pointCategories, routeCategories } from '../src/gisDemoData.ts';
 import { applyLayerVisibility, clusterLocations, defaultLayers, displayedNetwork, layerCount, networkCoordinates } from '../src/gisNetwork.ts';
 import { locationDetails, routeDetails } from '../src/gisDetails.ts';
@@ -143,6 +144,7 @@ test('expanded map stays exclusively in the existing Logistics tab and does not 
   const source = readFileSync(new URL('../src/main.tsx', import.meta.url), 'utf8');
   assert.deepEqual(views, ['producer', 'logistics', 'commercial', 'readiness']);
   assert.equal((source.match(/<MarketMap /g) ?? []).length, 1);
+  assert.doesNotMatch(source, /LogisticsScenarios/);
   assert.match(source, /id="panel-logistics"[^>]*hidden=\{active !== 'logistics'\}[\s\S]*?<MarketMap active=\{active === 'logistics'\}/);
   assert.match(source, /useState<PresentationView>\('producer'\)/);
   assert.equal(sampleData.supply.cartonCount, 486);
@@ -190,4 +192,27 @@ test('legend renders bilingual labels in order and reflects the existing layer s
       assert.doesNotMatch(restored, /data-active="false"/);
     }
   } finally { await server.close(); }
+});
+
+
+test('light basemap uses the official raster URL with all required attribution and no embedded key', () => {
+  assert.equal(logisticsBasemap.url, 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png');
+  assert.equal(logisticsBasemap.style, 'Alidade Smooth');
+  assert.equal(logisticsBasemap.maxZoom, 20);
+  for (const credit of ['Stadia Maps', 'OpenMapTiles', 'OpenStreetMap']) assert.ok(logisticsBasemap.attribution.includes(credit));
+  for (const url of ['https://stadiamaps.com/attribution/', 'https://openmaptiles.org/', 'https://www.openstreetmap.org/copyright']) assert.ok(logisticsBasemap.attribution.includes(url));
+  assert.doesNotMatch(logisticsBasemap.url, /dark|api_key|token|\?/i);
+});
+
+test('botanical colors remain legible on ivory and popup accents match their categories', () => {
+  function luminance(hex) {
+    const channels = hex.match(/[a-f\d]{2}/gi).map(value => parseInt(value, 16) / 255).map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4);
+    return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+  }
+  for (const item of [...Object.values(pointCategories), ...Object.values(routeCategories)]) {
+    const contrast = (luminance('#fffcf5') + .05) / (luminance(item.color) + .05);
+    assert.ok(contrast >= 4.5, `${item.label}: ${contrast}`);
+  }
+  for (const point of demoLocations) assert.equal(locationDetails(point, 'en').color, pointCategories[point.category].color);
+  for (const route of demoRoutes) assert.equal(routeDetails(route, 'es').color, routeCategories[route.category].color);
 });

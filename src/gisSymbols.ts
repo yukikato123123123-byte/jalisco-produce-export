@@ -8,10 +8,10 @@ export const pointCategories: Record<PointCategory, { label: string; color: stri
   market: { label: 'US Markets & Distribution', color: '#7553a5', background: '#eee7f8', paths: ['M4 11v10h16V11', 'm3 7 2-4h14l2 4v2c0 3-4 3-4 0 0 3-5 3-5 0 0 3-5 3-5 0 0 3-4 3-4 0Z', 'M3 7h18M8 21v-6h4v6m4-6h1v2h-1Z'] },
 };
 export const routeCategories: Record<RouteCategory, { label: string; color: string; dashArray?: string; decoration?: 'border' | 'arrow' }> = {
-  collection: { label: 'Local collection', color: '#438e60', dashArray: '2 7' },
-  refrigerated: { label: 'Refrigerated corridor', color: '#289b9c' },
-  border: { label: 'Border scenario', color: '#af7a21', dashArray: '9 5', decoration: 'border' },
-  distribution: { label: 'Market distribution', color: '#9b7cc8', dashArray: '14 5 2 5', decoration: 'arrow' },
+  collection: { label: 'Local collection', color: '#28754e', dashArray: '2 7' },
+  refrigerated: { label: 'Refrigerated corridor', color: '#087d80' },
+  border: { label: 'Border scenario', color: '#956117', dashArray: '9 5', decoration: 'border' },
+  distribution: { label: 'Market distribution', color: '#7553a5', dashArray: '14 5 2 5', decoration: 'arrow' },
 };
 export const routeAccentPaths = {
   border: ['M11 3v18m3-18v18', 'M3 12h5m-3-3 3 3-3 3m12-3h5m-3-3 3 3-3 3'],

@@ -47,7 +47,7 @@ npm run preview
 Producer is the default. Persistent semantic tab buttons support click, Arrow keys, Home, and End, with selected state, roving focus, and linked tab panels. Panels stay mounted while hidden so the map and form retain their state. No router or separate HTML pages were added.
 
 - **Producer / Productor:** reported harvest and location, visible **Supply & Market Overview** graphics, producer dossier, commercial review states, and packaging summary.
-- **Logistics / Logística:** existing interactive regional map, origin view, destination shortcuts, full-route reset, and target-market planning cards. Reported transport/customs contacts are distinguished from actual appointments, quotes, and bookings.
+- **Logistics / Logística:** expanded interactive light GIS map, regional and destination shortcuts, full-network reset, layer controls, and bilingual demo details. Reported transport/customs contacts are distinguished from actual appointments, quotes, and bookings.
 - **Commercial / Comercial:** quotation information still needed, unknown price fields, packaging/specification review, and the local demo inquiry.
 - **Readiness / Preparación:** compact review statuses and expandable supporting-evidence requirements, without claims of completion or eligibility.
 
@@ -78,6 +78,7 @@ Charts use visible numeric axes, direct destination labels, contrasting green/te
 - `src/gisDetails.ts`: bilingual popup models and safe DOM presentation.
 - `src/gisLeaflet.ts`: retained Leaflet layer/marker/route rendering and interaction bindings.
 - `src/mapBehavior.ts`: responsive, filtered network focus/refresh controller.
+- `src/mapBasemap.ts`: official light raster tile URL, attribution, and local-development constraints.
 
 English is the first-use default. EN/ES switches instantly and updates document language/title. Only the language preference is stored under `jalisco-produce-export.language`; blocked storage is handled gracefully. Inquiry values remain in memory only. Tests check coverage of static interface phrases and centralized descriptions in both languages.
 
@@ -85,7 +86,7 @@ The verification-state model retains `sample`, `pending`, `verified`, and `quote
 
 ## Expanded demo GIS — Logistics tab only
 
-Selecting **Logistics / Logística** opens the expanded Leaflet map inside the existing Logistics panel. The Producer, Logistics, Commercial, and Readiness tabs retain their names and order. Producer remains the initial view. The header, language selector, supply overview, charts, commercial/readiness content, and client-side inquiry are preserved. The App component's navigation/layout code is unchanged; the previous inline map implementation has been extracted into `src/components/MarketMap.tsx` and extended.
+Selecting **Logistics / Logística** opens the expanded Leaflet map inside the existing Logistics panel. The Producer, Logistics, Commercial, and Readiness tabs retain their names and order. Producer remains the initial view. The header, language selector, supply overview, charts, commercial/readiness content, and client-side inquiry are preserved. Navigation and header behavior are preserved. Logistics now contains the map without the former redundant Target-market planning cards. Their unused `LogisticsScenarios` component and dedicated styles were removed after confirming there were no other callers; logistics data and verification states remain intact.
 
 ### Isolated spatial dataset
 
@@ -104,7 +105,7 @@ Routes are generalized polylines, **not road-matched navigation or carrier route
 
 ### Layers, controls, and interactions
 
-The desktop Logistics map occupies about 80% of its map/layer workspace, with a compact left sidebar and a taller geographic viewport. Mobile layouts stack the sidebar and map; the layer panel can be collapsed with its native summary control. The layout changes are scoped to Logistics.
+The desktop Logistics map occupies about 80% of its map/layer workspace, with a compact ivory sidebar and a taller geographic viewport. The Logistics card, controls, tooltips, legend, and popups use warm ivory, light borders, dark text, and restrained shadows. No tile filter is used. Production/collection green, packing/border amber, cold-chain teal, and market/distribution violet are shared by vector symbols, legend, layer controls, popup accents, and selection treatments. Route patterns and visible/hidden text distinguish states beyond color. Mobile layouts stack the sidebar and map; the layer panel can be collapsed with its native summary control. The layout changes are scoped to Logistics.
 
 Five independently controlled layers show Production Sites, Collection & Packing, Logistics & Cold Chain, US Markets & Distribution, and Transport Routes. Counts indicate total records per layer; the summary reports displayed locations and named route segments, not the number of rendered cluster icons or individual line strokes. Hiding a point layer hides its markers; visible routes can still pass through those coordinates. The legend distinguishes point symbols and local collection, refrigerated, border-scenario, and distribution routes.
 
@@ -116,7 +117,18 @@ Selecting an individual marker opens its ID, category, region, simulated attribu
 
 A persistent notice reads **DEMO DATA — SIMULATED LOCATIONS & ROUTES**, or **DATOS DE DEMOSTRACIÓN — UBICACIONES Y RUTAS SIMULADAS**. Neither the routes nor the observations imply export clearance, legal compliance, appointments, real prices, or confirmed buyers.
 
-Tiles remain **Stadia Maps Alidade Smooth Dark**, with visible Stadia Maps, OpenMapTiles, and OpenStreetMap credits. The [style documentation](https://docs.stadiamaps.com/map-styles/alidade-smooth-dark/) gives the tile URL and attribution. [Authentication documentation](https://docs.stadiamaps.com/authentication/) permits key-free local browser development on localhost/127.0.0.1, subject to rate limits. The [provider FAQ](https://stadiamaps.com/faqs/) describes development/demo use and commercial restrictions. Non-local hosting needs provider authentication/licensing review; no key, account, subscription, or public hosting configuration was added. Internet access is required for tiles.
+### Light basemap and provider requirements
+
+The basemap is now **Stadia Maps Alidade Smooth**, the provider's native muted light raster style, replacing Alidade Smooth Dark at the URL source. Map labels, pale roads, boundaries, and geographic detail come directly from the provider; there is no CSS inversion, brightness filter, second mapping library, or invented tile URL.
+
+- Tile URL: `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png`
+- Maximum zoom: 20; Leaflet's `{r}` placeholder supports retina tiles.
+- Visible attribution: **© Stadia Maps © OpenMapTiles © OpenStreetMap**, linked to [Stadia Maps attribution](https://stadiamaps.com/attribution/), [OpenMapTiles](https://openmaptiles.org/), and [OpenStreetMap copyright](https://www.openstreetmap.org/copyright).
+- Configuration: `src/mapBasemap.ts`.
+
+Provider requirements and the actual Leaflet URL/attribution were verified against the official [Alidade Smooth documentation](https://docs.stadiamaps.com/map-styles/alidade-smooth/) and [authentication documentation](https://docs.stadiamaps.com/authentication/) on **2026-10-20**. Key-free raster tile access is permitted for browser development served on **localhost or 127.0.0.1**, subject to strict rate limits. This is a local-development arrangement, not unrestricted public-hosting permission. Hosted websites require provider authorization (domain-based authentication is supported); commercial licensing/plan requirements must be reviewed before publishing. No key, account, subscription, or hosting configuration was added.
+
+Internet access is required for tiles. A translated error notice explains connection, host-authorization, and rate-limit limitations; GIS vectors and controls remain available if the basemap fails. The notice clears after a subsequent tile-loading cycle completes without failures. Actual tile loading and desktop/tablet/mobile appearance remain unverified in a browser.
 
 ## Imagery
 
@@ -128,7 +140,7 @@ The form collects company, email, intended destination, fresh nopal, desired qua
 
 ## Verification and remaining review
 
-Tests cover reported/unknown data, honest chart states, English/Spanish labels and tooltips, actual React chart markup and demo warnings in both languages, fictional/producer-data separation, preserved navigation/language/map controllers, and inquiry validation. GIS tests additionally verify exact counts, unique IDs/coordinates, valid route references/endpoints/stop geometry, whole-network connectivity, independent layer filtering and add/remove controller calls, regional extents, clustering/expansion, translated feature/route detail models and disclaimers, and the Logistics-only navigation boundary. Controller/model and server-rendered markup checks are not browser interaction or visual tests.
+Tests cover reported/unknown data, honest chart states, English/Spanish labels and tooltips, actual React chart markup and demo warnings in both languages, fictional/producer-data separation, preserved navigation/language/map controllers, and inquiry validation. GIS tests additionally verify exact counts, unique IDs/coordinates, valid route references/endpoints/stop geometry, whole-network connectivity, independent layer filtering and add/remove controller calls, regional extents, clustering/expansion, translated feature/route detail models and disclaimers, the Logistics-only navigation boundary, removal of redundant planning cards, required light-basemap attribution, and category-color contrast on ivory. Controller/model and server-rendered markup checks are not browser interaction or visual tests.
 
 No browser-testing tool is available in this workspace. Manually inspect desktop/mobile chart readability, all four tabs and both languages, full-network initial extent, all five layer toggles, cluster expansion, marker/route popup selection and keyboard activation, language switching with an open popup, region/destination/full-route shortcuts, repeated tab switching, wheel/pinch zoom, resize sizing, label placement, attribution and actual tile loading, form errors, preview, reset, and language persistence. No actual browser clicks, tile requests, screenshots, or desktop/mobile visual verification were performed for the GIS update.
 

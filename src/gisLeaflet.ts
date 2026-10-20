@@ -35,6 +35,8 @@ export function createGisRenderer(map: L.Map, initialLanguage: Language) {
       const title = () => `${route.id} · ${route.name[language]} · ${t('DEMO / SIMULATED')}`;
       line.bindPopup(() => detailElement(routeDetails(route, language)), { maxWidth: 360, maxHeight: 330, autoPanPadding: [24, 48] });
       line.bindTooltip(title());
+      line.on('popupopen', () => path.setStyle({ weight: 5 }));
+      line.on('popupclose', () => path.setStyle({ weight: 3 }));
       if (line === path) {
         line.on('add', () => {
           const element = line.getElement();
@@ -78,6 +80,8 @@ export function createGisRenderer(map: L.Map, initialLanguage: Language) {
         marker.on('click', () => map.fitBounds(cluster.points.map(member => member.coordinates), { padding: [50, 50], maxZoom: Math.min(map.getZoom() + 2, 16), animate: !window.matchMedia('(prefers-reduced-motion: reduce)').matches }));
       } else {
         marker.bindPopup(() => detailElement(locationDetails(point, language)), { maxWidth: 360, maxHeight: 330, autoPanPadding: [24, 48] });
+        marker.on('popupopen', () => marker.getElement()?.classList.add('gis-selected'));
+        marker.on('popupclose', () => marker.getElement()?.classList.remove('gis-selected'));
       }
       pointLabels.push({ marker, title });
     }

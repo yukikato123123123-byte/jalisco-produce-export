@@ -72,19 +72,49 @@ Charts use visible numeric axes, direct destination labels, contrasting green/te
 - `src/i18n.ts`: centralized English/Spanish text, including chart labels/descriptions, facts, pending states, map disclosures, form options, errors, and accessibility text.
 - `src/localization.tsx` and `src/localizeNode.ts`: React language state and presentation translation, without translating user entries or changing canonical form values.
 - `src/presentation.ts`: tab keyboard behavior and safe preference persistence.
-- `src/mapBehavior.ts`: existing responsive map focus/refresh controller.
+- `src/components/MarketMap.tsx`: Logistics-only Leaflet lifecycle and map controls.
+- `src/gisDemoData.ts`: typed, isolated fictional spatial network.
+- `src/gisNetwork.ts`: filtering, counts, bounds, clustering, and layer visibility controller.
+- `src/gisDetails.ts`: bilingual popup models and safe DOM presentation.
+- `src/gisLeaflet.ts`: retained Leaflet layer/marker/route rendering and interaction bindings.
+- `src/mapBehavior.ts`: responsive, filtered network focus/refresh controller.
 
 English is the first-use default. EN/ES switches instantly and updates document language/title. Only the language preference is stored under `jalisco-produce-export.language`; blocked storage is handled gracefully. Inquiry values remain in memory only. Tests check coverage of static interface phrases and centralized descriptions in both languages.
 
 The verification-state model retains `sample`, `pending`, `verified`, and `quoted`. Producer-reported fields carry explicit report labels while supporting evidence remains pending. The map's route is illustrative. No field claims verified evidence or an actual quotation.
 
-## Map behavior and geographic limitations
+## Expanded demo GIS — Logistics tab only
 
-The original representative points are retained: Jalisco `[20.66, -103.35]`, Texas `[31, -99]`, and Illinois `[40, -89]`. **The Jalisco point does not locate El Grullo or a farm.** El Grullo is the reported municipality in the dossier, not a newly fabricated map coordinate. The map explicitly discloses this distinction.
+Selecting **Logistics / Logística** opens the expanded Leaflet map inside the existing Logistics panel. The Producer, Logistics, Commercial, and Readiness tabs retain their names and order. Producer remains the initial view. The header, language selector, supply overview, charts, commercial/readiness content, and client-side inquiry are preserved. The App component's navigation/layout code is unchanged; the previous inline map implementation has been extracted into `src/components/MarketMap.tsx` and extended.
 
-The same Leaflet instance persists through tab and language switches. Initial visible layout fits all three regional points with padding. Texas/Illinois shortcuts smoothly focus the existing points at zoom 6, with reduced-motion support. Jalisco Origin uses zoom 8 on the representative regional point. Show Full Route restores all points and schematic connections. The +/− controls, wheel zoom, pinch zoom, marker popups, connection toggle, and attribution are preserved. Visibility/ResizeObserver handling invalidates stale dimensions before reframing after tab reveal or viewport changes.
+### Isolated spatial dataset
 
-Curves are sampled decorative Bezier polylines, not verified driving routes, border plans, or shipping lanes. No distances or route-derived timing are calculated. Existing destination/marker positions have not been converted into exact buyer or delivery locations.
+`src/gisDemoData.ts` contains **42 fictional point features**:
+
+- 12 production zones in Jalisco.
+- 6 collection/packing/consolidation nodes in Jalisco.
+- 12 cold-chain/logistics observation points across Mexico and the U.S.
+- 12 market/distribution examples: 6 in Texas and 6 in Illinois.
+
+Every feature has a stable ID, category, latitude/longitude, region, bilingual name/description, simulated attributes, and `DEMO / SIMULATED` provenance. These locations do **not** locate Eduardo's farm, real project facilities, actual buyers, or operational cold-chain coverage. Cultivated areas, seasonal quantities, handling capacities, demand bands, harvest windows, packaging states, and temperature observations are fictional. Temperatures are neither dated sensor observations nor commodity-handling recommendations. This dataset never populates `sampleData.ts`, producer harvest figures, inquiry previews, or the separate demo comparison charts.
+
+There are **20 named, connected multi-stop route segments**. Six collection scenarios pair the twelve production zones with the six packing nodes. Consolidation links lead through Guadalajara, the Jalisco highlands, San Luis Potosí, Saltillo/Monterrey, a fictional Nuevo Laredo–Laredo border-region scenario, Texas branches, and a Midwest/Chicago-region distribution chain. Intermediate stop IDs and corridor coordinates connect **all 42 points into one network**. Geographic place names indicate approximate scenario regions, not verified facilities or an approved border-crossing plan.
+
+Routes are generalized polylines, **not road-matched navigation or carrier routes**. No routing service or road-distance calculation is used. Route distance and transit duration remain `null` and display “Not supplied”; they are never inferred from line length or borrowed from chart examples. The previous three representative `sampleData.locations` records remain legacy data and no longer drive the map.
+
+### Layers, controls, and interactions
+
+The desktop Logistics map occupies about 80% of its map/layer workspace, with a compact left sidebar and a taller geographic viewport. Mobile layouts stack the sidebar and map; the layer panel can be collapsed with its native summary control. The layout changes are scoped to Logistics.
+
+Five independently controlled layers show Production Sites, Collection & Packing, Logistics & Cold Chain, US Markets & Distribution, and Transport Routes. Counts indicate total records per layer; the summary reports displayed locations and named route segments, not the number of rendered cluster icons or individual line strokes. Hiding a point layer hides its markers; visible routes can still pass through those coordinates. The legend distinguishes point symbols and local collection, refrigerated, border-scenario, and distribution routes.
+
+Jalisco, Border Corridor, US Markets, and Full Network fit bounds derived from the enabled network's points **and route vertices**. Texas/Illinois shortcuts and Show Full Route remain available. Full Network/Show Full Route respect the current layer selection; Restore all layers reenables every layer and restores the overview. Views without enabled features show an explicit empty-state notice instead of fitting invalid bounds.
+
+The same Leaflet instance, basemap, route geometry, and layer groups survive tab/language changes. Hidden-tab reveal and ResizeObserver handling invalidate cached dimensions before reframing; zoom and pan are preserved as ordinary Leaflet interactions between refreshes. Wheel zoom, touch pinch, +/− controls, attribution, and reduced-motion-aware view changes remain. Grid clustering aggregates nearby enabled points at overview zoom; selecting a cluster zooms into its members. Individual records are exposed at zoom 13 or higher. This avoids a new clustering dependency.
+
+Selecting an individual marker opens its ID, category, region, simulated attributes, and demo status. Selecting a route opens endpoints, intermediate stops, category, unsupplied distance/time fields, and warnings. Routes have a wider touch hit area and keyboard Enter/Space activation. Popup data uses DOM `textContent`, not data-interpolated HTML. Open popup content, tooltips, marker accessibility names, controls, legends, warnings, and labels update in English/Spanish without recreating the map.
+
+A persistent notice reads **DEMO DATA — SIMULATED LOCATIONS & ROUTES**, or **DATOS DE DEMOSTRACIÓN — UBICACIONES Y RUTAS SIMULADAS**. Neither the routes nor the observations imply export clearance, legal compliance, appointments, real prices, or confirmed buyers.
 
 Tiles remain **Stadia Maps Alidade Smooth Dark**, with visible Stadia Maps, OpenMapTiles, and OpenStreetMap credits. The [style documentation](https://docs.stadiamaps.com/map-styles/alidade-smooth-dark/) gives the tile URL and attribution. [Authentication documentation](https://docs.stadiamaps.com/authentication/) permits key-free local browser development on localhost/127.0.0.1, subject to rate limits. The [provider FAQ](https://stadiamaps.com/faqs/) describes development/demo use and commercial restrictions. Non-local hosting needs provider authentication/licensing review; no key, account, subscription, or public hosting configuration was added. Internet access is required for tiles.
 
@@ -98,8 +128,8 @@ The form collects company, email, intended destination, fresh nopal, desired qua
 
 ## Verification and remaining review
 
-Tests cover reported/unknown data, honest chart states, English/Spanish labels and tooltips, actual React chart markup and demo warnings in both languages, fictional/producer-data separation, preserved navigation/language/map controllers, and inquiry validation. Server-rendered markup checks are not browser visual tests.
+Tests cover reported/unknown data, honest chart states, English/Spanish labels and tooltips, actual React chart markup and demo warnings in both languages, fictional/producer-data separation, preserved navigation/language/map controllers, and inquiry validation. GIS tests additionally verify exact counts, unique IDs/coordinates, valid route references/endpoints/stop geometry, whole-network connectivity, independent layer filtering and add/remove controller calls, regional extents, clustering/expansion, translated feature/route detail models and disclaimers, and the Logistics-only navigation boundary. Controller/model and server-rendered markup checks are not browser interaction or visual tests.
 
-No browser-testing tool is available in this workspace. Manually inspect desktop/mobile chart readability, all four tabs and both languages, map initial extent, origin/destination/full-route interactions, wheel/pinch zoom, tab/resize sizing, label placement, attribution, form errors, preview, reset, and language persistence.
+No browser-testing tool is available in this workspace. Manually inspect desktop/mobile chart readability, all four tabs and both languages, full-network initial extent, all five layer toggles, cluster expansion, marker/route popup selection and keyboard activation, language switching with an open popup, region/destination/full-route shortcuts, repeated tab switching, wheel/pinch zoom, resize sizing, label placement, attribution and actual tile loading, form errors, preview, reset, and language persistence. No actual browser clicks, tile requests, screenshots, or desktop/mobile visual verification were performed for the GIS update.
 
 Before real commercial use, Eduardo must confirm specifications, exact weights, availability, identity/origin records, buyers, commercial terms, transport/customs arrangements, and applicable shipment-specific export/import/phytosanitary requirements with appropriate evidence and qualified trade partners. Public deployment is outside this source update and requires separate review and authorization.

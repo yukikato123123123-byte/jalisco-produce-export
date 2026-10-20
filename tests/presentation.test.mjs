@@ -9,6 +9,7 @@ import ts from 'typescript';
 import { sampleData, verificationStates } from '../src/sampleData.ts';
 import { views, viewLabels, nextView, loadLanguage, saveLanguage, languageStorageKey } from '../src/presentation.ts';
 import { translate } from '../src/i18n.ts';
+import { networkCoordinates } from '../src/gisNetwork.ts';
 import { focusMap, refreshMap, mapPadding } from '../src/mapBehavior.ts';
 import { validateInquiry } from '../src/inquiry.ts';
 
@@ -52,29 +53,26 @@ test('language preference defaults to English, persists Spanish, and tolerates b
   assert.doesNotThrow(() => saveLanguage('es', { setItem: () => { throw new Error('blocked'); } }));
 });
 
-test('overview frames all three existing points with responsive marker/control padding', () => {
+test('overview frames the displayed GIS network with responsive marker/control padding', () => {
   const map = mapPort();
   assert.equal(focusMap(map, 'regional'), true);
   const [, bounds, options] = map.calls.find(call => call[0] === 'bounds');
-  assert.deepEqual(bounds, sampleData.locations.map(location => location.coordinates));
+  assert.deepEqual(bounds, networkCoordinates());
   assert.ok(options.paddingBottomRight[0] >= 100);
   const mobile = mapPadding(280, 390);
   assert.ok(mobile.paddingTopLeft[0] + mobile.paddingBottomRight[0] < 280);
   assert.ok(mobile.paddingTopLeft[1] + mobile.paddingBottomRight[1] < 390);
 });
 
-test('destination focus and full overview use the same map and known coordinates', () => {
+test('destination shortcuts fit the appropriate GIS extent using the same map', () => {
   const map = mapPort();
-  focusMap(map, 'texas', true);
-  focusMap(map, 'illinois', true);
-  focusMap(map, 'origin');
-  focusMap(map, 'regional');
-  const flights = map.calls.filter(call => call[0] === 'fly');
-  assert.deepEqual(flights.map(call => call[1]), [sampleData.locations[1].coordinates, sampleData.locations[2].coordinates, sampleData.locations[0].coordinates]);
-  assert.deepEqual(flights.map(call => call[2]), [6, 6, 8]);
-  assert.equal(flights[0][3].animate, true);
-  assert.equal(flights[2][3].animate, false);
-  assert.equal(map.calls.filter(call => call[0] === 'bounds').length, 1);
+  for (const focus of ['texas', 'illinois', 'origin', 'regional']) focusMap(map, focus, true);
+  const bounds = map.calls.filter(call => call[0] === 'bounds');
+  assert.equal(bounds.length, 4);
+  for (const [index, focus] of ['texas', 'illinois', 'origin', 'regional'].entries()) {
+    assert.deepEqual(bounds[index][1], networkCoordinates(undefined, focus));
+    assert.equal(bounds[index][2].animate, true);
+  }
 });
 
 test('revealing a hidden Logistics tab invalidates cached zero dimensions before framing', () => {
@@ -85,8 +83,8 @@ test('revealing a hidden Logistics tab invalidates cached zero dimensions before
   assert.equal(map.calls[0][0], 'invalidate');
   assert.ok(map.calls.some(call => call[0] === 'bounds'));
   refreshMap(map, 'texas');
-  assert.equal(map.calls.at(-1)[0], 'fly');
-  assert.deepEqual(map.calls.at(-1)[1], sampleData.locations[1].coordinates);
+  assert.equal(map.calls.at(-1)[0], 'bounds');
+  assert.deepEqual(map.calls.at(-1)[1], networkCoordinates(undefined, 'texas'));
 });
 
 test('critical status, logistics, price, and validation messages translate without changing data', () => {
@@ -108,12 +106,12 @@ test('critical status, logistics, price, and validation messages translate witho
 
 test('all static rendered UI phrases and centralized descriptions have Spanish coverage', () => {
   const missing = new Set();
-  const proper = new Set(['Jalisco Produce Export', 'JALISCO', 'TEXAS', 'Texas', 'ILLINOIS', 'Illinois', 'EL GRULLO', ', JALISCO', 'El Grullo, Jalisco', '· El Grullo', '&gt;', 'EN', 'ES', 'Español', 'MT', 'MT),', 'kg', 'kg =', 'N', '/ kg', '/ ILLINOIS']);
+  const proper = new Set(['Jalisco Produce Export', 'Jalisco', 'JALISCO', 'TEXAS', 'Texas', 'ILLINOIS', 'Illinois', 'EL GRULLO', ', JALISCO', 'El Grullo, Jalisco', '· El Grullo', '&gt;', 'EN', 'ES', 'Español', 'MT', 'MT),', 'kg', 'kg =', 'N', '/ kg', '/ ILLINOIS']);
   const check = value => {
     const text = value.replace(/\s+/g, ' ').trim();
     if (/[a-zA-Z]/.test(text) && !proper.has(text) && translate(text, 'es') === text) missing.add(text);
   };
-  for (const path of ['../src/main.tsx', '../src/components/BusinessSections.tsx', '../src/components/BuyerInquiry.tsx', '../src/components/StatusBadge.tsx', '../src/components/SupplyMarketOverview.tsx']) {
+  for (const path of ['../src/main.tsx', '../src/components/MarketMap.tsx', '../src/components/BusinessSections.tsx', '../src/components/BuyerInquiry.tsx', '../src/components/StatusBadge.tsx', '../src/components/SupplyMarketOverview.tsx']) {
     const file = ts.createSourceFile(path, readFileSync(new URL(path, import.meta.url), 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
     const visit = node => {
       if (ts.isJsxText(node)) check(node.text);

@@ -1,5 +1,9 @@
 # Local authentication implementation
 
+For the current integration proposal, owner-specified staging D1, explicit config
+commands and remaining access requirements, see [AUTH_DEPLOYMENT.md](AUTH_DEPLOYMENT.md).
+The historical runbook below is not evidence that any remote setup was performed.
+
 No production resource was created or changed. The public homepage, presentation
 views, Leaflet map, illustrative GIS layers and 2.5D effects remain public.
 
@@ -53,7 +57,7 @@ review of proxy IP trust, abuse controls, privacy/retention and account lifecycl
    - `SESSION_ENCRYPTION_KEY`: exactly 64 hexadecimal characters, generated with
      `openssl rand -hex 32` into a secure local destination. Do not paste it into
      chat or commit it. Key rotation invalidates existing encrypted sessions.
-   `AUTH_ORIGIN` is `http://localhost:8787` in the local Wrangler config. Use that
+   `AUTH_ORIGIN` is `http://localhost:8787` in `wrangler.local.jsonc`. Use that
    exact hostname, not `127.0.0.1`, in the browser. Only loopback origins may use
    HTTP. No `VITE_` secret is required or supported.
 5. Run `npm run db:local` (explicitly `--local`), `npm run build`, then
@@ -64,9 +68,11 @@ review of proxy IP trust, abuse controls, privacy/retention and account lifecycl
    `/buyer/dashboard` use the same origin. API calls fail closed with a setup
    message when provider settings are absent. Public content remains available.
 
-Do not deploy this local Wrangler config as a replacement for the existing
-production deployment. The repository had no tracked Worker deployment config;
-its production hosting integration is unknown. A future approved staging effort
+Do not deploy the local Wrangler config as a replacement for production. The
+original repository had no tracked Worker deployment config. The owner has since
+confirmed a static-assets-only production Worker built from `main` using
+`npm run build` and `npx wrangler deploy`. The current CLI account settings and
+remote runtime bindings have not been inspected. A future approved staging effort
 must provision its own D1, run migrations, bind secrets, configure HTTPS origin,
 and verify all flows. No deployment or remote migration command belongs to the local workflow;
 the approval-gated staging examples later in this document are operator plans only.

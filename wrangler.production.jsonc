@@ -1,0 +1,31 @@
+// PROPOSAL ONLY. Production deployment and migrations require explicit owner approval.
+// Never substitute the staging database; fill the approved production account and D1.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "jalisco-produce-export",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-21",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "REPLACE_WITH_APPROVED_PRODUCTION_D1_NAME",
+      "database_id": "REPLACE_WITH_APPROVED_PRODUCTION_D1_UUID",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "AUTH_ORIGIN": "https://jalisco-produce-export.yukikato123123123.workers.dev",
+    "SUPABASE_URL": "https://xchkkdfelwzzpyorjeks.supabase.co"
+  },
+  "account_id": "REPLACE_WITH_APPROVED_PRODUCTION_ACCOUNT_ID",
+  "workers_dev": true,
+  "preview_urls": false
+}

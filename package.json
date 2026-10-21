@@ -9,11 +9,16 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "test": "node --experimental-strip-types tests/prototype.test.mjs",
-    "dev:worker": "wrangler dev --local --ip 127.0.0.1 --port 8787",
-    "db:local": "wrangler d1 migrations apply DB --local",
+    "dev:worker": "wrangler dev --config ./wrangler.local.jsonc --local --ip 127.0.0.1 --port 8787",
+    "db:local": "wrangler d1 migrations apply DB --config ./wrangler.local.jsonc --local",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.worker.json",
     "test:auth": "node --experimental-strip-types --test tests/auth.test.mjs",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "check:staging": "node scripts/validate-deployment.mjs staging",
+    "check:production": "node scripts/validate-deployment.mjs production",
+    "dry-run:staging": "wrangler deploy --dry-run --config ./wrangler.staging.jsonc --outdir ./.wrangler/staging-dry-run",
+    "dry-run:production": "wrangler deploy --dry-run --config ./wrangler.production.jsonc --outdir ./.wrangler/production-dry-run",
+    "test:deployment": "node --test tests/deployment-config.test.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

@@ -2,6 +2,9 @@ import type { Language } from './presentation.ts';
 // Shared source phrases are the English fallback. Values are presentation text,
 // never a second copy of numeric business data or inquiry option identifiers.
 export const spanish: Record<string, string> = {
+  "Demo origin reference": "Referencia de origen demo",
+  "2.5D · Illustrative depth": "2.5D · Profundidad ilustrativa",
+  "Visual depth only · No elevation data or verified farm location.": "Solo profundidad visual · Sin datos de elevación ni ubicación de predio verificada.",
   "Basemap unavailable. Check your connection and open localhost or 127.0.0.1. Hosted domains require provider authorization; rate limits may apply. GIS layers remain available.": "Mapa base no disponible. Revise su conexión y abra localhost o 127.0.0.1. Los dominios alojados requieren autorización del proveedor; pueden aplicarse límites de uso. Las capas SIG siguen disponibles.",
   "Fictional facilities and buyers. No verified carrier route, quote, customs clearance, or export approval.": "Instalaciones y compradores ficticios. Sin ruta de transportista, cotización, despacho aduanal ni autorización de exportación verificados.",
   "Locations": "Ubicaciones",

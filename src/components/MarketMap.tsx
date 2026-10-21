@@ -93,10 +93,10 @@ export function MarketMap({ active }: { active: boolean }) {
       </aside>
       <div className="gis-map-column"><div className="map-toolbar gis-toolbar"><div className="map-view-selector" role="group" aria-label="Map view">{quickViews.map(view => <button key={view.id} aria-pressed={focus === view.id} onClick={() => selectFocus(view.id)}>{view.label}</button>)}</div><button className="gis-overview-button" onClick={() => selectFocus('regional')}>Show Full Route</button></div>
         <div className="destination-shortcuts" role="group" aria-label="Destination shortcuts"><button aria-pressed={focus === 'texas'} onClick={() => selectFocus('texas')}>Focus on Texas</button><button aria-pressed={focus === 'illinois'} onClick={() => selectFocus('illinois')}>Focus on Illinois</button><span>Clusters expand on selection. Select a point or route for demo details.</span></div>
-        <div className="map-stage"><div ref={container} className="map" role="region" aria-label="Interactive demo logistics network from Jalisco to Texas and Illinois"/><div className="north-indicator" aria-hidden="true">▲<span>N</span></div></div>
+        <div className="map-stage"><div ref={container} className="map" role="region" aria-label="Interactive demo logistics network from Jalisco to Texas and Illinois"/><span className="gis-depth-caption">2.5D · Illustrative depth</span><div className="north-indicator" aria-hidden="true">▲<span>N</span></div></div>
         {emptyView && <p role="status" className="gis-empty">No visible features in this view. Enable layers or choose Full Network.</p>}
         {tileError && <p role="status" className="tile-warning">Basemap unavailable. Check your connection and open localhost or 127.0.0.1. Hosted domains require provider authorization; rate limits may apply. GIS layers remain available.</p>}
-        <p className="map-context">Generalized corridor geometry, not a road-routing result or navigation directions.</p>
+        <p className="map-context">Generalized corridor geometry, not a road-routing result or navigation directions.</p><p className="gis-depth-note">Visual depth only · No elevation data or verified farm location.</p>
       </div>
     </div><p className="gis-disclaimer">Fictional facilities and buyers. No verified carrier route, quote, customs clearance, or export approval.</p>
   </section></Localized>;

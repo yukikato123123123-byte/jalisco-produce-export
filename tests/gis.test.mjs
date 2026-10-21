@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
 import { pointSymbolSvg, routeDecoration } from '../src/gisSymbols.ts';
 import { logisticsBasemap } from '../src/mapBasemap.ts';
+import { demoOriginId, markerHierarchy, routePaint } from '../src/gisDepth.ts';
 import { demoLocations, demoRoutes, gisNotice, gisDisclaimer, layerDefinitions, locationById, pointCategories, routeCategories } from '../src/gisDemoData.ts';
 import { applyLayerVisibility, clusterLocations, defaultLayers, displayedNetwork, layerCount, networkCoordinates } from '../src/gisNetwork.ts';
 import { locationDetails, routeDetails } from '../src/gisDetails.ts';
@@ -215,4 +216,41 @@ test('botanical colors remain legible on ivory and popup accents match their cat
   }
   for (const point of demoLocations) assert.equal(locationDetails(point, 'en').color, pointCategories[point.category].color);
   for (const route of demoRoutes) assert.equal(routeDetails(route, 'es').color, routeCategories[route.category].color);
+});
+
+
+test('decorative route depth retains category patterns with one interactive stroke and no spatial measurements', () => {
+  const snapshot = JSON.stringify(demoRoutes);
+  for (const route of demoRoutes) {
+    const paint = routePaint(route.category);
+    const category = routeCategories[route.category];
+    assert.deepEqual(Object.values(paint).filter(stroke => stroke.interactive), [paint.hit]);
+    assert.equal(paint.hit.opacity, 0);
+    assert.ok(paint.hit.weight > paint.shadow.weight);
+    assert.ok(paint.shadow.weight > paint.primary.weight && paint.primary.weight > paint.highlight.weight);
+    assert.equal(paint.primary.color, category.color);
+    for (const stroke of [paint.shadow, paint.primary, paint.highlight]) {
+      assert.equal(stroke.dashArray, category.dashArray);
+      assert.equal(stroke.interactive, false);
+      assert.ok(stroke.opacity > 0 && stroke.opacity <= 1);
+      assert.equal('coordinates' in stroke, false);
+      assert.equal('elevation' in stroke, false);
+    }
+  }
+  assert.equal(JSON.stringify(demoRoutes), snapshot);
+});
+
+test('origin emphasis references an existing fictional collection origin and labels depth in both languages', () => {
+  const origin = locationById.get(demoOriginId);
+  assert.equal(demoOriginId, demoRoutes.find(route => route.category === 'collection').originId);
+  assert.equal(origin.provenance, 'DEMO / SIMULATED');
+  assert.equal(origin.category, 'production');
+  assert.deepEqual(markerHierarchy([origin]), { origin: true, border: false });
+  assert.equal(markerHierarchy(demoLocations).origin, true);
+  assert.equal(markerHierarchy([locationById.get('H07')]).border, true);
+  assert.deepEqual(markerHierarchy([locationById.get('U03')]), { origin: false, border: false });
+  for (const label of ['Demo origin reference', '2.5D · Illustrative depth', 'Visual depth only · No elevation data or verified farm location.']) assert.notEqual(translate(label, 'es'), label);
+  assert.equal(sampleData.supply.cartonCount, 486);
+  assert.equal(sampleData.supply.harvestTonnes, null);
+  assert.equal(demoLocations.length, 42);
 });

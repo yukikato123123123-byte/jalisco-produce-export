@@ -2,6 +2,7 @@ import type { Language } from './presentation.ts';
 // Shared source phrases are the English fallback. Values are presentation text,
 // never a second copy of numeric business data or inquiry option identifiers.
 export const spanish: Record<string, string> = {
+  "Account / Sign in": "Cuenta / Iniciar sesión",
   "Demo origin reference": "Referencia de origen demo",
   "2.5D · Illustrative depth": "2.5D · Profundidad ilustrativa",
   "Visual depth only · No elevation data or verified farm location.": "Solo profundidad visual · Sin datos de elevación ni ubicación de predio verificada.",

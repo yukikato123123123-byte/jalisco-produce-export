@@ -12,6 +12,7 @@ import { BuyerInquiry } from './components/BuyerInquiry';
 import { LanguageProvider, Localized, useLanguage } from './localization';
 import { nextView, viewLabels, views } from './presentation';
 import type { PresentationView } from './presentation';
+import { AccountPages, isAccountPage } from './components/AccountPages';
 import { MarketMap } from './components/MarketMap';
 function BrandMark() {
   return <svg className="brand-mark" viewBox="0 0 60 55" aria-hidden="true"><path fill="currentColor" d="M40 2c-8 0-14 6-14 14 0 10 14 31 14 31s14-21 14-31C54 8 48 2 40 2Zm0 8a6 6 0 1 1 0 12 6 6 0 0 1 0-12ZM3 14c18 4 24 16 26 31C11 40 5 31 3 14Z"/><path d="m10 23 19 22" stroke="#052332" strokeWidth="1.5"/></svg>;
@@ -50,7 +51,7 @@ function App() {
   return <Localized><div onClick={handleSectionLink}>
     <header className="header presentation-header">
       <a href="#overview" className="brand" aria-label="Jalisco Produce Export home"><BrandMark/><span><strong>Jalisco Produce Export</strong><small>SUPPLY · ORIGIN · LOGISTICS</small></span></a>
-      <div className="header-actions"><div className="language-selector" role="group" aria-label="Language"><button lang="en" aria-label="English" aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button><button lang="es" aria-label="Español" aria-pressed={language === 'es'} onClick={() => setLanguage('es')}>ES</button></div><button className="quote-button" onClick={openInquiry}>Request producer information</button></div>
+      <div className="header-actions"><a className="account-entry" href="/login">Account / Sign in</a><div className="language-selector" role="group" aria-label="Language"><button lang="en" aria-label="English" aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>EN</button><button lang="es" aria-label="Español" aria-pressed={language === 'es'} onClick={() => setLanguage('es')}>ES</button></div><button className="quote-button" onClick={openInquiry}>Request producer information</button></div>
       <nav className="presentation-tabs" role="tablist" aria-label="Presentation views">{views.map(view => <button key={view} id={`tab-${view}`} role="tab" aria-selected={active === view} aria-controls={`panel-${view}`} tabIndex={active === view ? 0 : -1} onClick={() => activate(view)} onKeyDown={event => handleTabKey(event, view)}>{viewLabels[view]}</button>)}</nav>
     </header>
     <main>
@@ -83,4 +84,4 @@ function App() {
   </div></Localized>;
 }
 
-createRoot(document.getElementById('root')!).render(<StrictMode><LanguageProvider><App/></LanguageProvider></StrictMode>);
+createRoot(document.getElementById('root')!).render(<StrictMode><LanguageProvider>{isAccountPage() ? <AccountPages/> : <App/>}</LanguageProvider></StrictMode>);

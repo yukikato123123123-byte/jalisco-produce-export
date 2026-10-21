@@ -5,3 +5,10 @@ dist/
 *.local
 
 .npm-cache/
+
+# Local Worker secrets and D1 state
+.dev.vars
+.dev.vars.*
+.wrangler/
+test-results/
+!.dev.vars.example

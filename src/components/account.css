@@ -32,3 +32,67 @@
 .account-entry { color:var(--cream, #eee8d7); font-size:12px; white-space:nowrap; }
 @media(max-width:800px) { .account-layout { grid-template-columns:1fr; padding:35px 20px; gap:30px; } .account-art { display:none; } .account-intro h1 { font-size:36px; } .account-header { flex-wrap:wrap; padding:22px; } .account-card { padding:25px; } }
 @media(max-width:380px) { .account-role { grid-template-columns:1fr; } }
+.account-wide { max-width:1500px; grid-template-columns:minmax(230px, .7fr) minmax(0, 1.5fr); gap:45px; }
+.producer-workspace h3 { margin-top:32px; }
+.producer-summary { padding:20px; background:#e5eddf; border-radius:8px; }
+.producer-item { padding:16px; border:1px solid #b5bda6; border-radius:8px; margin:14px 0; overflow-wrap:anywhere; }
+.account-card input.producer-check { width:18px; min-height:18px; margin-right:8px; }
+@media(max-width:800px) { .account-wide { grid-template-columns:1fr; } }
+.site-nav { display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px; font-size:13px; }
+.site-nav a { color:inherit; padding:8px 0; text-decoration:none; border-bottom:2px solid transparent; }
+.site-nav a[aria-current="page"], .site-nav a:hover { border-bottom-color:#bfa56b; }
+.site-nav a:focus-visible { outline:2px solid #bfa56b; outline-offset:3px; }
+.explore-layout { max-width:1300px; margin:40px auto; }
+.explore-layout h1 { font:clamp(30px,5vw,52px) Georgia,serif; color:#173b2c; }
+.produce-filters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:20px 0; }
+.produce-filters label { margin:0; }
+.produce-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr)); gap:18px; }
+.produce-card { border:1px solid #b5bda6; border-radius:8px; padding:20px; min-width:0; overflow-wrap:anywhere; }
+.produce-card h3 { font:26px Georgia,serif; color:#173b2c; margin:10px 0; }
+.produce-card p { white-space:pre-wrap; }
+.produce-card summary { cursor:pointer; padding:8px 0; }
+.produce-pagination { display:flex; gap:12px; }
+@media(max-width:800px) { .account-header { align-items:flex-start; } .site-nav { width:100%; gap:6px 16px; } .explore-layout { margin:20px 12px; } .header-actions { flex-wrap:wrap; } .header-actions .site-nav { order:2; } }
+@media(max-width:480px) { .produce-filters { grid-template-columns:1fr; } }
+
+/* Warm paper surfaces and a shared, accessible hierarchy for working controls. */
+.account-page { background:radial-gradient(ellipse at top left,#294b37 0,transparent 65%),#102e25; }
+.account-card { background:#faf6eb; border-color:#ded5bf; box-shadow:0 16px 48px #071c2326; padding:clamp(24px,3vw,44px); }
+.account-card h2 { line-height:1.2; }
+.account-card h3 { font:500 25px/1.3 Georgia,serif; color:#244b36; margin-top:32px; }
+.account-card label { font-size:14px; line-height:1.6; font-weight:550; margin:20px 0; }
+.account-card :is(input,select,textarea) { width:100%; padding:12px 14px; font-family:inherit; font-size:16px; font-weight:400; line-height:1.5; border-radius:8px; background:#fffdf7; border:1px solid #a8b49b; color:#193e2b; transition:border-color .16s,box-shadow .16s; }
+.account-card :is(input,textarea)::placeholder { color:#66715d; }
+.account-card :is(input,select,textarea):focus-visible { outline:2px solid #39724e; outline-offset:3px; box-shadow:0 0 0 4px #39724e14; }
+.account-card :is(input,select,textarea):user-invalid { border-color:#a34a32; background:#fff6ef; }
+.account-card small { font-weight:400; font-size:12px; line-height:1.6; color:#53634b; }
+.account-role { gap:12px; }
+.account-role label { cursor:pointer; padding:16px 12px; background:#fffdf7; transition:background .16s,border-color .16s; }
+.account-role label:has(input:checked) { background:#e8efdc; border-color:#527543; box-shadow:inset 0 0 0 1px #527543; }
+.account-role label:has(input:focus-visible) { outline:2px solid #39724e; outline-offset:3px; }
+.account-role input,.account-card input.producer-check { width:20px; height:20px; min-height:20px; padding:0; flex-shrink:0; accent-color:#396b44; cursor:pointer; }
+.account-card label:has(.producer-check) { display:flex; gap:10px; align-items:flex-start; padding:16px; background:#edf1e4; border-radius:8px; }
+.account-card input.producer-check { margin:2px 0 0; }
+.account-card button { min-height:48px; padding:12px 20px; border-radius:8px; font-weight:600; line-height:1.5; letter-spacing:.1px; background:#2c593e; border-color:#2c593e; box-shadow:0 2px 3px #163a2310; transition:background .16s,border-color .16s,box-shadow .16s; }
+.account-card button:hover:not(:disabled) { background:#20462f; box-shadow:0 3px 8px #163a2320; }
+.account-card button.button-secondary,.account-card .produce-pagination button { color:#2d5138; background:transparent; border-color:#9cab8c; box-shadow:none; }
+.account-card button.button-secondary:hover:not(:disabled),.account-card .produce-pagination button:hover:not(:disabled) { background:#e7eddc; }
+.account-card button.button-danger { background:transparent; border-color:#bc8c76; color:#8b3c28; box-shadow:none; }
+.account-card button.button-danger:hover:not(:disabled) { background:#f7e7dc; }
+.account-card button:focus-visible { outline:2px solid #39724e; outline-offset:4px; }
+.account-card button:disabled { opacity:.65; box-shadow:none; cursor:wait; }
+.account-card :is(.account-error,.account-success) { padding:16px 18px; border-radius:8px; border-left-width:4px; line-height:1.7; overflow-wrap:anywhere; }
+.account-card a { text-decoration:underline; text-underline-offset:4px; color:#31593c; }
+.account-card summary { min-height:44px; padding:10px 0; color:#31593c; font-weight:550; }
+.account-card details[open] summary { margin-bottom:12px; }
+.producer-summary { background:#e9eedf; border:1px solid #cbd6bb; line-height:1.8; }
+.producer-item,.produce-card { background:#fffdf7; border-color:#d4d9c5; padding:24px; border-radius:12px; }
+.producer-item h4 { margin:0 0 12px; font:24px Georgia,serif; }
+.producer-item button { width:auto; margin-right:10px; }
+.produce-pagination { margin-top:20px; }
+.site-nav a { min-height:44px; display:inline-flex; align-items:center; padding:10px 8px; border-radius:6px 6px 0 0; }
+.site-nav a:hover,.site-nav a[aria-current="page"] { background:#c6d5a910; color:#f5e7c0; }
+@media(max-width:480px) { .account-layout { padding:28px 16px; } .account-card { padding:24px 20px; } .account-role { grid-template-columns:1fr; } .producer-item button { width:100%; margin-right:0; } .produce-pagination { flex-wrap:wrap; } }
+.account-role label { margin:0; }
+.account-card label[for='account-password'] { margin-bottom:0; }
+.account-card input#account-password { margin-top:7px; }

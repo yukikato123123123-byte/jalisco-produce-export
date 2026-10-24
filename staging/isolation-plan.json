@@ -1,0 +1,55 @@
+{
+  "status": "project-url-supplied-awaiting-key-and-sandbox-verification",
+  "worker": "jalisco-auth-staging",
+  "origin": "https://jalisco-auth-staging.yukikato123123123.workers.dev",
+  "existing_d1": {
+    "name": "jalisco-auth-staging",
+    "id": "7712d6bb-2414-44d3-9282-cb5b941d740e",
+    "reuse": true
+  },
+  "new_supabase_project": {
+    "reference": "heaswpawzuuijxurlfoz",
+    "organization": null,
+    "region": null,
+    "billing_approval": "free-capacity-only-unless-separately-approved",
+    "site_url": "https://jalisco-auth-staging.yukikato123123123.workers.dev",
+    "redirect_urls": [
+      "https://jalisco-auth-staging.yukikato123123123.workers.dev/verify-email",
+      "https://jalisco-auth-staging.yukikato123123123.workers.dev/verify-email?purpose=recovery"
+    ],
+    "require_email_confirmation": true,
+    "minimum_password_length": 12,
+    "proposed_otp_expiry_seconds": 300,
+    "confirm_signup_template": "staging/emails/confirm-signup.html",
+    "recovery_template": "staging/emails/recovery.html",
+    "url": "https://heaswpawzuuijxurlfoz.supabase.co",
+    "source": "owner-supplied; management settings not independently verified"
+  },
+  "dedicated_email_test_environment": {
+    "proposed_service": "Mailtrap Email Sandbox or an existing owner-approved SMTP test inbox",
+    "provider_account": null,
+    "smtp_credentials": "secure-owner-connection-only-not-this-file",
+    "external_forwarding": false,
+    "allowed_recipients": [
+      "zacharymaynard182@gmail.com",
+      "yukikato123123123@gmail.com"
+    ],
+    "maximum_initial_test_users": 2,
+    "maximum_initial_test_messages": 6,
+    "paid_upgrade_authorized": false
+  },
+  "production_changes_authorized": false,
+  "remote_actions_executed": false,
+  "authorization": {
+    "free_supabase_project": true,
+    "free_receiving_only_email_sandbox": true,
+    "staging_only_configuration_and_deployment": true,
+    "maximum_test_users": 10,
+    "maximum_test_messages": 30,
+    "paid_upgrade_authorized": false
+  },
+  "access_blockers": [
+    "No authenticated Supabase management connection is available; organization, Free allocation and region cannot yet be verified.",
+    "No authenticated sandbox account or SMTP connection is available; external delivery blocking cannot yet be verified."
+  ]
+}

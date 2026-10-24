@@ -12,13 +12,17 @@
     "dev:worker": "wrangler dev --config ./wrangler.local.jsonc --local --ip 127.0.0.1 --port 8787",
     "db:local": "wrangler d1 migrations apply DB --config ./wrangler.local.jsonc --local",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.worker.json",
+    "test:directory": "node --experimental-strip-types --test tests/directory.test.mjs",
+    "test:producer": "node --experimental-strip-types tests/producer.test.mjs",
     "test:auth": "node --experimental-strip-types --test tests/auth.test.mjs",
     "test:browser": "playwright test",
     "check:staging": "node scripts/validate-deployment.mjs staging",
     "check:production": "node scripts/validate-deployment.mjs production",
     "dry-run:staging": "wrangler deploy --dry-run --config ./wrangler.staging.jsonc --outdir ./.wrangler/staging-dry-run",
     "dry-run:production": "wrangler deploy --dry-run --config ./wrangler.production.jsonc --outdir ./.wrangler/production-dry-run",
-    "test:deployment": "node --test tests/deployment-config.test.mjs"
+    "test:deployment": "node --test tests/deployment-config.test.mjs",
+    "check:staging:template": "node scripts/validate-deployment.mjs staging --template",
+    "check:translations": "node --experimental-strip-types scripts/check-ui-translations.mjs"
   },
   "dependencies": {
     "leaflet": "^1.9.4",

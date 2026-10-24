@@ -17,7 +17,7 @@ export function routeDetails(route: DemoRoute, language: Language): DetailModel 
     { label: t('Feature ID'), value: route.id }, { label: t('Category'), value: t(routeCategories[route.category].label) },
     { label: t('Origin'), value: locationById.get(route.originId)!.name[language] },
     { label: t('Destination'), value: locationById.get(route.destinationId)!.name[language] },
-    { label: t('Scenario stops'), value: route.stopIds.map(id => `${id} · ${locationById.get(id)!.name[language]}`).join(' → ') },
+    { label: t('Scenario stops'), value: route.stopIds.map(id => `${id} · ${locationById.get(id)!.name[language]}`).join('  ') },
     { label: t('Simulated distance (km)'), value: route.simulatedDistanceKm === null ? t('Not supplied') : String(route.simulatedDistanceKm) },
     { label: t('Simulated transit (hours)'), value: route.simulatedTransitHours === null ? t('Not supplied') : String(route.simulatedTransitHours) },
   ] };

@@ -1,0 +1,9 @@
+{
+  "scope": {
+    "project_ref": "heaswpawzuuijxurlfoz",
+    "account_id": "89dd3e659cece6bdf3181b991a2a0bd2",
+    "database_id": "7712d6bb-2414-44d3-9282-cb5b941d740e",
+    "worker": "jalisco-auth-staging"
+  },
+  "approvers": []
+}

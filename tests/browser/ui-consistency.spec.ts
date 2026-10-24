@@ -1,0 +1,39 @@
+import {test,expect} from '@playwright/test';
+for(const language of ['en','es'])for(const width of [1440,1280,768,375])test(`${language} shared controls and inline review workspace fit ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height:1000});
+ const row={id:'producer-id',company:'Home Products Original',country:'México',region:'Jalisco',state:'listed',profile_saved:1,public_products:0,total_products:3,bio:'Long original applicant text '.repeat(80),updated_at:'2026-10-23T10:00:00Z'};
+ let writes=0;
+ await page.route('**/api/admin/**',r=>{if(r.request().method()!=='GET')writes++;return r.fulfill({json:new URL(r.request().url()).pathname.endsWith('/overview')?{counts:{products:0},health:{},recent:[]}:{items:[row],page:1,hasMore:false}});});
+ await page.goto('/admin');await page.getByRole('combobox',{name:'Language / Idioma',exact:true}).selectOption(language);
+ await page.getByRole('navigation',{name:language==='es'?'Secciones de administración':'Admin sections'}).getByRole('button',{name:language==='es'?'Productores':'Producers',exact:true}).click();
+ const title=await page.locator('.admin-main>h1').boundingBox(),brand=await page.locator('.site-header .brand').boundingBox();expect(Math.abs(title!.x-brand!.x)).toBeLessThan(1);
+ const controls=page.locator('.filter-bar'),elements=controls.locator('input,select,button');
+ await expect(elements).toHaveCount(4);
+ const boxes=await elements.evaluateAll(es=>es.map(e=>{const b=e.getBoundingClientRect();return {height:b.height,bottom:b.bottom,x:b.x,right:b.right};}));
+ for(const box of boxes){expect(box.height).toBe(44);expect(box.x).toBeGreaterThanOrEqual(0);expect(box.right).toBeLessThanOrEqual(width);}
+ if(width>=1280)for(const box of boxes)expect(Math.abs(box.bottom-boxes[0].bottom)).toBeLessThan(1);
+ const details=page.getByRole('button',{name:language==='es'?'Ver detalles':'View details',exact:true});
+ await expect(page.getByText(row.company,{exact:true})).toBeVisible();await details.focus();await page.keyboard.press('Enter');
+ await expect(page.locator('#record-detail-title')).toBeFocused();await expect(page.locator('.record-detail-panel')).toContainText(row.bio);if(language==='es'){await expect(page.locator('.record-detail-information dt')).toContainText(['país','región','presentación']);}
+ const panel=await page.locator('.record-detail-panel').boundingBox();expect(panel!.x).toBeGreaterThanOrEqual(0);expect(panel!.x+panel!.width).toBeLessThanOrEqual(width);
+ const currentUrl=page.url();await page.keyboard.press('Tab');await page.keyboard.press('Enter');await expect(details).toBeFocused();await expect(page.locator('.record-detail-panel')).toHaveCount(0);expect(page.url()).toBe(currentUrl);
+ await details.click();await page.keyboard.press('Escape');await expect(details).toBeFocused();await expect(details).toHaveAttribute('aria-expanded','false');
+ // A pale secondary control must keep its dark, readable foreground on hover.
+ const secondary=controls.locator('button').last();await secondary.hover();await expect(secondary).toHaveCSS('background-color','rgb(231, 237, 220)');const colors=await secondary.evaluate(e=>({fg:getComputedStyle(e).color,bg:getComputedStyle(e).backgroundColor}));
+ function luminance(color:string){const rgb=color.match(/[\d.]+/g)!.slice(0,3).map(Number).map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722;}
+ const l=[luminance(colors.fg),luminance(colors.bg)].sort((a,b)=>b-a);expect((l[0]+.05)/(l[1]+.05)).toBeGreaterThanOrEqual(4.5);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect(writes).toBe(0);
+ await page.screenshot({path:`/tmp/jalisco-ui-local-${language}-${width}.png`,fullPage:true});
+ await page.reload();await expect(page.getByRole('combobox',{name:'Language / Idioma',exact:true})).toHaveValue(language);
+});
+test('primary, secondary, destructive and navigation states keep readable contrast and visible keyboard focus',async({page})=>{
+ await page.route('**/api/admin/**',r=>r.fulfill({json:new URL(r.request().url()).pathname.endsWith('/overview')?{counts:{},health:{},recent:[]}:{items:[{id:'fixture',name:'Original registration',state:'pending',revision:1,last_event_id:null}],page:1,hasMore:false}}));
+ await page.goto('/admin');await page.getByRole('button',{name:'Producer approvals',exact:true}).click();await page.getByRole('button',{name:'View details',exact:true}).click();
+ function lum(c:string){const v=c.match(/[\d.]+/g)!.slice(0,3).map(Number).map(x=>x/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);return v[0]*.2126+v[1]*.7152+v[2]*.0722;}
+ for(const [name,bg] of [['Approve registration','rgb(49, 95, 67)'],['Reject registration','rgb(247, 231, 220)'],['Close details','rgb(231, 237, 220)']]){
+  const b=page.getByRole('button',{name,exact:true});await b.hover();await expect(b).toHaveCSS('background-color',bg);const colors=await b.evaluate(e=>({fg:getComputedStyle(e).color,bg:getComputedStyle(e).backgroundColor}));const ls=[lum(colors.fg),lum(colors.bg)].sort((a,b)=>b-a);expect((ls[0]+.05)/(ls[1]+.05)).toBeGreaterThanOrEqual(4.5);
+  await b.focus();await page.keyboard.press('Tab');await page.keyboard.press('Shift+Tab');await expect(b).toBeFocused();await expect(b).toHaveCSS('outline-style','solid');
+ }
+ const nav=page.getByRole('navigation',{name:'Admin sections'}).getByRole('button',{name:'Products',exact:true});await nav.hover();await expect(nav).toHaveCSS('color','rgb(255, 249, 233)');await nav.focus();await page.keyboard.press('Tab');await page.keyboard.press('Shift+Tab');await expect(nav).toHaveCSS('outline-style','solid');
+ await page.emulateMedia({reducedMotion:'reduce'});await expect(page.getByRole('button',{name:'Approve registration',exact:true})).toHaveCSS('transition-duration','0s');
+});

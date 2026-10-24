@@ -1,0 +1,33 @@
+import type {Database} from './authState.ts';
+import {Failure} from './provider.ts';
+const kinds=['producer','product','buyer'];
+async function rows(db:Database,sql:string,values:unknown[]){const r=await db.prepare(`SELECT json_group_array(json(row)) AS data FROM (${sql})`).bind(...values).first<{data:string}>();return JSON.parse(r?.data??'[]');}
+export async function reviewList(db:Database,kind:string,params:URLSearchParams){
+ if(!kinds.includes(kind))throw new Failure(404,'Endpoint not found.');
+ const pageText=params.get('page')??'1',state=params.get('status')??'',q=params.get('q')??'';
+ if((params.get('target')?.length??0)>80)throw new Failure(400,'Choose a valid registration.');
+ if(!/^[1-9][0-9]{0,5}$/.test(pageText)||q.length>120||!['','pending','approved','rejected'].includes(state))throw new Failure(400,'Choose valid review filters.');
+ const page=Number(pageText);
+ const items=await rows(db,`SELECT json_object('id',r.target_id,'name',CASE WHEN r.kind='product' THEN i.name ELSE COALESCE(pp.company,bp.company,p.company) END,'applicant',p.full_name,'owner_id',p.user_id,'country',COALESCE(pp.country,bp.country,p.country),'state',r.state,'revision',r.revision,'last_event_id',r.last_event_id,'review_requested_at',r.submitted_at,'source_updated_at',i.updated_at,'updated_at',r.updated_at,'description',COALESCE(i.description,pp.bio,bp.bio,''),'region',COALESCE(pp.region,bp.region,''),'business_email',pp.business_email,'business_phone',pp.business_phone,'public_contact',pp.public_contact,'producer',COALESCE(pp.company,p.company),'category',i.category,'quantity',i.quantity,'unit',i.unit,'price',i.price,'currency',i.currency,'availability',i.availability,'publication',COALESCE(i.status,CAST(b.published AS TEXT)),'consent_version',b.consent_version,'consented_at',b.consented_at,'public_company',b.company,'markets',b.markets,'interests',b.interests,'introduction',b.introduction) AS row
+ FROM registration_reviews r LEFT JOIN producer_items i ON r.kind='product' AND i.id=r.target_id
+ JOIN profiles p ON p.user_id=CASE WHEN r.kind='product' THEN i.user_id ELSE r.target_id END AND p.role=CASE WHEN r.kind='product' THEN 'producer' ELSE r.kind END
+ LEFT JOIN producer_profiles pp ON pp.user_id=p.user_id LEFT JOIN buyer_profiles bp ON bp.user_id=p.user_id LEFT JOIN buyer_publications b ON b.user_id=p.user_id
+ WHERE r.kind=? AND (?='' OR r.target_id=?) AND (?='' OR r.state=?) AND instr(lower(COALESCE(i.name,'')||' '||p.full_name||' '||COALESCE(pp.company,bp.company,p.company)),lower(?))>0
+ ORDER BY r.submitted_at DESC,r.target_id LIMIT 51 OFFSET ?`,[kind,params.get('target')??'',params.get('target')??'',state,state,q,(page-1)*50]);
+ return {items:items.slice(0,50),page,hasMore:items.length>50};
+}
+export async function reviewHistory(db:Database,kind:string,target:string){
+ if(!kinds.includes(kind)||!target||target.length>80)throw new Failure(404,'Registration not found.');
+ const review=await db.prepare('SELECT * FROM registration_reviews WHERE kind=? AND target_id=?').bind(kind,target).first();if(!review)throw new Failure(404,'Registration not found.');
+ return {review,history:await rows(db,"SELECT json_object('id',id,'revision',revision,'actor_id',actor_id,'state',after_state,'reason',reason,'created_at',created_at) AS row FROM registration_review_events WHERE kind=? AND target_id=? ORDER BY sequence",[kind,target])};
+}
+export async function decideReview(db:Database,actor:string,project:string,kind:string,target:string,body:Record<string,unknown>){
+ if(!kinds.includes(kind)||!target||target.length>80||typeof body.id!=='string'||!/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(body.id)||!Number.isSafeInteger(body.revision)||Number(body.revision)<1||!['pending','approved','rejected'].includes(String(body.before_state))||!['approved','rejected'].includes(String(body.after_state))||body.before_state===body.after_state||!(body.expected_event_id===null||(typeof body.expected_event_id==='string'&&body.expected_event_id.length<=80)))throw new Failure(400,'Check the review decision and revision.');
+ if(typeof body.reason!=='string'||!body.reason.trim()||body.reason.length>500)throw new Failure(400,'Enter a review reason of 1 to 500 characters.');
+ const values=[body.id,kind,target,body.revision,actor,project,body.before_state,body.after_state,body.expected_event_id,body.reason.trim()];
+ const existing=await db.prepare('SELECT * FROM registration_review_events WHERE id=?').bind(body.id).first<Record<string,unknown>>();
+ if(existing){const keys=['id','kind','target_id','revision','actor_id','project_ref','before_state','after_state','expected_event_id','reason'];if(JSON.stringify(keys.map(k=>existing[k]))!==JSON.stringify(values))throw new Failure(409,'The request ID was already used.');const current=await db.prepare('SELECT revision,state,last_event_id FROM registration_reviews WHERE kind=? AND target_id=?').bind(kind,target).first<Record<string,unknown>>();if(current?.revision!==existing.revision||current?.last_event_id!==existing.id||current?.state!==existing.after_state)throw new Failure(409,'The registration changed, its producer needs approval, or access was revoked. Refresh before retrying.');return {ok:true};}
+ try{await db.prepare('INSERT INTO registration_review_events(id,kind,target_id,revision,actor_id,project_ref,before_state,after_state,expected_event_id,reason,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)').bind(...values,new Date().toISOString()).run();}
+ catch{throw new Failure(409,'The registration changed, its producer needs approval, or access was revoked. Refresh before retrying.');}
+ return {ok:true};
+}

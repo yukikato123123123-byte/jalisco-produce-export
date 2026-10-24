@@ -1,0 +1,24 @@
+{
+  "scope": {
+    "project_ref": "heaswpawzuuijxurlfoz",
+    "account_id": "89dd3e659cece6bdf3181b991a2a0bd2",
+    "database_id": "7712d6bb-2414-44d3-9282-cb5b941d740e",
+    "worker": "jalisco-auth-staging"
+  },
+  "review_id": "REPLACE_EXTERNAL_REVIEW_ID",
+  "reviewer": "REPLACE_INDEPENDENT_REVIEWER_ID",
+  "key_custodian": "REPLACE_KEY_CUSTODIAN_ID",
+  "cloudflare_ownership_ref": "REPLACE_PROVIDER_OR_ORGANIZATION_RECORD",
+  "supabase_ownership_ref": "REPLACE_PROVIDER_OR_ORGANIZATION_RECORD",
+  "independent_channel_ref": "REPLACE_PREVIOUSLY_VERIFIED_CHANNEL_RECORD",
+  "unrecoverable_key_ref": "REPLACE_OWNER_ATTESTATION_RECORD",
+  "fingerprint_comparison_ref": "REPLACE_OUT_OF_BAND_FINGERPRINT_REVIEW",
+  "previous_policy_sha256": "REPLACE_WITH_READ_ONLY_CHECK_OUTPUT",
+  "reviewed_artifacts": {
+    "root_fingerprint": "REPLACE_INDEPENDENTLY_COMPARED_ROOT_FINGERPRINT",
+    "recovery_fingerprint": "REPLACE_INDEPENDENTLY_COMPARED_RECOVERY_FINGERPRINT",
+    "approval_fingerprints": ["REPLACE_INDEPENDENTLY_COMPARED_APPROVAL_FINGERPRINT"],
+    "bootstrap_sha256": "REPLACE_REVIEWED_BOOTSTRAP_HASH",
+    "activation_sha256": "REPLACE_REVIEWED_ACTIVATION_HASH"
+  }
+}

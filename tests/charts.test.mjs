@@ -1,3 +1,4 @@
+import { initialView } from '../src/presentation.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { URL, fileURLToPath } from 'node:url';
@@ -59,7 +60,7 @@ test('rendered bilingual charts preserve reported facts and disclose fictional m
       assert.doesNotMatch(output, /(?:\s|<)hidden(?:=|\s|>)|display:\s*none|\b\d+%|NaN|US\$/);
     }
     const main = readFileSync(new URL('../src/main.tsx', import.meta.url), 'utf8');
-    assert.match(main, /useState<PresentationView>\('producer'\)/);
+    assert.equal(initialView(''), 'producer');
     assert.match(main, /<SupplyMarketOverview language=\{language\}\/>/);
   } finally { await server.close(); }
 });

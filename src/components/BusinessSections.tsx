@@ -5,7 +5,7 @@ import { StatusBadge } from './StatusBadge';
 export const formatNumber = (value: number, digits = 1) => new Intl.NumberFormat('en-US', { maximumFractionDigits: digits }).format(value);
 
 function SectionHeading({ step, title, description, id }: { step: string; title: string; description: string; id: string }) {
-  return <div className="business-heading"><div><p className="eyebrow">{step}</p><h2 id={id}>{title}</h2></div><p>{description}</p></div>;
+  return <Localized><div className="business-heading"><div><p className="eyebrow">{step}</p><h2 id={id}>{title}</h2></div><p>{description}</p></div></Localized>;
 }
 
 export function ProducerDossier() {
@@ -18,7 +18,7 @@ export function ProducerDossier() {
     <article className="panel dossier-card commercial-card" aria-labelledby="commercial-heading">
       <div className="dossier-card-heading"><h2 id="commercial-heading">Commercial Readiness</h2><span className="dossier-index">REVIEW STATUS</span></div>
       <dl className="commercial-fields">{data.commercialReadiness.map(field => <div key={field.label}><dt>{field.label}</dt><dd><StatusBadge state={field.state} label={field.value === 'Pending confirmation' || field.value === 'Evidence required' || field.value === 'Review required' ? field.value : undefined}/>{!['Pending confirmation', 'Evidence required', 'Review required'].includes(field.value) && <span>{field.value}</span>}</dd></div>)}</dl>
-      <p className="dossier-note">No current field is verified or backed by an actual quotation. <a href="#documents">Review evidence checklist ↗</a></p>
+      <p className="dossier-note">No current field is verified or backed by an actual quotation. <a href="#documents">Review evidence checklist </a></p>
     </article>
   </section></Localized>;
 }
@@ -34,7 +34,7 @@ export function PackagingSection() {
 export function PricingSection() {
   return <Localized><section id="pricing" className="business-section" aria-labelledby="pricing-heading">
     <SectionHeading id="pricing-heading" step="COMMERCIAL TERMS" title="Build the quotation with confirmed details." description="No nopal price, buyer commitment, or freight quotation has been supplied."/>
-    <div className="pricing-grid">{data.pricing.map(price => <article key={price.id} className="price-card panel"><p className="example-label"><StatusBadge state={price.state} label="EVIDENCE REQUIRED"/></p><h3>{price.label}</h3><p className="unknown-price">Pending confirmation</p><p className="named-place">{price.namedPlace}</p><details className="price-scope"><summary>Information needed</summary><p>{price.scope}</p></details><a href="#contact">Request producer information <span aria-hidden="true">↗</span></a></article>)}</div><p className="section-disclosure">{data.pricingNotice}</p>
+    <div className="pricing-grid">{data.pricing.map(price => <article key={price.id} className="price-card panel"><p className="example-label"><StatusBadge state={price.state} label="EVIDENCE REQUIRED"/></p><h3>{price.label}</h3><p className="unknown-price">Pending confirmation</p><p className="named-place">{price.namedPlace}</p><details className="price-scope"><summary>Information needed</summary><p>{price.scope}</p></details><a href="#contact">Request producer information <span aria-hidden="true"></span></a></article>)}</div><p className="section-disclosure">{data.pricingNotice}</p>
   </section></Localized>;
 }
 

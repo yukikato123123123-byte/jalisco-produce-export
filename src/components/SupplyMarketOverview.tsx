@@ -1,3 +1,4 @@
+import {Localized} from '../localization';
 import { sampleData } from '../sampleData';
 import { demoData } from '../demoData';
 import { translate } from '../i18n';
@@ -8,14 +9,14 @@ import { localizeNode } from '../localizeNode';
 function comparison(id: string, title: string, unit: string, field: 'priceUsdPerKg' | 'transitDays' | 'freightUsdPerVehicle', language: Language) {
   const maximum = demoData.axes[field];
   const format = (value: number) => new Intl.NumberFormat(language === 'es' ? 'es-MX' : 'en-US', { minimumFractionDigits: field === 'priceUsdPerKg' ? 2 : 0, maximumFractionDigits: 2 }).format(value);
-  return <div className="comparison-metric"><h4>{title}</h4><p className="axis-unit">{unit}</p>
+  return <Localized><div className="comparison-metric"><h4>{title}</h4><p className="axis-unit">{unit}</p>
     <svg viewBox="0 0 500 160" role="img" aria-labelledby={`${id}-title ${id}-desc`}>
       <title id={`${id}-title`}>{title}</title><desc id={`${id}-desc`}>{demoData.disclaimer}</desc>
       {[0, 1, 2, 3, 4].map(tick => <g key={tick}><line x1={90 + tick * 78} y1="12" x2={90 + tick * 78} y2="116" className="plot-grid"/><text x={90 + tick * 78} y="143" textAnchor="middle" className="plot-tick">{format(maximum * tick / 4)}</text></g>)}
       {demoData.markets.map((market, index) => <g key={market.id}><text x="0" y={43 + index * 58} className="plot-label">{market.name}</text><rect x="90" y={21 + index * 58} width={market[field] / maximum * 312} height="32" rx="2" className={`plot-bar ${market.id}`}><title>{`${market.name}: ${format(market[field])} ${translate(unit, language)}`}</title></rect><text x={100 + market[field] / maximum * 312} y={43 + index * 58} className="plot-value">{format(market[field])}</text></g>)}
     </svg>
     <ul className="metric-text-values">{demoData.markets.map(market => <li key={market.id}><span>{market.name}</span><strong>{format(market[field])} <span>{unit}</span></strong></li>)}</ul>
-  </div>;
+  </div></Localized>;
 }
 
 export function SupplyMarketOverview({ language }: { language: Language }) {

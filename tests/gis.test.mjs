@@ -1,3 +1,4 @@
+import { initialView } from '../src/presentation.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -147,7 +148,7 @@ test('expanded map stays exclusively in the existing Logistics tab and does not 
   assert.equal((source.match(/<MarketMap /g) ?? []).length, 1);
   assert.doesNotMatch(source, /LogisticsScenarios/);
   assert.match(source, /id="panel-logistics"[^>]*hidden=\{active !== 'logistics'\}[\s\S]*?<MarketMap active=\{active === 'logistics'\}/);
-  assert.match(source, /useState<PresentationView>\('producer'\)/);
+  assert.equal(initialView(''), 'producer');
   assert.equal(sampleData.supply.cartonCount, 486);
   assert.equal(sampleData.supply.harvestWeightDescription, 'Slightly more than 10 metric tonnes');
   assert.equal(sampleData.supply.cartonNetKg, null);
@@ -196,13 +197,15 @@ test('legend renders bilingual labels in order and reflects the existing layer s
 });
 
 
-test('light basemap uses the official raster URL with all required attribution and no embedded key', () => {
-  assert.equal(logisticsBasemap.url, 'https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png');
-  assert.equal(logisticsBasemap.style, 'Alidade Smooth');
-  assert.equal(logisticsBasemap.maxZoom, 20);
-  for (const credit of ['Stadia Maps', 'OpenMapTiles', 'OpenStreetMap']) assert.ok(logisticsBasemap.attribution.includes(credit));
-  for (const url of ['https://stadiamaps.com/attribution/', 'https://openmaptiles.org/', 'https://www.openstreetmap.org/copyright']) assert.ok(logisticsBasemap.attribution.includes(url));
-  assert.doesNotMatch(logisticsBasemap.url, /dark|api_key|token|\?/i);
+test('public basemap uses official OSM tiles, visible attribution and tile-only origin referrer without credentials', () => {
+  assert.equal(logisticsBasemap.url, 'https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+  assert.equal(logisticsBasemap.provider, 'OpenStreetMap');
+  assert.equal(logisticsBasemap.style, 'Standard');
+  assert.equal(logisticsBasemap.maxZoom, 19);
+  assert.equal(logisticsBasemap.referrerPolicy, 'origin');
+  assert.ok(logisticsBasemap.attribution.includes('OpenStreetMap'));
+  assert.ok(logisticsBasemap.attribution.includes('https://www.openstreetmap.org/copyright'));
+  assert.doesNotMatch(logisticsBasemap.url, /api_key|token|\?|stadiamaps/i);
 });
 
 test('botanical colors remain legible on ivory and popup accents match their categories', () => {

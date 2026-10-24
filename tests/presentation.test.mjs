@@ -7,7 +7,7 @@ import { localizeNode } from '../src/localizeNode.ts';
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import { sampleData, verificationStates } from '../src/sampleData.ts';
-import { views, viewLabels, nextView, loadLanguage, saveLanguage, languageStorageKey } from '../src/presentation.ts';
+import { initialView, views, viewLabels, nextView, loadLanguage, saveLanguage, languageStorageKey } from '../src/presentation.ts';
 import { translate } from '../src/i18n.ts';
 import { networkCoordinates } from '../src/gisNetwork.ts';
 import { focusMap, refreshMap, mapPadding } from '../src/mapBehavior.ts';
@@ -111,7 +111,7 @@ test('all static rendered UI phrases and centralized descriptions have Spanish c
     const text = value.replace(/\s+/g, ' ').trim();
     if (/[a-zA-Z]/.test(text) && !proper.has(text) && translate(text, 'es') === text) missing.add(text);
   };
-  for (const path of ['../src/main.tsx', '../src/components/MarketMap.tsx', '../src/components/BusinessSections.tsx', '../src/components/BuyerInquiry.tsx', '../src/components/StatusBadge.tsx', '../src/components/SupplyMarketOverview.tsx']) {
+  for (const path of ['../src/main.tsx', '../src/components/FarmStory.tsx', '../src/components/MarketMap.tsx', '../src/components/BusinessSections.tsx', '../src/components/BuyerInquiry.tsx', '../src/components/StatusBadge.tsx', '../src/components/SupplyMarketOverview.tsx']) {
     const file = ts.createSourceFile(path, readFileSync(new URL(path, import.meta.url), 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
     const visit = node => {
       if (ts.isJsxText(node)) check(node.text);
@@ -149,4 +149,10 @@ test('React presentation localization preserves option values, user text, and ev
   assert.match(output, /Describa el empaque/);
   assert.equal(localized.props.children[0].props.onClick, onClick);
   assert.match(renderToStaticMarkup(localizeNode(tree, 'en')), /Show Full Route/);
+});
+
+test('direct public section links select their existing tab with a safe default',()=>{
+  for(const hash of ['', '#overview', '#supply', '#unknown'])assert.equal(initialView(hash),'producer');
+  for(const hash of ['#contact','#pricing','#packaging'])assert.equal(initialView(hash),'commercial');
+  assert.equal(initialView('#markets'),'logistics');assert.equal(initialView('#documents'),'readiness');
 });

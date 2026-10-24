@@ -1,7 +1,31 @@
+import {extraSpanish} from './translations/es-extra.ts';
 import type { Language } from './presentation.ts';
 // Shared source phrases are the English fallback. Values are presentation text,
 // never a second copy of numeric business data or inquiry option identifiers.
 export const spanish: Record<string, string> = {
+  'Page not available': 'Página no disponible',
+  'ORIGIN · CONNECTION · POSSIBILITY': 'ORIGEN · CONEXIÓN · POSIBILIDAD',
+  'Discover the farm →': 'Descubra la finca →',
+  'Request producer information →': 'Solicitar información del productor →',
+  "From the farm · Photographs supplied by Edgar": "Desde el campo · Fotografías proporcionadas por Edgar",
+  "Rooted in Jalisco.": "Con raíces en Jalisco.",
+  "Connected by trust.": "Conectados por la confianza.",
+  "Fresh nopal · El Grullo": "Nopal fresco · El Grullo",
+  "Discover the people, produce and possibilities behind the harvest. Start with the origin. Build the next connection.": "Descubra las personas, los productos y las posibilidades detrás de la cosecha. Comience con el origen. Construya la próxima conexión.",
+  "Explore Produce ↗": "Explorar productos ↗",
+  "Meet the producers →": "Conozca a los productores →",
+  "ORIGIN · CORRIDOR · DESTINATION": "ORIGEN · CORREDOR · DESTINO",
+  "From Jalisco, toward new markets.": "Desde Jalisco, hacia nuevos mercados.",
+  "Explore the illustrative network separately from shipment planning. Texas and Illinois are intended markets; carriers, transit times, costs and cold-chain arrangements require confirmation.": "Explore la red ilustrativa por separado de la planificación de envíos. Texas e Illinois son mercados previstos; transportistas, tiempos, costos y cadena de frío requieren confirmación.",
+  "Basemap unavailable. The background map could not be loaded. The illustrative network and all layer controls remain available; this is not a navigation map.": "Mapa base no disponible. No se pudo cargar el fondo del mapa. La red ilustrativa y los controles de capas siguen disponibles; no es un mapa de navegación.",
+  "A connection that": "Una conexión que",
+  "starts at the source.": "comienza en el origen.",
+  "Nopal fields, open skies and the landscape of Jalisco. A closer look at the farm, through photographs supplied by Edgar.": "Campos de nopal, cielos abiertos y el paisaje de Jalisco. Una mirada a la finca a través de fotografías proporcionadas por Edgar.",
+  "The existing producer dossier reports El Grullo, Jalisco as the origin. Supply figures are producer reported; recurring availability, export eligibility and specifications still need confirmation.": "El expediente del productor indica El Grullo, Jalisco como origen. Las cifras son declaradas por el productor; la disponibilidad recurrente, la elegibilidad para exportar y las especificaciones requieren confirmación.",
+  "At the source · Farm photograph supplied by Edgar": "En el origen · Fotografía de la finca proporcionada por Edgar",
+  "From the harvest · This photograph does not establish packaging specifications, current stock or export approval.": "De la cosecha · Esta fotografía no acredita especificaciones de empaque, existencias actuales ni autorización de exportación.",
+
+  'Account access does not imply verified supply or commercial commitments.': 'El acceso a la cuenta no implica oferta verificada ni compromisos comerciales.',
   "Account / Sign in": "Cuenta / Iniciar sesión",
   "Demo origin reference": "Referencia de origen demo",
   "2.5D · Illustrative depth": "2.5D · Profundidad ilustrativa",
@@ -340,18 +364,35 @@ export const spanish: Record<string, string> = {
   'Packaging summary': 'Resumen de empaque', 'View packaging details': 'Ver detalles del empaque', 'kg / carton': 'kg / caja',
 };
 
+const cleanPhrase=(s:string)=>s.replace(/[→←↑↓↗↘↟]/g,'').replace(/\s+/g,' ').trim();
+const translations:Record<string,string>={...Object.fromEntries(Object.entries(spanish).map(([k,v])=>[cleanPhrase(k),cleanPhrase(v)])),...extraSpanish};
 export function translate(text: string, language: Language): string {
+  const rawDate=text.trim();
+  if(/^\d{4}-\d{2}-\d{2}T[0-9:.]+Z$/.test(rawDate)&&Number.isFinite(Date.parse(rawDate)))return new Intl.DateTimeFormat(language==='es'?'es-MX':'en-US',{dateStyle:'medium',timeStyle:'short'}).format(new Date(rawDate));
   if (language === 'en') return text;
-  const source = text.replace(/\s+/g, ' ').trim();
-  let result = spanish[source];
+  const source = cleanPhrase(text);
+  let result = translations[source];
+  if(!result){
+    const limited=/^Enter a valid ([a-z_]+) \(maximum (\d+) characters\)\.$/.exec(source);
+    const invalid=/^Enter a valid ([a-z_]+)\.$/.exec(source);
+    const nonnegative=/^Enter a non-negative ([a-z_]+) up to 1 trillion\.$/.exec(source);
+    const field=(key:string)=>translations[key.replaceAll('_',' ')]||key;
+    if(limited)result=`Introduce un valor válido de ${field(limited[1])} (máximo ${limited[2]} caracteres).`;
+    else if(invalid)result=`Introduce un valor válido de ${field(invalid[1])}.`;
+    else if(nonnegative)result=`Introduce un valor de ${field(nonnegative[1])} no negativo de hasta un billón (10¹²).`;
+    const consumed=' This recovery session was consumed; request a new code.';
+    if(source.endsWith(consumed))result=translate(source.slice(0,-consumed.length),'es')+' Esta sesión de recuperación se consumió; solicita otro código.';
+    const patterns:[RegExp,string][]=[[/^Welcome, (.*)\.$/,'Bienvenido, $1.'],[/^(\d+) public items on this page$/,'$1 productos públicos en esta página'],[/^(\d+) public (buyers?|producers?) on this page$/,'$1 perfiles públicos en esta página'],[/^Loading (buyers|producers)…$/,'Cargando perfiles…'],[/^Page (\d+)$/,'Página $1'],[/^· Page (\d+)$/,'· Página $1'],[/^Try again in (\d+)s$/,'Inténtalo en $1 s'],[/^Saved (.*)\.$/,'Guardado: $1.']];
+    for(const [pattern,replacement] of patterns)if(pattern.test(source)){result=source.replace(pattern,replacement);break;}
+  }
   if (!result) {
     result = source.replace(/^(\d+(?:[,.]\d+)?) MT \/ harvest$/, '$1 MT / cosecha')
       .replace(/^(\d+) cartons \/ harvest$/, '$1 cajas / cosecha')
       .replace(/^([\d,.]+) kg \/ carton$/, '$1 kg / caja')
       .replace(/^(\d+) cartons × (\d+) pallets$/, '$1 cajas × $2 tarimas');
     const colon = source.indexOf(': ');
-    if (colon > 0 && spanish[source.slice(0, colon)] && spanish[source.slice(colon + 2)]) {
-      result = `${spanish[source.slice(0, colon)]}: ${spanish[source.slice(colon + 2)]}`;
+    if (colon > 0 && translations[source.slice(0, colon)] && translations[source.slice(colon + 2)]) {
+      result = `${translations[source.slice(0, colon)]}: ${translations[source.slice(colon + 2)]}`;
     }
   }
   const leading = text.match(/^\s*/)?.[0] ?? '';

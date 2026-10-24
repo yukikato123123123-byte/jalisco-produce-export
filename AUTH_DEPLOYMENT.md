@@ -1,5 +1,8 @@
 # Authentication integration and deployment proposal
 
+> Current isolation work supersedes the historical shared-provider instructions below.
+> See [STAGING_ISOLATION.md](STAGING_ISOLATION.md). Do not apply shared-project setup instructions for the new staging cutover.
+
 ## Current status and production boundary
 
 The existing homepage, layout, localization, Leaflet map and GIS code are unchanged by this integration patch. The existing authentication commit already added its account link and account pages. No replacement homepage is introduced. The production Worker name and origin remain `jalisco-produce-export` and `https://jalisco-produce-export.yukikato123123123.workers.dev`.

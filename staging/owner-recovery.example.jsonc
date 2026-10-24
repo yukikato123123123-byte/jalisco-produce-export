@@ -1,0 +1,10 @@
+// REVIEW ONLY: merge these additions into an explicitly approved isolated config.
+// This is not a deployable config. Existing wrangler.* configs are unchanged.
+// Separate secrets: OWNER_ROOT_PUBLIC_KEY, OWNER_BOOTSTRAP_MANIFEST, OWNER_PIN_PEPPER.
+// OwnerAuthority does NOT use or seed D1 ownership tables.
+{
+  "durable_objects": {
+    "bindings": [{"name":"OWNER_AUTHORITY","class_name":"OwnerAuthority"}]
+  },
+  "migrations": [{"tag":"owner-authority-v1","new_sqlite_classes":["OwnerAuthority"]}]
+}

@@ -1,0 +1,31 @@
+import {test,expect} from '@playwright/test';
+const publicBuyer={id:'public-buyer-only',company:'Public Buyer Company',country:'US',region:'Illinois',markets:'Texas and Illinois',interests:'Nopal and avocado',introduction:'A company introduction approved for public discovery.'};
+test('buyer explicitly publishes, reloads and withdraws a separate public profile',async({page})=>{
+  const profile={full_name:'Private Buyer',role:'buyer',company:'Private Company',country:'US',region:'',bio:'Private company introduction'};
+  let data:{profile:typeof profile;publication:(typeof publicBuyer&{published:number;updated_at:string;approval_state?:string})|null;savedItems:never[];page:number;hasMore:boolean}={profile,publication:null,savedItems:[],page:1,hasMore:false};
+  const posts:Record<string,unknown>[]=[];
+  await page.route('**/api/auth/session',r=>r.fulfill({json:{user:{email:'private@example.test'},profile,recovery:false}}));
+  await page.route('**/api/buyer/dashboard*',r=>r.fulfill({json:data}));
+  await page.route('**/api/public/produce*',r=>r.fulfill({json:{items:[],page:1,hasMore:false}}));
+  await page.route('**/api/buyer/publication',r=>{const body=r.request().postDataJSON();posts.push(body);data={...data,publication:body.publish?{...publicBuyer,...body,published:1,approval_state:'pending',updated_at:'publish-1'}:{...data.publication!,published:0,updated_at:'withdraw-2'}};return r.fulfill({json:data});});
+  await page.goto('/buyer/dashboard');await expect(page.getByText('Your directory profile is private.',{exact:true})).toBeVisible();
+  await expect(page.getByLabel('Public company name',{exact:true})).toHaveValue('');
+  for(const [label,value] of [['Public company name',publicBuyer.company],['Public company country',publicBuyer.country],['Public company region',publicBuyer.region],['Public target markets',publicBuyer.markets],['Public produce interests',publicBuyer.interests],['Public company introduction',publicBuyer.introduction]])await page.getByLabel(label,{exact:true}).fill(value);
+  await page.getByRole('button',{name:'Publish buyer profile',exact:true}).click();expect(posts).toHaveLength(0);
+  await page.getByRole('checkbox',{name:/I explicitly agree to publish/}).check();await page.getByRole('button',{name:'Publish buyer profile',exact:true}).click();
+  await expect(page.getByText('Your publication choice is enabled. Public visibility requires administrator approval.',{exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'View your public buyer profile',exact:true})).toHaveCount(0);expect(posts[0]).toMatchObject({publish:true,explicit_consent:true,consent_version:'buyer-directory-v1'});
+  await expect(page.getByRole('checkbox',{name:/I explicitly agree to publish/})).not.toBeChecked();
+  data.publication!.approval_state='approved';await page.reload();await expect(page.getByText('Your directory profile is public.',{exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'View your public buyer profile'})).toHaveAttribute('href','/buyers/'+publicBuyer.id);
+  await page.getByRole('button',{name:'Unpublish buyer profile',exact:true}).click();await expect(page.getByText('Your directory profile is private.',{exact:true})).toBeVisible();expect(posts[1]).toEqual({publish:false});
+  await expect(page.getByRole('link',{name:'View your public buyer profile'})).toHaveCount(0);await expect(page.getByLabel('Buyer company',{exact:true})).toHaveValue('Private Company');
+});
+for(const viewport of [{width:375,height:812},{width:390,height:844},{width:768,height:1024},{width:1366,height:768},{width:1440,height:900}])test(`consenting buyer directory search and detail fit ${viewport.width}px`,async({page})=>{
+  await page.setViewportSize(viewport);const queries:string[]=[];
+  const buyer={...publicBuyer,company:'A'.repeat(120),introduction:'Public company introduction. '.repeat(50)};
+  await page.route('**/api/public/buyers?*',r=>{queries.push(new URL(r.request().url()).search);return r.fulfill({json:{items:[buyer],page:1,hasMore:false,publication:'consent-only'}});});
+  await page.goto('/buyers');await expect(page.getByRole('heading',{name:buyer.company,exact:true})).toBeVisible();
+  await page.getByLabel('Target market',{exact:true}).fill('Illinois');await page.getByLabel('Produce interest',{exact:true}).fill('Nopal');await page.getByRole('button',{name:'Search buyers',exact:true}).click();await expect(page.getByRole('status')).toContainText('1 public buyer');expect(queries.at(-1)).toContain('market=Illinois');expect(queries.at(-1)).toContain('interest=Nopal');
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.getByRole('link',{name:'View buyer profile'}).click();await expect(page.getByRole('heading',{name:'Company introduction',exact:true})).toBeVisible();
+  await expect(page.getByRole('link',{name:'Explore matching producers'})).toHaveAttribute('href','/producers?q=Nopal%20and%20avocado');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:`.wrangler/completion-release/screenshots/buyer-detail-${viewport.width}.png`,fullPage:true});
+});

@@ -1,14 +1,29 @@
+import {uploadImage,manageImages,imageFile,cleanupImages} from './productImages.ts';
+import { ownerPage } from './owner/ui.ts';
+import { ownerRoute } from './owner/router.ts';
+import type { OwnerNamespace } from './owner/router.ts';
+import {usesOwnerGateway,ownerAdmin,ownerAdminHint} from './owner/gateway.ts';
+export { OwnerAuthority } from './owner/authority.ts';
+import { administrator, hasAdministratorGrant } from './admin.ts';
+import {adminPreview} from './adminPreview.ts';
+import { verifiedRecoveryClaims } from './implicitRecovery.ts';
+import {submitInquiry,readInquiries} from './inquiries.ts';
+import { buyer } from './buyer.ts';
+import { producer, publicItems } from './producer.ts';
 import { Failure, ProviderFailure, provider } from './provider.ts';
 import { authenticationRevision, prepareUser, insertSession, currentSession, claimRecovery, finishRecovery } from './authState.ts';
 import type { Database } from './authState.ts';
-export interface Env { DB: Database; ASSETS: { fetch(request: Request): Promise<Response> }; AUTH_ORIGIN: string; SUPABASE_URL: string; SUPABASE_PUBLISHABLE_KEY: string; SESSION_ENCRYPTION_KEY: string }
+import { assertAuthEnvironment, isolatedStaging } from './environment.ts';
+import { publicProducers, publicBuyers } from './directory.ts';
+export interface Env { SUPABASE_STORAGE_SERVICE_ROLE_KEY?:string; OWNER_ADMIN_MODE?:string; OWNER_ROOT_PUBLIC_KEY?:string; OWNER_GRANT_ACTIVATION?:string; OWNER_AUTHORITY?: OwnerNamespace; AUTH_ENVIRONMENT?: string; DB: Database; ASSETS: { fetch(request: Request): Promise<Response> }; AUTH_ORIGIN: string; SUPABASE_URL: string; SUPABASE_PUBLISHABLE_KEY: string; SESSION_ENCRYPTION_KEY: string }
 type Profile = { full_name: string; company: string; country: string; role: 'producer' | 'buyer' };
 type User = { id: string; email: string; email_confirmed_at?: string; user_metadata?: Record<string, unknown> };
 const json = (value: unknown, status = 200, cookie?: string, retryAfter?: number) => new Response(JSON.stringify(value), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff', ...(cookie ? { 'Set-Cookie': cookie } : {}), ...(retryAfter ? { 'Retry-After': String(retryAfter) } : {}) } });
-const generic = 'If this address is eligible, an email with a confirmation code will arrive. Check your inbox and spam folder.';
+const generic = 'If this address is eligible, a confirmation email will arrive. Open its link to finish signing up. Check your inbox and spam folder.';
 const bytes = (text: string) => new TextEncoder().encode(text);
 async function hash(text: string) { return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes(text))), n => n.toString(16).padStart(2, '0')).join(''); }
 async function key(env: Env) { if (!/^[a-f0-9]{64}$/i.test(env.SESSION_ENCRYPTION_KEY)) throw new Failure(503, 'Authentication is not configured.'); return crypto.subtle.importKey('raw', new Uint8Array(env.SESSION_ENCRYPTION_KEY.match(/../g)!.map(v => parseInt(v, 16))), 'AES-GCM', false, ['encrypt', 'decrypt']); }
+async function sessionHash(id: string, env: Env) { return hash(isolatedStaging(env) ? `${env.SUPABASE_URL}:${id}` : id); }
 async function encrypt(value: string, env: Env) { const iv = crypto.getRandomValues(new Uint8Array(12)); const data = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await key(env), bytes(value))); return btoa(String.fromCharCode(...iv, ...data)); }
 async function decrypt(value: string, env: Env) { const data = Uint8Array.from(atob(value), c => c.charCodeAt(0)); return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: data.slice(0, 12) }, await key(env), data.slice(12))); }
 function cookieName(env: Env) { return env.AUTH_ORIGIN.startsWith('https:') ? '__Host-jalisco-session' : 'jalisco-session'; }
@@ -19,7 +34,7 @@ function password(value: unknown) { if (typeof value !== 'string' || value.lengt
 function profile(value: Record<string, unknown>): Profile { const result: Record<string, string> = {}; for (const name of ['full_name', 'company', 'country']) { if (typeof value[name] !== 'string' || !(value[name] as string).trim() || (value[name] as string).length > 120) throw new Failure(400, 'Enter your name, company or farm, and country (up to 120 characters each).'); result[name] = (value[name] as string).trim(); } if (!['producer', 'buyer'].includes(String(value.role))) throw new Failure(400, 'Choose Producer or Buyer.'); return { ...result, role: value.role } as Profile; }
 async function readSession(request: Request, env: Env) {
   const id = sessionId(request, env); if (!/^[a-f0-9]{64}$/.test(id)) throw new Failure(401, 'Please sign in to continue.');
-  const session = await currentSession(env.DB, await hash(id));
+  const session = await currentSession(env.DB, await sessionHash(id, env));
   if (!session) throw new Failure(401, 'Your session has expired or was revoked. Please sign in again.');
   await limitSessionReads(env, session.id);
   const token = await decrypt(session.token, env);
@@ -38,7 +53,7 @@ async function createSession(payload: Record<string, unknown>, purpose: string, 
   const id = Array.from(crypto.getRandomValues(new Uint8Array(32)), n => n.toString(16).padStart(2, '0')).join('');
   const age = Math.min(purpose === 'recovery' ? 600 : 3600, Math.floor(payload.expires_in));
   const generation = await prepareUser(env.DB, user.id);
-  await insertSession(env.DB, { id: await hash(id), user_id: user.id, token: await encrypt(payload.access_token, env), expires: Date.now() + age * 1000, purpose, generation, recovery_claimed: 0 }, revision);
+  await insertSession(env.DB, { id: await sessionHash(id, env), user_id: user.id, token: await encrypt(payload.access_token, env), expires: Date.now() + age * 1000, purpose, generation, recovery_claimed: 0 }, revision);
   return cookie(env, id, age);
 }
 function resetUncertain(env: Env) {
@@ -53,12 +68,33 @@ async function limitSessionReads(env: Env, sessionId: string) {
 }
 export async function handle(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
+  if(url.pathname==='/admin/preview'||url.pathname==='/api/staging/admin-preview'||url.pathname.startsWith('/api/staging/admin-preview/'))return adminPreview(request,env);
+  if ((url.pathname === '/owner' || url.pathname === '/owner/client.js') && request.method === 'GET') return ownerPage(url.pathname);
+  if (url.pathname.startsWith('/api/owner/')) return ownerRoute(request, env.OWNER_AUTHORITY);
   if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
   try {
+    const imagePath=/^\/api\/product-images\/([^/]+)\/(thumb|full)$/.exec(url.pathname);
+    if(request.method==='GET'&&imagePath)return await imageFile(env,imagePath[1],imagePath[2],async owner=>{
+      try{const a=await readSession(request,env);if(a.session.purpose==='recovery')return false;if(a.user.id===owner&&a.profile?.role==='producer')return true;return usesOwnerGateway(env)?ownerAdminHint(env,a.user.id):hasAdministratorGrant(env.DB,a.user.id,new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,''));}catch(e){if(e instanceof Failure&&[401,403].includes(e.status))return false;throw e;}
+    });
+    const uploadPath=/^\/api\/producer\/items\/([^/]+)\/images\/upload$/.exec(url.pathname);
+    if(request.method==='POST'&&uploadPath){
+      if(request.headers.get('Origin')!==env.AUTH_ORIGIN||request.headers.get('Sec-Fetch-Site')==='cross-site'||!request.headers.get('Content-Type')?.startsWith('multipart/form-data;'))throw new Failure(403,'Request origin rejected.');
+      assertAuthEnvironment(env);const a=await readSession(request,env);if(a.session.purpose==='recovery')throw new Failure(403,'Complete password recovery before continuing.');if(a.profile?.role!=='producer')throw new Failure(403,'A producer account is required.');
+      return json(await uploadImage(request,env,a.user.id,uploadPath[1]));
+    }
+    // Published read-only data does not require a configured auth provider.
+    if (request.method === 'GET' && ['/api/public/produce','/api/public/producers','/api/public/buyers'].includes(url.pathname)) {
+      if (!env.DB) throw new Failure(503, 'The public directory is temporarily unavailable.');
+      if (url.pathname === '/api/public/producers') return json(await publicProducers(env.DB,url.searchParams));
+      if (url.pathname === '/api/public/buyers') return json(await publicBuyers(env.DB,url.searchParams));
+      return json(await publicItems(env.DB,url.searchParams));
+    }
     if (!env.DB || !env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY || !env.AUTH_ORIGIN) throw new Failure(503, 'Authentication is not configured. Public pages remain available.');
     const origin = new URL(env.AUTH_ORIGIN);
     if (origin.origin !== env.AUTH_ORIGIN || (origin.protocol !== 'https:' && !(origin.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(origin.hostname)))) throw new Failure(503, 'Authentication is not configured.');
     if (!/^https:\/\/[a-z0-9.-]+$/i.test(env.SUPABASE_URL)) throw new Failure(503, 'Authentication is not configured.');
+    assertAuthEnvironment(env);
     await key(env);
     if (request.method !== 'GET' && request.method !== 'POST') throw new Failure(405, 'Method not allowed.');
     if (request.method === 'POST' && (request.headers.get('Origin') !== env.AUTH_ORIGIN || request.headers.get('Sec-Fetch-Site') === 'cross-site' || !request.headers.get('Content-Type')?.startsWith('application/json'))) throw new Failure(403, 'Request origin rejected.');
@@ -81,15 +117,61 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     const path = url.pathname;
     if (request.method === 'POST' && path === '/api/auth/signup') {
       const details = profile(body), address = email(body.email), secret = password(body.password);
-      try { await provider(env, 'signup', 'POST', { email: address, password: secret, data: details }); }
+      const redirect = `signup?redirect_to=${encodeURIComponent(`${env.AUTH_ORIGIN}/verify-email`)}`;
+      try { await provider(env, redirect, 'POST', { email: address, password: secret, data: details }); }
       catch (error) { if (!(error instanceof ProviderFailure) || error.code !== 'account_existence') throw error; }
       return json({ message: generic });
     }
     if (request.method === 'POST' && ['/api/auth/forgot-password', '/api/auth/resend'].includes(path)) {
       const address = email(body.email);
-      try { await provider(env, path.endsWith('resend') ? 'resend' : 'recover', 'POST', { email: address, ...(path.endsWith('resend') ? { type: 'signup' } : {}) }); }
+      const resend = path.endsWith('resend');
+      const endpoint = resend ? `resend?redirect_to=${encodeURIComponent(`${env.AUTH_ORIGIN}/verify-email`)}` : isolatedStaging(env) ? `recover?redirect_to=${encodeURIComponent(`${env.AUTH_ORIGIN}/verify-email?purpose=recovery`)}` : 'recover';
+      try { await provider(env, endpoint, 'POST', { email: address, ...(resend ? { type: 'signup' } : {}) }); }
       catch (error) { if (!(error instanceof ProviderFailure) || error.code !== 'account_existence') throw error; }
       return json({ message: generic });
+    }
+    if (request.method === 'POST' && path === '/api/auth/confirm-link') {
+      // A verified one-time provider proof, never a client-supplied session purpose.
+      const purpose = body.type === 'email' ? 'signup' : body.type;
+      if ((purpose !== 'signup' && purpose !== 'recovery') || typeof body.token_hash !== 'string' || !/^[A-Za-z0-9_-]{16,256}$/.test(body.token_hash) || body.access_token !== undefined || body.code !== undefined) throw new Failure(400, 'Invalid authentication link. Request a new email for the intended action.');
+      const revision = await authenticationRevision(env.DB);
+      const payload = await provider(env, 'verify', 'POST', { token_hash: body.token_hash, type: purpose });
+      if (typeof payload.access_token !== 'string') throw new Failure(400, 'Unable to verify this authentication link.');
+      const user = await provider(env, 'user', 'GET', undefined, payload.access_token) as unknown as User;
+      if (typeof user.email !== 'string' || !user.email_confirmed_at) throw new Failure(403, 'Email verification is required.');
+      const nextCookie = await createSession(payload, purpose === 'recovery' ? 'recovery' : 'normal', env, revision, email(user.email));
+      const previous = sessionId(request, env);
+      if (previous) await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(await sessionHash(previous, env)).run();
+      return json({ ok: true }, 200, nextCookie);
+    }
+    if (request.method === 'POST' && path === '/api/auth/callback') {
+      if ((body.type !== 'signup' && body.type !== 'recovery') || typeof body.access_token !== 'string' || body.access_token.length < 20 || body.access_token.length > 8192) {
+        throw new Failure(400, 'The confirmation link is invalid or expired. Request a new confirmation email.');
+      }
+      // Validate the provider token before creating the local HttpOnly session.
+      const revision = await authenticationRevision(env.DB);
+      const verified = await provider(env, 'user', 'GET', undefined, body.access_token) as unknown as User;
+      if (typeof verified.id !== 'string' || typeof verified.email !== 'string' || !verified.email_confirmed_at) {
+        throw new Failure(403, 'Verify your email before signing in.');
+      }
+      const recovering = body.type === 'recovery';
+      let expiresIn = 3600;
+      if (recovering) {
+        const proof = verifiedRecoveryClaims(body.access_token, verified.id, env.SUPABASE_URL);
+        expiresIn = proof.expiresIn;
+        // Reserve the proof atomically through its signed JWT expiry. This uses
+        // a separate hash namespace from rate buckets and existing expiry cleanup.
+        const proofId = await hash(`implicit-recovery:${env.SUPABASE_URL}:${body.access_token}`);
+        const consumed = await env.DB.prepare('INSERT INTO auth_limits (id, attempts, expires) VALUES (?, 1, ?) ON CONFLICT(id) DO NOTHING RETURNING id').bind(proofId, proof.expiresAt).first();
+        if (!consumed) throw new Failure(400, 'This recovery session is invalid, expired or already used. Request a new recovery email.');
+      }
+      const nextCookie = await createSession(
+        { access_token: body.access_token, expires_in: expiresIn },
+        recovering ? 'recovery' : 'normal', env, revision, email(verified.email)
+      );
+      const previous = sessionId(request, env);
+      if (previous) await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(await sessionHash(previous, env)).run();
+      return json({ ok: true }, 200, nextCookie);
     }
     if (request.method === 'POST' && ['/api/auth/login', '/api/auth/verify'].includes(path)) {
       const address = email(body.email);
@@ -99,17 +181,21 @@ export async function handle(request: Request, env: Env): Promise<Response> {
       const revision = await authenticationRevision(env.DB);
       const payload = await provider(env, verifying ? 'verify' : 'token?grant_type=password', 'POST', verifying ? { email: address, token: body.code, type: body.type } : { email: address, password: password(body.password) });
       const nextCookie = await createSession(payload, verifying && body.type === 'recovery' ? 'recovery' : 'normal', env, revision, address);
-      const previous = sessionId(request, env); if (previous) await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(await hash(previous)).run();
+      const previous = sessionId(request, env); if (previous) await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(await sessionHash(previous, env)).run();
       return json({ ok: true }, 200, nextCookie);
     }
     // Logout must revoke local proof even when the provider is unavailable.
     if (request.method === 'POST' && path === '/api/auth/logout') {
       const id = sessionId(request, env);
-      await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(await hash(id)).run();
+      await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(await sessionHash(id, env)).run();
       return json({ ok: true }, 200, cookie(env, '', 0));
     }
     const auth = await readSession(request, env);
-    if (request.method === 'GET' && path === '/api/auth/session') return json({ user: { email: auth.user.email }, profile: auth.profile, recovery: auth.session.purpose === 'recovery', registration: auth.profile ? undefined : auth.user.user_metadata });
+    if (request.method === 'GET' && path === '/api/auth/session') {
+      const recovery = auth.session.purpose === 'recovery';
+      const is_admin = !recovery && (usesOwnerGateway(env) ? await ownerAdminHint(env,auth.user.id) : await hasAdministratorGrant(env.DB, auth.user.id, new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/, '')));
+      return json({ user: { email: auth.user.email }, profile: auth.profile, recovery, is_admin, registration: auth.profile ? undefined : auth.user.user_metadata });
+    }
     if (request.method === 'POST' && path === '/api/auth/reset-password') {
       if (auth.session.purpose !== 'recovery') throw new Failure(403, 'Verify a password recovery code first.');
       const secret = password(body.password);
@@ -131,18 +217,35 @@ export async function handle(request: Request, env: Env): Promise<Response> {
       return json({ ok: true }, 200, cookie(env, '', 0));
     }
     if (auth.session.purpose === 'recovery') throw new Failure(403, 'Complete password recovery before continuing.');
+    if(path==='/api/inquiries'||path.startsWith('/api/inquiries/')){
+      if(path==='/api/inquiries'&&request.method==='POST')return json(await submitInquiry(env.DB,auth.user,body),201);
+      if(request.method==='GET')return json(await readInquiries(env.DB,url.searchParams,auth.user.id,path==='/api/inquiries'?undefined:path.slice('/api/inquiries/'.length)));
+      throw new Failure(405,'Method not allowed.');
+    }
+    // Provider-verified subject + server-only owner grant. Metadata is never authority.
+    if (path === '/api/admin' || path.startsWith('/api/admin/')) {
+      if(usesOwnerGateway(env))return await ownerAdmin(env,{kind:'request',user:auth.user.id,path,method:request.method,body,query:url.searchParams.toString()});
+      const result=await administrator(env.DB,auth.user.id,path,request.method,body,url.searchParams,new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,''));
+      if(request.method==='POST'&&/^\/api\/admin\/drafts\/[^/]+$/.test(path)&&body.action==='draft_delete')try{await cleanupImages(env,auth.user.id);}catch{/* Durable image tombstones are retried by the existing cleanup job. */}
+      return json(result);
+    }
     if (request.method === 'POST' && path === '/api/auth/onboarding') {
       if (auth.profile) throw new Failure(409, 'Your account type is already set. Contact support to request a change.');
       const p = profile(body);
-      await env.DB.prepare('INSERT INTO profiles (user_id, full_name, company, country, role) VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id) DO NOTHING').bind(auth.user.id, p.full_name, p.company, p.country, p.role).run();
+      await env.DB.prepare('INSERT INTO registration_notifications(user_id,full_name,company,country,role,email,created_at) VALUES(?,?,?,?,?,?,?)').bind(auth.user.id,p.full_name,p.company,p.country,p.role,email(auth.user.email),new Date().toISOString()).run();
       return json({ ok: true });
     }
-    if (request.method === 'GET' && ['/api/producer/dashboard', '/api/buyer/dashboard'].includes(path)) {
-      if (!auth.profile) throw new Failure(403, 'Complete onboarding first.');
-      if (auth.profile.role !== path.split('/')[2]) throw new Failure(403, 'This workspace is not available for your account type.');
-      return json({ profile: auth.profile, message: 'Account workspace only. Inventory, sourcing, orders and logistics integrations are not implemented.' });
+    if (path.startsWith('/api/producer/')) {
+      if (auth.profile?.role !== 'producer') throw new Failure(403, 'A producer account is required.');
+      const imageAction=/^\/api\/producer\/items\/([^/]+)\/images(?:\/(discard))?$/.exec(path);
+      if(imageAction)return json(await manageImages(env,auth.user.id,imageAction[1],request.method,body,!!imageAction[2]));
+      const result=await producer(env.DB, auth.user.id, auth.profile, path, request.method, body);if(body.action==='delete')await cleanupImages(env,auth.user.id);return json(result);
+    }
+    if (path.startsWith('/api/buyer/')) {
+      if (auth.profile?.role !== 'buyer') throw new Failure(403, 'A buyer account is required.');
+      return json(await buyer(env.DB, auth.user.id, auth.profile, path, request.method, body, url.searchParams));
     }
     throw new Failure(404, 'Endpoint not found.');
-  } catch (error) { return json({ error: error instanceof Failure ? error.message : 'Authentication is temporarily unavailable.' }, error instanceof Failure ? error.status : 503, undefined, error instanceof Failure ? error.retryAfter : undefined); }
+  } catch (error) { return json({ error: error instanceof Failure ? error.message : 'Authentication is temporarily unavailable.', ...(isolatedStaging(env) && error instanceof ProviderFailure && error.code === 'email_rate_limited' ? { code: 'email_rate_limited' } : {}) }, error instanceof Failure ? error.status : 503, undefined, error instanceof Failure ? error.retryAfter : undefined); }
 }
-export default { fetch: handle };
+export default { fetch: handle, async scheduled(_event:unknown,env:Env){if(env.AUTH_ENVIRONMENT==='staging')await cleanupImages(env);} };

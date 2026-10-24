@@ -7,12 +7,14 @@ import { translate } from './i18n.ts';
 // mutating the DOM. Stable option values, event handlers, refs, and user entries
 // are preserved. Components with their own render logic use their own Localized.
 export function localizeNode(node: ReactNode, language: Language): ReactNode {
+  if (typeof node === 'number') return new Intl.NumberFormat(language==='es'?'es-MX':'en-US',{maximumFractionDigits:20}).format(node);
   if (typeof node === 'string') return translate(node, language);
   if (!isValidElement(node)) return Array.isArray(node) ? node.map(child => localizeNode(child, language)) : node;
   const element = node as ReactElement<Record<string, unknown>>;
   if (element.props['data-no-translate']) return element;
   const props: Record<string, unknown> = {};
-  for (const key of ['title', 'aria-label', 'placeholder', 'label', 'description', 'step']) {
+  if(element.type==='option'&&element.props.value===undefined&&typeof element.props.children==='string')props.value=element.props.children;
+  for (const key of ['title', 'aria-label', 'alt', 'placeholder', 'label', 'description', 'step']) {
     if (typeof element.props[key] === 'string') props[key] = translate(element.props[key], language);
   }
   if (element.props.children !== undefined) props.children = Children.map(element.props.children as ReactNode, child => localizeNode(child, language));

@@ -1,0 +1,2 @@
+import {useLanguage} from '../localization';
+export function LanguageMenu(){const {language,setLanguage}=useLanguage();return <label className="global-language-menu" data-no-translate><span>Language / Idioma</span><select aria-label="Language / Idioma" value={language} onChange={e=>setLanguage(e.target.value==='es'?'es':'en')}><option value="en" lang="en">English</option><option value="es" lang="es">Español</option></select></label>;}

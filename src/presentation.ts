@@ -18,3 +18,7 @@ export function loadLanguage(storage?: Pick<Storage, 'getItem'>): Language {
 export function saveLanguage(language: Language, storage?: Pick<Storage, 'setItem'>): void {
   try { storage?.setItem(languageStorageKey, language); } catch { /* Storage can be unavailable; React state still works. */ }
 }
+
+export function initialView(hash: string): PresentationView {
+  return ({ '#markets':'logistics', '#packaging':'commercial', '#pricing':'commercial', '#contact':'commercial', '#documents':'readiness' } as Record<string,PresentationView>)[hash] || 'producer';
+}

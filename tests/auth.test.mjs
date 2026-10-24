@@ -6,7 +6,7 @@ import { handle } from '../worker/index.ts';
 const { Request, Response, URL } = globalThis;
 const details = { full_name: 'Test Person', company: 'Test Farm', country: 'Mexico', role: 'producer' };
 function fixture() {
-  const sql = new DatabaseSync(':memory:'); for (const name of ['0001_auth.sql', '0002_limits_index.sql', '0003_auth_generations.sql']) sql.exec(readFileSync(new URL('../migrations/' + name, import.meta.url), 'utf8'));
+  const sql = new DatabaseSync(':memory:'); for (const name of ['0001_auth.sql', '0002_limits_index.sql', '0003_auth_generations.sql', '0004_producer_workspace.sql', '0005_buyer_center.sql', '0006_buyer_publication.sql', '0007_admin_operations.sql', '0008_admin_grant_events.sql','0010_inquiries.sql','0011_inquiry_workflow.sql','0012_registration_reviews.sql','0013_product_images.sql','0014_admin_notifications_drafts.sql']) sql.exec(readFileSync(new URL('../migrations/' + name, import.meta.url), 'utf8'));
   const env = { DB: { prepare(query) { return { values: [], bind(...values) { this.values = values; return this; }, async first() { return sql.prepare(query).get(...this.values) ?? null; }, async run() { return sql.prepare(query).run(...this.values); } }; } }, ASSETS: { async fetch() { return new Response('public'); } }, AUTH_ORIGIN: 'https://app.example.test', SUPABASE_URL: 'https://auth.example.test', SUPABASE_PUBLISHABLE_KEY: 'synthetic', SESSION_ENCRYPTION_KEY: 'ab'.repeat(32) };
   let fail = false, confirmed = true; const calls = [], original = globalThis.fetch;
   globalThis.fetch = async (url, options) => {
@@ -24,9 +24,22 @@ function fixture() {
 test('public assets require no auth; missing configuration fails closed', async () => { const f = fixture(); try { assert.equal(await (await handle(new Request('https://app.example.test/'), { ASSETS: f.env.ASSETS })).text(), 'public'); assert.equal((await handle(new Request('https://app.example.test/api/auth/session'), {})).status, 503); } finally { f.close(); } });
 test('registration validation, actual provider invocation, conditional guidance and outage handling', async () => { const f = fixture(); try {
   for (const body of [{}, { ...details, email: 'bad', password: 'short' }, { ...details, role: 'admin', email: 'test@example.test', password: 'valid-password-123' }]) assert.equal((await f.request('/api/auth/signup', body)).status, 400);
-  assert.equal(f.calls.length, 0); const r = await f.request('/api/auth/signup', { ...details, email: 'test@example.test', password: 'valid-password-123' }); assert.equal(r.status, 200); assert.match((await r.json()).message, /If this address is eligible/); assert.equal(r.headers.get('set-cookie'), null); assert.match(f.calls.at(-1).url, /\/signup$/);
+  assert.equal(f.calls.length, 0); const r = await f.request('/api/auth/signup', { ...details, email: 'test@example.test', password: 'valid-password-123' }); assert.equal(r.status, 200); assert.match((await r.json()).message, /If this address is eligible/); assert.equal(r.headers.get('set-cookie'), null); assert.match(f.calls.at(-1).url, /\/signup\?redirect_to=/); assert.equal(new URL(f.calls.at(-1).url).searchParams.get('redirect_to'), 'https://app.example.test/verify-email');
   f.fail(); assert.equal((await f.request('/api/auth/signup', { ...details, email: 'test@example.test', password: 'valid-password-123' })).status, 503);
 } finally { f.close(); } });
+test('signup confirmation callback validates the provider token and creates a secure session', async () => {
+  const f = fixture();
+  try {
+    const bad = await f.request('/api/auth/callback', { access_token: 'synthetic-provider-token', type: 'recovery' });
+    assert.equal(bad.status, 400);
+    const r = await f.request('/api/auth/callback', { access_token: 'synthetic-provider-token', type: 'signup' });
+    assert.equal(r.status, 200);
+    assert.match(r.headers.get('set-cookie'), /HttpOnly/);
+    assert.match(r.headers.get('set-cookie'), /SameSite=Lax/);
+    assert.equal(f.sql.prepare('SELECT count(*) AS n FROM sessions').get().n, 1);
+  } finally { f.close(); }
+});
+
 test('CSRF rejection and durable request rate limit', async () => { const f = fixture(); try {
   assert.equal((await f.request('/api/auth/login', {}, null, 'https://evil.example')).status, 403); assert.equal(f.calls.length, 0);
   for (let n = 0; n < 30; n++) assert.equal((await f.request('/api/auth/forgot-password', { email: 'test@example.test' })).status, 200);
@@ -44,7 +57,9 @@ test('server role isolation, onboarding requirement and immutable roles ignore p
   const c = await f.login(); assert.equal((await f.request('/api/producer/dashboard', undefined, c)).status, 403);
   assert.equal((await f.request('/api/auth/onboarding', details, c)).status, 200); assert.equal((await f.request('/api/producer/dashboard', undefined, c)).status, 200); assert.equal((await f.request('/api/buyer/dashboard', undefined, c)).status, 403);
   assert.equal((await f.request('/api/auth/onboarding', { ...details, role: 'buyer' }, c)).status, 409); assert.throws(() => f.sql.prepare("UPDATE profiles SET role='buyer'").run(), /immutable/);
-  f.sql.prepare('DELETE FROM profiles').run(); await f.request('/api/auth/onboarding', { ...details, role: 'buyer' }, c); assert.equal((await f.request('/api/buyer/dashboard', undefined, c)).status, 200); assert.equal((await f.request('/api/producer/dashboard', undefined, c)).status, 403);
+  // A separate disposable account database tests buyer isolation without erasing a completed registration.
+  const buyer = fixture(); try { const bc=await buyer.login(); assert.equal((await buyer.request('/api/auth/onboarding',{...details,role:'buyer'},bc)).status,200); assert.equal((await buyer.request('/api/buyer/dashboard',undefined,bc)).status,200); assert.equal((await buyer.request('/api/producer/dashboard',undefined,bc)).status,403); } finally { buyer.close(); }
+  assert.equal((await f.request('/api/producer/dashboard',undefined,c)).status,200);
 } finally { f.close(); } });
 test('confirmation, expired codes, recovery-only authority, reset and all-app-session revocation', async () => { const f = fixture(); try {
   assert.equal((await f.request('/api/auth/verify', { email: 'test@example.test', code: '000000', type: 'signup' })).status, 400);
@@ -57,3 +72,7 @@ test('logout immediately revokes local session despite provider outage', async (
 
 import './auth-security.test.mjs';
 import './auth-d1.test.mjs';
+
+import './auth-isolation.test.mjs';
+
+import './auth-links.test.mjs';

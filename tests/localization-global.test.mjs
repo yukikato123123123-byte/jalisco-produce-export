@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createElement} from 'react';
+import {localizeNode} from '../src/localizeNode.ts';
+import {translate} from '../src/i18n.ts';
+test('translated implicit option labels preserve original server enum values',()=>{const result=localizeNode(createElement('option',{},'received'),'es');assert.equal(result.props.value,'received');assert.deepEqual(result.props.children,['recibida']);});
+test('protected user names are preserved while neighboring labels are translated',()=>{const name=createElement('strong',{'data-no-translate':true},'Products');assert.equal(localizeNode(name,'es'),name);assert.equal(translate('Products','es'),'Productos');assert.equal(translate('Future untranslated phrase','es'),'Future untranslated phrase');});
+test('dates use the selected locale and API error phrases retain their safe public meaning',()=>{const date='2026-10-23T01:00:00.000Z';assert.equal(translate(date,'es'),new Intl.DateTimeFormat('es-MX',{dateStyle:'medium',timeStyle:'short'}).format(new Date(date)));assert.equal(translate('Please sign in to continue.','es'),'Inicia sesión para continuar.');});
+test('server field-specific validation templates translate without changing backend codes or amounts',()=>{assert.equal(translate('Enter a valid company (maximum 120 characters).','es'),'Introduce un valor válido de empresa (máximo 120 caracteres).');assert.equal(translate('Enter a valid quantity.','es'),'Introduce un valor válido de cantidad.');assert.match(translate('Enter a non-negative price up to 1 trillion.','es'),/10¹²/);});
+test('composed pagination labels translate in Spanish',()=>{assert.equal(translate(' · Page 1','es'),' · Página 1');});
+test('localized numeric display preserves precise quantities and prices',()=>{assert.equal(localizeNode(0.00012345,'es'),'0.00012345');});

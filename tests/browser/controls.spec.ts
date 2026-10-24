@@ -1,0 +1,42 @@
+import { test, expect } from '@playwright/test';
+// UI behavior only: no live account or email request is made by these tests.
+for (const width of [390, 1440]) test(`role cards, keyboard focus and reduced motion at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 900 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/signup');
+  const producer = page.getByRole('radio', { name: /Producer/ });
+  const buyer = page.getByRole('radio', { name: /Buyer/ });
+  await producer.check();
+  const selectedColor = await producer.locator('..').evaluate(el => getComputedStyle(el).backgroundColor);
+  await buyer.focus();
+  await page.keyboard.press('Space');
+  await expect(buyer).toBeChecked();
+  await expect(producer).not.toBeChecked();
+  expect(await buyer.locator('..').evaluate(el => getComputedStyle(el).backgroundColor)).toBe(selectedColor);
+  expect(await producer.locator('..').evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe(selectedColor);
+  expect(await buyer.evaluate(el => el.matches(':focus-visible'))).toBe(true);
+  const submit = page.getByRole('button', { name: 'Create account', exact: true });
+  expect(await submit.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+  expect(await submit.evaluate(el => getComputedStyle(el).transitionDuration)).toBe('0s');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: `.wrangler/ui-review/signup-${width}.png`, fullPage: true });
+});
+test('search has primary and secondary actions and restores filters', async ({ page }) => {
+  await page.route('**/api/public/produce*', r => r.fulfill({ json: { items: [], page: 1, hasMore: false } }));
+  await page.goto('/explore');
+  const search = page.getByRole('button', { name: 'Search produce', exact: true });
+  const reset = page.getByRole('button', { name: 'Reset search', exact: true });
+  expect(await search.evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe(await reset.evaluate(el => getComputedStyle(el).backgroundColor));
+  await page.getByLabel('Country', { exact: true }).fill('Mexico');
+  await reset.click();
+  await expect(page.getByLabel('Country', { exact: true })).toHaveValue('');
+});
+test('mobile public brand and main navigation do not overlap', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto('/');
+  const brand = await page.locator('.site-header .brand').boundingBox();
+  const navigation = await page.getByRole('navigation', { name: 'Main navigation' }).boundingBox();
+  expect(brand).not.toBeNull();
+  expect(navigation).not.toBeNull();
+  expect(navigation!.y).toBeGreaterThanOrEqual(brand!.y + brand!.height);
+});

@@ -1,0 +1,23 @@
+{
+  "scope": {
+    "project_ref": "heaswpawzuuijxurlfoz",
+    "account_id": "89dd3e659cece6bdf3181b991a2a0bd2",
+    "database_id": "7712d6bb-2414-44d3-9282-cb5b941d740e",
+    "worker": "jalisco-auth-staging"
+  },
+  "approvers": [
+    {
+      "id": "staging-owner",
+      "public_key": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAHuEZgdMIjrOZzPNTbNUvGKXVVc/u932Pai1UBUP+XIM=\n-----END PUBLIC KEY-----\n"
+    }
+  ],
+  "registration": {
+    "operator": "PROJECT_OWNER",
+    "identity_ref": "USER_CONFIRMED_PROJECT_OWNER_ATTESTATION",
+    "reason": "User-approved initial staging approver enrollment",
+    "approval_ref": "USER_EXPLICIT_APPROVAL_2026-10-23",
+    "fingerprint": "SHA256:911f43e48a44503d627aa3a3bea6ca07fd0da8174b7aa916f7d915b1336f006a",
+    "fingerprint_format": "SHA256:lowercase-hex(SPKI-DER)",
+    "registered_at": "2026-10-22T23:46:04.643Z"
+  }
+}

@@ -1,5 +1,8 @@
 # Local staging configuration preparation
 
+> Current isolation work supersedes the historical shared-provider instructions below.
+> See [STAGING_ISOLATION.md](STAGING_ISOLATION.md). Do not apply shared-project setup instructions for the new staging cutover.
+
 For the current owner-supplied staging database, existing Supabase project and
 consolidated completion checklist, see [AUTH_DEPLOYMENT.md](AUTH_DEPLOYMENT.md).
 Earlier validation records below describe the configuration at that time.

@@ -27,7 +27,7 @@ async function authAdmin(env:Environment,path:string){
  try{headers=new Headers({apikey:env.SUPABASE_STORAGE_SERVICE_ROLE_KEY,Authorization:'Bearer '+env.SUPABASE_STORAGE_SERVICE_ROLE_KEY});}catch{throw new ResearchAccountFailure(0,'credential_header_invalid');}
  let status=0;
  try{
-  const r=await fetch(env.SUPABASE_URL+'/auth/v1/admin/'+path,{headers,redirect:'error',signal:AbortSignal.timeout(10000)});
+  const r=await fetch(env.SUPABASE_URL+'/auth/v1/admin/'+path,{headers,redirect:'manual',signal:AbortSignal.timeout(10000)});
   status=r.status;if(!r.ok)throw new ResearchAccountFailure(status);return await r.json();
  }catch(error){if(error instanceof ResearchAccountFailure)throw error;throw new ResearchAccountFailure(status,status?'invalid_response':error instanceof Error&&['TimeoutError','AbortError'].includes(error.name)?'transport_timeout':'transport_error');}
 }

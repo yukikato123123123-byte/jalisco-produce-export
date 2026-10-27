@@ -1,7 +1,8 @@
 import {useRef,useState} from 'react';
 import type {FormEvent} from 'react';
 import {accountRequest} from './AccountPages';
-import {Localized,useLanguage} from '../localization';
+import {LegacyLocalized as Localized} from '../legacyLocalization';
+import {useLanguage} from '../localization';
 type Row=Record<string,string|number|null>;
 export function RegistrationReview({kind,row,onSaved}:{kind:string;row:Row;onSaved:(state:string,eventId:string|null,revision:number)=>void}){
  const {language}=useLanguage(),[busy,setBusy]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[history,setHistory]=useState<Row[]|null>(null);const lock=useRef(false),retry=useRef<{key:string;id:string}|null>(null);

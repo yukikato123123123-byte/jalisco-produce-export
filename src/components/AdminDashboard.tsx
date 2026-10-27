@@ -1,6 +1,7 @@
 import {ProductImages} from './ProductImages';
 import {parseProductImages} from '../productImages';
-import {useLanguage,Localized} from '../localization';
+import {LegacyLocalized as Localized} from '../legacyLocalization';
+import {useLanguage} from '../localization';
 type Activity=Record<string,string|number|null>;
 export type ApprovalSummary={kind:string;pending:number;approved:number;rejected:number};
 type Props={activityTrend?:{day:string;count:number}[]|null;counts:Record<string,number>;health:Record<string,string>;recent:Activity[];recentProducts?:Activity[];approvals?:ApprovalSummary[];inquiries?:Record<string,number>;observed_at?:string;select:(section:string,status?:string)=>void};

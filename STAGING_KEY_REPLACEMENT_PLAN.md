@@ -15,7 +15,7 @@
 | Cloudflare account | `89dd3e659cece6bdf3181b991a2a0bd2` |
 | D1 | `7712d6bb-2414-44d3-9282-cb5b941d740e` |
 | Origin | `https://jalisco-auth-staging.yukikato123123123.workers.dev` |
-| 관리자 대상 | `zacharymaynard182@gmail.com` / `51f007ac-f719-4219-81c8-94922fcacc1c` |
+| 관리자 대상 | `administrator@example.test` / `11111111-1111-4111-8111-111111111111` |
 | 기존 승인 키 fingerprint | `SHA256:911f43e48a44503d627aa3a3bea6ca07fd0da8174b7aa916f7d915b1336f006a` |
 
 기존 `staging/admin-approval-policy.json`, 공개 키, 암호화 개인 키, 영수증과 실패 기록을 보존한다. 기존 정책 삭제·덮어쓰기, 새 키를 기존 키로 위장, D1 직접 grant 삽입, 서명 검사 완화는 금지한다. 기존 계정·데이터를 삭제하지 않는다. 위 이메일과 UID는 교체 승인 또는 소유권의 증거가 아니며 실제 grant 직전에 재검증한다.

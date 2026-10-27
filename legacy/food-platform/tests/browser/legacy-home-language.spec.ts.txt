@@ -1,0 +1,31 @@
+import {test,expect} from '@playwright/test';
+for(const width of [375,1440])test(`Preserved platform EN | ES changes content and persists at ${width}px`,async({page})=>{
+ await page.setViewportSize({width,height:900});
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.route('**/api/**',r=>r.fulfill({status:200,json:{items:[],page:1,hasMore:false}}));
+ await page.goto('/platform');
+ const selector=page.getByRole('group',{name:'Language / Idioma',exact:true});
+ for(const [lang,label,title,cta,nav,note] of [
+  ['es','Español','De Jaliscopara el mundo.','Explorar productos','Inicio','Aún no hay productos públicos.'],
+  ['en','English','From Jaliscoto the World','Explore Produce','Home','No public produce is available yet.']
+ ]){
+  await selector.getByRole('button',{name:label,exact:true}).click();
+  await expect(selector.getByRole('button',{name:label,exact:true})).toHaveAttribute('aria-pressed','true');
+  await expect(selector.getByRole('button',{name:label==='English'?'Español':'English',exact:true})).toHaveAttribute('aria-pressed','false');
+  await expect(page.locator('h1')).toHaveText(title);
+  await expect(page.locator('.hero-cta').getByRole('link',{name:cta,exact:true})).toHaveAttribute('href','/explore');
+  await expect(page.locator('.site-nav').getByRole('link',{name:nav,exact:true})).toBeVisible();
+  await expect(page.getByRole('status')).toContainText(note);
+  await expect(page.locator('.origin-copy>p:not(.eyebrow)')).toContainText(lang==='es'?'El origen nos inspira.':'Rooted in Jalisco.');
+  await expect(page.locator('.site-footer')).toContainText(lang==='es'?'El acceso a la cuenta':'Account access');
+  await page.reload();await expect(page.locator('h1')).toHaveText(title);
+  await expect(selector.getByRole('button',{name:label,exact:true})).toHaveAttribute('aria-pressed','true');
+  const box=await selector.boundingBox();expect(box).not.toBeNull();expect(box!.x).toBeGreaterThanOrEqual(0);expect(box!.x+box!.width).toBeLessThanOrEqual(width);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await page.screenshot({path:`.wrangler/home-language/${width}-${lang}.png`,fullPage:true});
+  await page.locator('.hero-cta').getByRole('link',{name:cta,exact:true}).click();
+  await expect(page).toHaveURL(/\/explore$/);
+  await expect(page.getByRole('combobox',{name:'Language / Idioma',exact:true})).toHaveValue(lang);
+  await page.goto('/platform');await expect(selector.getByRole('button',{name:label,exact:true})).toHaveAttribute('aria-pressed','true');
+ }
+});

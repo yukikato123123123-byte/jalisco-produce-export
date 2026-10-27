@@ -1,166 +1,37 @@
-# Jalisco Produce Export · Fresh nopal
+# NopaHua — cosmetic concept and private research
 
-A bilingual B2B producer-dossier and logistics-map prototype for Eduardo, a fresh nopal producer in El Grullo, Jalisco, Mexico, exploring Texas and Illinois markets. This is a presentation and inquiry demonstration, not an operational export marketplace or a verified supplier/shipping offer.
+NopaHua is a candidate cosmetic brand for concept development and market research in Mexico. Formula, ingredients, benefits, instructions, prices, certifications and launch timing remain unconfirmed. Public imagery shows conceptual materials, not a finished product.
 
-## Workspace and GitHub reconciliation
+## Current application
 
-At the start of the nopal migration review, the GitHub default branch was `main`, and both local HEAD and `origin/main` were at `ea3649d` (the earlier B2B sample-workflow commit). The later dossier, four-tab UI, bilingual localization, map shortcuts, and focused tests were present in this workspace as modified/untracked files, rather than in another branch or on GitHub `main`. That working implementation has been preserved and extended in this source version. Use the repository history and `git status` for current commit and delivery state. No public deployment is part of this update.
+- `/`: brand concept, interactive ritual, research entry, private contact/feedback and launch requests.
+- `/login`, `/signup`, `/forgot-password`, `/verify-email`, `/reset-password`: existing Supabase authentication, with NopaHua presentation.
+- `/account`: neutral account landing. Existing accounts and sessions are retained; no business-role onboarding is required.
+- `/research/nopahua`: existing verified accounts with explicitly granted research access only.
+- `/research/nopahua/results`: separately authorized aggregate sharing; no individual comments.
+- `/admin`: existing administrator guard, research access, raw survey results and aggregates, concept content, feedback, launch list, audit history and browser settings.
 
-## Reported facts and evidence boundaries
+See [NOPAHUA_RESEARCH.md](NOPAHUA_RESEARCH.md) for permission/storage details and [REBRANDING.md](REBRANDING.md) for retired routes, preserved data and the archival manifest.
 
-According to the current producer information supplied in the brief:
-
-- Product: **fresh nopal**.
-- Producer location: **El Grullo, Jalisco, Mexico**. No exact farm location is provided.
-- Latest reported harvest: **486 cartons and slightly more than 10 metric tonnes**.
-- Intended U.S. markets: **Texas and Illinois**.
-- Eduardo reports contacts for refrigerated transport and prospective customs brokers.
-
-These are producer-reported facts, not independently audited commercial evidence. The latest harvest is not a recurring-capacity or stock-availability commitment. There is no exact total weight or net carton weight, so the application does not compute a per-carton average, an exact harvest total, or a packing reconciliation. The numeric 10 in the model is strictly a lower bound, not an exact weight.
-
-Variety, grade, carton weights/dimensions, packaging standard, pallet pattern, season, recurring capacity, prices, buyers, freight quotes, delivery times, routes, border crossings, documentation, certification, phytosanitary clearance, and legal export/import eligibility remain **Pending confirmation** or **Evidence required**. Unknown numeric values use `null`, never zero or synthetic estimates. Earlier fictional product/pricing/transport examples have been removed from current commercial data rather than reused for nopal. The actual producer/commercial model contains no simulated monetary or transit estimates. Separately, `src/demoData.ts` now supplies explicitly fictional chart examples; these never populate producer pricing, logistics records, or inquiry previews.
-
-## Local setup and checks
-
-Stack: React, TypeScript, Vite, Leaflet, CSS, and responsive SVG/CSS graphics. No additional packages were installed.
-
-Requires Node.js **22.12+** and npm:
+## Verification
 
 ```sh
-npm ci
-npm run dev
-```
-
-Open Vite's printed localhost URL. Available checks:
-
-```sh
+npm run typecheck
 npm run lint
-npm test
+npm run check:translations
 npm run build
-npm run preview
+npm test
+npm run test:browser
+npm run check:staging
+npm run dry-run:staging
 ```
 
-`build` runs TypeScript checking (`tsc --noEmit`) and the Vite production build. `test` uses Node's built-in test API and TypeScript stripping with the already-installed dependencies. Chart render tests use Vite's TSX transform and React server rendering with HTTP/WebSocket listening disabled; they do not open or simulate a browser.
+Real browser tests require the environment's Chromium runtime libraries. Local authentication tests use disposable synthetic providers and databases; they do not send real mail.
 
-## Four-view presentation
+## Security and deployment
 
-Producer is the default. Persistent semantic tab buttons support click, Arrow keys, Home, and End, with selected state, roving focus, and linked tab panels. Panels stay mounted while hidden so the map and form retain their state. No router or separate HTML pages were added.
+Supabase verifies identity; the existing encrypted HttpOnly session is retained. D1 is private to the Worker and has no Supabase-style RLS. Existing admin grants, owner authority, research triggers and schema migrations are preserved. Research access does not confer administrator authority.
 
-- **Producer / Productor:** reported harvest and location, visible **Supply & Market Overview** graphics, producer dossier, commercial review states, and packaging summary.
-- **Logistics / Logística:** expanded interactive light GIS map, regional and destination shortcuts, full-network reset, layer controls, and bilingual demo details. Reported transport/customs contacts are distinguished from actual appointments, quotes, and bookings.
-- **Commercial / Comercial:** quotation information still needed, unknown price fields, packaging/specification review, and the local demo inquiry.
-- **Readiness / Preparación:** compact review statuses and expandable supporting-evidence requirements, without claims of completion or eligibility.
+Only staging/local page routing changes. The existing Cloudflare account, Worker name, Supabase project, D1 binding, cookies, secrets and production config retain their technical identifiers. Never run pending remote migrations indiscriminately: an unrelated historical owner migration can remain pending. This rebrand requires no new migration or deletion.
 
-### Visible Supply & Market Overview
-
-`src/components/SupplyMarketOverview.tsx` is mounted directly in the default Producer panel, above the dossier; it is not inside a disclosure or a hidden chart-only page. Four responsive figures are rendered, with evidence and fictional scenarios visually separated:
-
-1. **Harvest & cartons:** 486 cartons and `>10` metric tonnes, with the original “slightly more than 10 metric tonnes” wording and producer-reported attribution. Exact total and carton net weights remain unknown; no conversion is calculated.
-2. **Export-readiness review:** packaging, pricing, refrigerated transport, export documentation, and customs arrangements use explicit Reported, Pending Verification, or Demo Only states. Reported contacts do not imply verified appointments, documentation, or clearance. No percentage or legal/export approval is shown.
-3. **Illustrative price comparison:** zero-based horizontal bars compare Texas **1.20 USD/kg** and Illinois **1.55 USD/kg**, entirely invented. Assumptions specify the same unspecified grade/packaging, exclude freight/duties/taxes/fees, and disclaim a landed-cost calculation.
-4. **Illustrative logistics comparison:** independent zero-based plots show fictional estimated elapsed transit (**3 vs 5 days**) and simulated refrigerated transport budgets (**3,200 vs 5,100 USD per vehicle**). These represent one hypothetical vehicle with unspecified capacity, temperature, collection point, and address. Customs, inspections, duties, taxes, and delays are excluded. No carrier, border crossing, or route is selected.
-
-The demo section and each fictional figure display **DEMO DATA — NOT A REAL OFFER OR QUOTE**. These values are arbitrary UI examples, not researched market rates or carrier estimates. Price and logistics examples are independent and cannot be combined into a quotation. All chart headings, units, tooltips, review notes, assumptions, and disclaimers have English/Spanish presentation text.
-
-Charts use visible numeric axes, direct destination labels, contrasting green/terracotta bars, SVG titles/descriptions, and full textual value equivalents. Layouts stack on smaller screens. The visual system uses deep cactus green, warm cream, sand, serif editorial headings, and original local botanical nopal artwork. No chart, font, or image dependencies were added.
-
-## Data and localization architecture
-
-- `src/demoData.ts`: isolated fictional price/logistics values, axes, assumptions, and mandatory disclaimers; never merged into producer data.
-- `src/sampleData.ts`: typed producer/product, approximate harvest, unknown specifications, commercial/logistics review, chart models, readiness states, and existing map coordinates. `sampleData.overview.harvest` references the shared supply object.
-- `src/components/`: dossier, packaging, commercial planning, inquiry, reusable status badge, and visible overview graphics.
-- `src/i18n.ts`: centralized English/Spanish text, including chart labels/descriptions, facts, pending states, map disclosures, form options, errors, and accessibility text.
-- `src/localization.tsx` and `src/localizeNode.ts`: React language state and presentation translation, without translating user entries or changing canonical form values.
-- `src/presentation.ts`: tab keyboard behavior and safe preference persistence.
-- `src/components/MarketMap.tsx`: Logistics-only Leaflet lifecycle and map controls.
-- `src/gisDemoData.ts`: typed, isolated fictional spatial network.
-- `src/gisNetwork.ts`: filtering, counts, bounds, clustering, and layer visibility controller.
-- `src/gisDetails.ts`: bilingual popup models and safe DOM presentation.
-- `src/gisLeaflet.ts`: retained Leaflet layer/marker/route rendering and interaction bindings.
-- `src/mapBehavior.ts`: responsive, filtered network focus/refresh controller.
-- `src/mapBasemap.ts`: official light raster tile URL, attribution, and local-development constraints.
-
-English is the first-use default. EN/ES switches instantly and updates document language/title. Only the language preference is stored under `jalisco-produce-export.language`; blocked storage is handled gracefully. Inquiry values remain in memory only. Tests check coverage of static interface phrases and centralized descriptions in both languages.
-
-The verification-state model retains `sample`, `pending`, `verified`, and `quoted`. Producer-reported fields carry explicit report labels while supporting evidence remains pending. The map's route is illustrative. No field claims verified evidence or an actual quotation.
-
-## Expanded demo GIS — Logistics tab only
-
-Selecting **Logistics / Logística** opens the expanded Leaflet map inside the existing Logistics panel. The Producer, Logistics, Commercial, and Readiness tabs retain their names and order. Producer remains the initial view. The header, language selector, supply overview, charts, commercial/readiness content, and client-side inquiry are preserved. Navigation and header behavior are preserved. Logistics now contains the map without the former redundant Target-market planning cards. Their unused `LogisticsScenarios` component and dedicated styles were removed after confirming there were no other callers; logistics data and verification states remain intact.
-
-### Isolated spatial dataset
-
-`src/gisDemoData.ts` contains **42 fictional point features**:
-
-- 12 production zones in Jalisco.
-- 6 collection/packing/consolidation nodes in Jalisco.
-- 12 cold-chain/logistics observation points across Mexico and the U.S.
-- 12 market/distribution examples: 6 in Texas and 6 in Illinois.
-
-Every feature has a stable ID, category, latitude/longitude, region, bilingual name/description, simulated attributes, and `DEMO / SIMULATED` provenance. These locations do **not** locate Eduardo's farm, real project facilities, actual buyers, or operational cold-chain coverage. Cultivated areas, seasonal quantities, handling capacities, demand bands, harvest windows, packaging states, and temperature observations are fictional. Temperatures are neither dated sensor observations nor commodity-handling recommendations. This dataset never populates `sampleData.ts`, producer harvest figures, inquiry previews, or the separate demo comparison charts.
-
-There are **20 named, connected multi-stop route segments**. Six collection scenarios pair the twelve production zones with the six packing nodes. Consolidation links lead through Guadalajara, the Jalisco highlands, San Luis Potosí, Saltillo/Monterrey, a fictional Nuevo Laredo–Laredo border-region scenario, Texas branches, and a Midwest/Chicago-region distribution chain. Intermediate stop IDs and corridor coordinates connect **all 42 points into one network**. Geographic place names indicate approximate scenario regions, not verified facilities or an approved border-crossing plan.
-
-Routes are generalized polylines, **not road-matched navigation or carrier routes**. No routing service or road-distance calculation is used. Route distance and transit duration remain `null` and display “Not supplied”; they are never inferred from line length or borrowed from chart examples. The previous three representative `sampleData.locations` records remain legacy data and no longer drive the map.
-
-### Layers, controls, and interactions
-
-The desktop Logistics map occupies about 80% of its map/layer workspace, with a compact ivory sidebar and a taller geographic viewport. The Logistics card, controls, tooltips, legend, and popups use warm ivory, light borders, dark text, and restrained shadows. No tile filter is used. Production/collection green, packing/border amber, cold-chain teal, and market/distribution violet are shared by vector symbols, legend, layer controls, popup accents, and selection treatments. Route patterns and visible/hidden text distinguish states beyond color. Mobile layouts stack the sidebar and map; the layer panel can be collapsed with its native summary control. The layout changes are scoped to Logistics.
-
-Five independently controlled layers show Production Sites, Collection & Packing, Logistics & Cold Chain, US Markets & Distribution, and Transport Routes. Counts indicate total records per layer; the summary reports displayed locations and named route segments, not the number of rendered cluster icons or individual line strokes. Hiding a point layer hides its markers; visible routes can still pass through those coordinates. The legend distinguishes point symbols and local collection, refrigerated, border-scenario, and distribution routes.
-
-Jalisco, Border Corridor, US Markets, and Full Network fit bounds derived from the enabled network's points **and route vertices**. Texas/Illinois shortcuts and Show Full Route remain available. Full Network/Show Full Route respect the current layer selection; Restore all layers reenables every layer and restores the overview. Views without enabled features show an explicit empty-state notice instead of fitting invalid bounds.
-
-The same Leaflet instance, basemap, route geometry, and layer groups survive tab/language changes. Hidden-tab reveal and ResizeObserver handling invalidate cached dimensions before reframing; zoom and pan are preserved as ordinary Leaflet interactions between refreshes. Wheel zoom, touch pinch, +/− controls, attribution, and reduced-motion-aware view changes remain. Grid clustering aggregates nearby enabled points at overview zoom; selecting a cluster zooms into its members. Individual records are exposed at zoom 13 or higher. This avoids a new clustering dependency.
-
-Selecting an individual marker opens its ID, category, region, simulated attributes, and demo status. Selecting a route opens endpoints, intermediate stops, category, unsupplied distance/time fields, and warnings. Routes have a wider touch hit area and keyboard Enter/Space activation. Popup data uses DOM `textContent`, not data-interpolated HTML. Open popup content, tooltips, marker accessibility names, controls, legends, warnings, and labels update in English/Spanish without recreating the map.
-
-A persistent notice reads **DEMO DATA — SIMULATED LOCATIONS & ROUTES**, or **DATOS DE DEMOSTRACIÓN — UBICACIONES Y RUTAS SIMULADAS**. Neither the routes nor the observations imply export clearance, legal compliance, appointments, real prices, or confirmed buyers.
-
-### Light basemap and provider requirements
-
-The basemap is now **Stadia Maps Alidade Smooth**, the provider's native muted light raster style, replacing Alidade Smooth Dark at the URL source. Map labels, pale roads, boundaries, and geographic detail come directly from the provider; there is no CSS inversion, brightness filter, second mapping library, or invented tile URL.
-
-- Tile URL: `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png`
-- Maximum zoom: 20; Leaflet's `{r}` placeholder supports retina tiles.
-- Visible attribution: **© Stadia Maps © OpenMapTiles © OpenStreetMap**, linked to [Stadia Maps attribution](https://stadiamaps.com/attribution/), [OpenMapTiles](https://openmaptiles.org/), and [OpenStreetMap copyright](https://www.openstreetmap.org/copyright).
-- Configuration: `src/mapBasemap.ts`.
-
-Provider requirements and the actual Leaflet URL/attribution were verified against the official [Alidade Smooth documentation](https://docs.stadiamaps.com/map-styles/alidade-smooth/) and [authentication documentation](https://docs.stadiamaps.com/authentication/) on **2026-10-20**. Key-free raster tile access is permitted for browser development served on **localhost or 127.0.0.1**, subject to strict rate limits. This is a local-development arrangement, not unrestricted public-hosting permission. Hosted websites require provider authorization (domain-based authentication is supported); commercial licensing/plan requirements must be reviewed before publishing. No key, account, subscription, or hosting configuration was added.
-
-Internet access is required for tiles. A translated error notice explains connection, host-authorization, and rate-limit limitations; GIS vectors and controls remain available if the basemap fails. The notice clears after a subsequent tile-loading cycle completes without failures. Browser verification status and its evidence limits are recorded under Verification and remaining review below.
-
-## Leaflet 2.5D presentation
-
-The inspected application uses React/TypeScript and **Leaflet 1.9.4** with the existing Alidade Smooth raster basemap. The local default-branch reference is `origin/main`. `MarketMap.tsx` owns the single retained map instance, tab/resize sizing, layers, and regional shortcuts; `gisLeaflet.ts` renders the existing fictional network. No engine, dependency, tile provider, geographic record, route geometry, pricing, or verification process was changed for this enhancement.
-
-The 2.5D effects are **decorative screen-space styling**, not actual terrain or elevation:
-
-- Routes use the same source coordinates for a soft 7 px underlay, the existing category-colored patterned line, and a restrained narrow highlight. The underlay pane is offset downward by 2 screen pixels; source coordinates remain untouched. A separate transparent 14 px path is the single pointer/popup surface per route. The visible primary line retains keyboard Enter/Space activation. All strokes remain in the existing route layer and toggle together. Existing border/arrow accents remain.
-- Markers use softly shaded raised faces, directional shadows, and small ground ellipses. Their geographic anchors remain tied to their original coordinates. The first existing fictional collection origin is given a stronger ring and stacking priority, including inside clusters. It is labeled **Demo origin reference**, never Eduardo's verified farm. Border-region points use a subtle distinct frame. No McAllen alternative is present in the current dataset; the existing Nuevo Laredo–Laredo demo scenario is unchanged.
-- A translucent, noninteractive map caption identifies illustrative depth and avoids the zoom controls. A nearby bilingual note explicitly states that no elevation data or verified farm location is shown. Popups retain every field and warning, with refined status labels, shadows, and responsive label/value alignment.
-- Route strokes are created once per map lifecycle. Marker rendering is skipped when cluster identities/membership are unchanged. There are no new animation loops, terrain filters, or continuous effects; existing reduced-motion handling remains.
-
-Stadia's [additional tileset documentation](https://docs.stadiamaps.com/tilesets/) was reviewed on **2026-10-21**. It offers Terrarium elevation and Natural Earth shaded relief, but requires an active account for these additional datasets; Terrarium also requires compatible elevation rendering. No such access or renderer is configured in this checkout. Adding those tiles is outside this minimal account-free implementation. No relief overlay, DEM decoding, fake mountains, elevation values, or new tile requests have been added. The light basemap remains unfiltered and its attribution is unchanged.
-
-Automated checks cover category pattern/color preservation, noninteractive decorative strokes, a single route hit surface, unchanged data, bilingual labels, and the fictional origin reference, alongside the existing controller/data/chart tests. The project owner now reports successful manual browser verification with no visible or interaction problems. The agent did not independently run a browser; detailed viewport coverage and console/network inspection results were not supplied.
-
-### Deployment inspection
-
-The inspected repository has no tracked Cloudflare/Wrangler configuration, GitHub Actions workflow, deployment script, or custom Vite configuration. Vite uses its existing default configuration and produces `dist/`; package scripts cover local development, tests, lint, build, and preview only. The provided `workers.dev` URL does not establish how hosting is wired to this repository. GitHub API inspection for this review also returned zero Actions workflows and no repository webhooks. Cloudflare dashboard settings and external GitHub App/build integration remain unknown; the absence of workflows or webhooks does not rule out an external connection. A separate manual deployment or an external pipeline may be required; neither was invoked or changed. No automatic deployment is assumed from a future Git push.
-
-## Imagery
-
-`src/assets/nopal-illustration.svg` is local illustrative artwork, not a photograph of Eduardo's produce or farm. Packaging uses a dimension-free neutral carton schematic. The earlier user-supplied design-reference asset is retained unused; it is no longer referenced by application styles or emitted as a displayed asset. No external image service was added.
-
-## Inquiry limitations
-
-The form collects company, email, intended destination, fresh nopal, desired quantity, packaging requirements, delivery terms, and a message. Existing client-side validation and the explicit local demo preview remain. Changing tabs/languages preserves in-session entries; editing clears the preview and reset clears the form. **No message is sent, no inquiry is saved, and no quotation or booking is created.** There is no backend, email service, API submission, local-storage inquiry persistence, database, or invented contact address.
-
-## Verification and remaining review
-
-Tests cover reported/unknown data, honest chart states, English/Spanish labels and tooltips, actual React chart markup and demo warnings in both languages, fictional/producer-data separation, preserved navigation/language/map controllers, and inquiry validation. GIS tests additionally verify exact counts, unique IDs/coordinates, valid route references/endpoints/stop geometry, whole-network connectivity, independent layer filtering and add/remove controller calls, regional extents, clustering/expansion, translated feature/route detail models and disclaimers, the Logistics-only navigation boundary, removal of redundant planning cards, required light-basemap attribution, and category-color contrast on ivory. Controller/model and server-rendered markup checks are not browser interaction or visual tests.
-
-The project owner reports that manual browser verification of the current 2.5D implementation passed with no visible or interaction problems. This is user-reported validation, not an agent-operated browser test. The agent started Vite and checked nine local HTML/module/style/asset URLs (HTTP 200 without transform errors), reviewed source/geometry/provenance, and ran automated checks. No browser tool was available to the agent. Detailed desktop/mobile viewport coverage, browser-console output, and tile-network results were not supplied; no independent browser or production-deployment verification is claimed.
-
-Before real commercial use, Eduardo must confirm specifications, exact weights, availability, identity/origin records, buyers, commercial terms, transport/customs arrangements, and applicable shipment-specific export/import/phytosanitary requirements with appropriate evidence and qualified trade partners. Public deployment is outside this source update and requires separate review and authorization.
+Production is not deployed. Historical food-platform source and tests are frozen as inert reference files in `legacy/food-platform/`; they are neither compiled nor served. No historical business or research records are erased.

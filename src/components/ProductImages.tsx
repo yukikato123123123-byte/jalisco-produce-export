@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {Localized} from '../localization';
+import {LegacyLocalized as Localized} from '../legacyLocalization';
 import type {ProductImage} from '../productImages';
 import './product-images.css';
 function Photo({src,name,full=false}:{src:string;name:string;full?:boolean}){const [failed,setFailed]=useState(false);return <Localized>{failed?<span className="product-photo-empty">Photo unavailable</span>:<img data-no-translate src={src} alt={name} loading="lazy" decoding="async" className={full?'product-photo-full':''} onError={()=>setFailed(true)}/>}</Localized>;}

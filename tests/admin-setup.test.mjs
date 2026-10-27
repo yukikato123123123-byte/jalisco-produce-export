@@ -84,7 +84,7 @@ test('prepared-directory trust API rejects mixed manual fingerprints and never r
 }));
 test('CLI cannot combine stages, apply, supply secrets, select a policy, or skip confirmation',()=>{
  for(const args of [['apply'],['--apply'],['trust','--generate'],['key','--register'],['plan','--confirm','anything'],['--token','secret'],['--passphrase','secret'],['--policy','other'],['--email','a@b.test','--email','a@b.test']])assert.throws(()=>parseSetupArgs(args));
- const plan=parseSetupArgs([]);assert.equal(plan.stage,'plan');assert.equal(plan.user,'51f007ac-f719-4219-81c8-94922fcacc1c');
+ const plan=parseSetupArgs([]);assert.equal(plan.stage,'plan');assert.equal(plan.user,'11111111-1111-4111-8111-111111111111');
  const output=execFileSync(process.execPath,['scripts/admin-setup.mjs'],{encoding:'utf8',env:{...process.env,CLOUDFLARE_API_TOKEN:'SENTINEL_CF',SUPABASE_ACCESS_TOKEN:'SENTINEL_SB'}});
  assert.equal(output.includes('SENTINEL'),false);assert.equal(JSON.parse(output).changed,false);
 });

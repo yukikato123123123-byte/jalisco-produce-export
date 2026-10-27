@@ -17,8 +17,8 @@ for(const purpose of ['signup','recovery'])test(`valid ${purpose} query link rea
  await page.route('**/api/auth/confirm-link',r=>{callbacks++;return r.fulfill({json:{ok:true}});});
  await page.route('**/api/auth/session',r=>r.fulfill({json:{profile:null,user:{email:'test@example.test'},recovery:purpose==='recovery'}}));
  await page.goto(`/verify-email?token_hash=synthetic-link-hash-proof&type=${purpose}`);
- await expect(page).toHaveURL(purpose==='recovery'?/\/reset-password$/:/\/onboarding$/);expect(callbacks).toBe(1);
- await expect(page.getByRole('button',{name:purpose==='recovery'?'Update password':'Complete onboarding',exact:true})).toBeVisible();
+ await expect(page).toHaveURL(purpose==='recovery'?/\/reset-password$/:/\/account$/);expect(callbacks).toBe(1);
+ if(purpose==='recovery')await expect(page.getByRole('button',{name:'Update password',exact:true})).toBeVisible();else await expect(page.getByRole('link',{name:'Open market research',exact:true})).toBeVisible();
 });
 test('PKCE code and wrong-purpose links are rejected locally without automatic network verification',async({page})=>{
  let calls=0;await page.route('**/api/auth/confirm-link',r=>{calls++;return r.fulfill({status:400,json:{error:'Unexpected'}});});
@@ -28,7 +28,7 @@ test('PKCE code and wrong-purpose links are rejected locally without automatic n
 test('implicit signup callback is retained and duplicate effects do not submit twice',async({page})=>{
  let calls=0;await page.route('**/api/auth/callback',r=>{calls++;expect(r.request().postDataJSON().type).toBe('signup');return r.fulfill({json:{ok:true}});});
  await page.route('**/api/auth/session',r=>r.fulfill({json:{profile:null,user:{email:'test@example.test'},recovery:false}}));
- await page.goto('/verify-email#type=signup&access_token=synthetic-access-token-value');await expect(page).toHaveURL(/\/onboarding$/);expect(calls).toBe(1);
+ await page.goto('/verify-email#type=signup&access_token=synthetic-access-token-value');await expect(page).toHaveURL(/\/account$/);expect(calls).toBe(1);
 });
 
 test('provider verify recovery redirect reaches reset form, saves password and allows subsequent sign-in',async({page,baseURL})=>{
@@ -53,7 +53,7 @@ test('provider verify recovery redirect reaches reset form, saves password and a
  await expect(page).toHaveURL(/\/reset-password$/);expect(callbacks).toBe(1);
  await expect(page.getByText('legacy session-token',{exact:false})).toHaveCount(0);
  await page.getByLabel('New password',{exact:true}).fill('changed-synthetic-password-123');await page.getByRole('button',{name:'Update password',exact:true}).click();await expect(page.getByRole('status')).toContainText('Your password has been updated');
- await page.goto('/login');await page.getByLabel('Email address',{exact:true}).fill('test@example.test');await page.getByLabel('Password',{exact:true}).fill('changed-synthetic-password-123');await page.getByRole('button',{name:'Sign in',exact:true}).click();await expect(page).toHaveURL(/\/buyer\/dashboard$/);
+ await page.goto('/login');await page.getByLabel('Email address',{exact:true}).fill('test@example.test');await page.getByLabel('Password',{exact:true}).fill('changed-synthetic-password-123');await page.getByRole('button',{name:'Sign in',exact:true}).click();await expect(page).toHaveURL(/\/account$/);
 });
 test('expired provider recovery redirect and reused callback show recovery errors without entering reset form',async({page})=>{
  let calls=0;await page.route('**/api/auth/callback',r=>{calls++;return r.fulfill({status:400,json:{error:'This recovery session is invalid, expired or already used. Request a new recovery email.'}});});

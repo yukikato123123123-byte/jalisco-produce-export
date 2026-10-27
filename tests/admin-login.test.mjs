@@ -7,12 +7,12 @@ test('server grant controls login destination and every admin request; revocatio
  const f=fixture();try{
   const cookie=await f.login();assert.equal((await f.request('/api/auth/onboarding',details,cookie)).status,200);
   const session=async()=>{const r=await f.request('/api/auth/session',undefined,cookie);assert.equal(r.status,200);return r.json();};
-  assert.equal((await session()).is_admin,false);assert.equal(accountDestination(await session()),'/producer/dashboard');
-  assert.equal((await f.request('/api/admin/overview',undefined,cookie)).status,403);
+  assert.equal((await session()).is_admin,false);assert.equal(accountDestination(await session()),'/account');
+  assert.equal((await f.request('/api/admin/settings',undefined,cookie)).status,403);
   accessEvent(f);assert.equal((await session()).is_admin,true);assert.equal(accountDestination(await session()),'/admin');
-  assert.equal((await f.request('/api/admin/overview',undefined,cookie)).status,200);
-  accessEvent(f,'revoke');assert.equal((await session()).is_admin,false);assert.equal(accountDestination(await session()),'/producer/dashboard');
-  assert.equal((await f.request('/api/admin/overview',undefined,cookie)).status,403);
+  assert.equal((await f.request('/api/admin/settings',undefined,cookie)).status,200);
+  accessEvent(f,'revoke');assert.equal((await session()).is_admin,false);assert.equal(accountDestination(await session()),'/account');
+  assert.equal((await f.request('/api/admin/settings',undefined,cookie)).status,403);
  }finally{f.close();}
 });
 test('metadata, another subject/project and recovery sessions never select administrator access',async()=>{
@@ -24,12 +24,12 @@ test('metadata, another subject/project and recovery sessions never select admin
   assert.equal((await(await f.request('/api/auth/session',undefined,cookie)).json()).is_admin,false);
   const recovery=await f.login('recovery');const current=await(await f.request('/api/auth/session',undefined,recovery)).json();
   assert.equal(current.is_admin,false);assert.equal(accountDestination(current),'/reset-password');
-  assert.equal((await f.request('/api/admin/overview',undefined,recovery)).status,403);
+  assert.equal((await f.request('/api/admin/settings',undefined,recovery)).status,403);
  }finally{f.close();}
 });
 test('ordinary buyer, onboarding, absent admin hint and recovery preserve their destinations',()=>{
- assert.equal(accountDestination({recovery:false,profile:{role:'buyer'},is_admin:false}),'/buyer/dashboard');
- assert.equal(accountDestination({recovery:false,profile:null}),'/onboarding');
- assert.equal(accountDestination({recovery:false,profile:{role:'producer'}}),'/producer/dashboard');
+ assert.equal(accountDestination({recovery:false,profile:{role:'buyer'},is_admin:false}),'/account');
+ assert.equal(accountDestination({recovery:false,profile:null}),'/account');
+ assert.equal(accountDestination({recovery:false,profile:{role:'producer'}}),'/account');
  assert.equal(accountDestination({recovery:true,profile:null,is_admin:true}),'/reset-password');
 });

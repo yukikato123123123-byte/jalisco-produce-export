@@ -1,4 +1,4 @@
-import {Localized} from '../localization';
+import {LegacyLocalized as Localized} from '../legacyLocalization';
 import {useRef,useState} from 'react';
 import type {FormEvent} from 'react';
 import {accountRequest} from './AccountPages';

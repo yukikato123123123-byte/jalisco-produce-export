@@ -9,7 +9,7 @@ import console from 'node:console';
 import {STAGING,canonical,validateOptions} from './lib/admin-grant.mjs';
 import {readConfig} from './validate-deployment.mjs';
 const {AbortSignal,URL}=globalThis;
-const subject={id:'51f007ac-f719-4219-81c8-94922fcacc1c',email:'zacharymaynard182@gmail.com'};
+const subject={id:'11111111-1111-4111-8111-111111111111',email:'administrator@example.test'};
 const origin='https://jalisco-auth-staging.yukikato123123123.workers.dev';
 export async function checkStagingReadonly({cloudflareToken,supabaseToken,approvalFilePresent=false,fetcher=globalThis.fetch,now=Date.now()}={}){
  const report={mode:'READ_ONLY',scope:STAGING,approval_file_present:approvalFilePresent,approval_authorized:false,approval_verification:approvalFilePresent?'REQUIRES_INDEPENDENT_SIGNATURE_AND_IDENTITY_REVIEW':'NO_RECORD',cloudflare:{status:'NOT_CONNECTED'},supabase:{status:'NOT_CONNECTED'},supabase_connection_source:'PROCESS_ENVIRONMENT_MANAGEMENT_API_ONLY',supabase_mcp_connection:'NOT_CHECKED_BY_SCRIPT',migration:'NOT_RECHECKED',operational_changes_performed:false};

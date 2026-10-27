@@ -22,7 +22,7 @@ export function validateDeployment(config, target, { allowUnconfiguredStagingPro
   fail(config.name === (target === 'staging' ? 'jalisco-auth-staging' : 'jalisco-produce-export'), 'Unexpected target Worker name.');
   fail(config.main === 'worker/index.ts', 'The authentication Worker entry point is required.');
   fail(config.assets?.directory === './dist' && config.assets?.binding === 'ASSETS' && config.assets?.not_found_handling === 'single-page-application', 'Preserve the existing SPA assets and ASSETS binding.');
-  fail(JSON.stringify(config.assets?.run_worker_first) === JSON.stringify(target==='staging'?['/api/*','/admin/preview']:['/api/*']), 'API requests must run the Worker first.');
+  fail(JSON.stringify(config.assets?.run_worker_first) === JSON.stringify(target==='staging'?['/*']:['/api/*']), 'API requests must run the Worker first.');
   fail(!config.previews && !config.env && !config.route, 'Use explicit persistent configs without Preview or inherited environment overrides.');
   fail(config.preview_urls === false, 'Disable alternate version preview URLs.');
   const db = config.d1_databases?.[0];

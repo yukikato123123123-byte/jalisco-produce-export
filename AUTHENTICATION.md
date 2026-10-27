@@ -747,7 +747,7 @@ The user authorized one new confirmation-email request and one recovery-email re
 
 Management access was checked again: no connected Supabase tools, available Supabase plugin not installed/connected, and no Supabase management credential available in the process environment. Therefore actual Site URL, redirect allowlist, installed templates, SMTP/quota configuration and historical Auth logs could not be read or modified. Desired settings remain those specified in the preceding repair section and the two source templates. Local file values are not evidence of remotely saved settings.
 
-Actual requests, each sent once to `yukikato123123123@gmail.com` through the existing staging Worker flow:
+Actual requests, each sent once to `operator@example.test` through the existing staging Worker flow:
 
 - POST `/api/auth/resend`: HTTP 200, conditional “If this address is eligible…” response. Delivery and a fresh confirmation proof are NOT verified. The account is already confirmed/onboarded, so a successful response need not produce a new confirmation message.
 - POST `/api/auth/forgot-password`: HTTP 429, safe code `email_rate_limited`, message “Too many attempts. Please wait before trying again.” Recovery delivery was not successful/verified. No retries or alternate mail path were attempted.
@@ -982,7 +982,7 @@ SELECT만 실행했다. 최종 재조회에서도 grant/활성 grant/감사 이�
 ### 증거와 신원 경계
 
 사용자가 기존 Supabase 관리 조회로 확인했다고 제공한 후보:
-`51f007ac-f719-4219-81c8-94922fcacc1c`, `zacharymaynard182@gmail.com`,
+`11111111-1111-4111-8111-111111111111`, `administrator@example.test`,
 프로젝트 `heaswpawzuuijxurlfoz`. 이번 세션에는 Supabase 관리 도구가 없으므로
 그 조회를 독립 재실행하지 않았다. 이메일 확인 시각/계정 상태는 전달되지 않아
 추가로 단정하지 않는다. 후보의 Auth 일치 정보는 사용자가 전달한 조회 결과에
@@ -1177,8 +1177,8 @@ CLI의 `--policy` 같은 임의 신뢰키 선택 옵션은 없다. 일반 앱 �
 ```bash
 node scripts/admin-grant.mjs --offline \
   --project heaswpawzuuijxurlfoz \
-  --user 51f007ac-f719-4219-81c8-94922fcacc1c \
-  --email zacharymaynard182@gmail.com \
+  --user 11111111-1111-4111-8111-111111111111 \
+  --email administrator@example.test \
   --action grant --expected none \
   --request 22222222-2222-4222-8222-222222222222 \
   --reason 'Prepare owner access review only'

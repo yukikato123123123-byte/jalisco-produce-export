@@ -234,8 +234,8 @@ DO는 승인 registry·epoch·감사·단일 pending 명령의 권위 저장소�
 ```sh
 node scripts/admin-grant.mjs --owner-aware --dry-run \
   --project heaswpawzuuijxurlfoz \
-  --user 51f007ac-f719-4219-81c8-94922fcacc1c \
-  --email zacharymaynard182@gmail.com --action grant \
+  --user 11111111-1111-4111-8111-111111111111 \
+  --email administrator@example.test --action grant \
   --request REQUEST_UUID --reason 'REVIEWED_REASON' --expected none
 ```
 
@@ -248,11 +248,11 @@ CLI는 고정 로컬 root와 보존된 이전 정책을 읽고, 초기화 부작
 ```sh
 node scripts/admin-grant.mjs --owner-aware --apply \
   --project heaswpawzuuijxurlfoz \
-  --user 51f007ac-f719-4219-81c8-94922fcacc1c \
-  --email zacharymaynard182@gmail.com --action grant \
+  --user 11111111-1111-4111-8111-111111111111 \
+  --email administrator@example.test --action grant \
   --request REQUEST_UUID --reason 'EXACT_DRY_RUN_REASON' --expected none \
   --approval /PROTECTED/exact-signed-approval.json \
-  --confirm 'APPLY grant 51f007ac-f719-4219-81c8-94922fcacc1c REQUEST_UUID'
+  --confirm 'APPLY grant 11111111-1111-4111-8111-111111111111 REQUEST_UUID'
 ```
 
 최초 부여 이후에는 dry-run이 반환한 expected event를 사용한다. 루트가 있다는 이유로 구 CLI의 직접 D1 apply를 다시 활성화하지 않는다.

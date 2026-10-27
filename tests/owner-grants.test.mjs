@@ -70,7 +70,7 @@ test('D1-only grants, incomplete enrollment and direct public internal-path call
   assert.equal((await f.app.request('/api/admin/overview',undefined,f.cookie)).status,403);assert.equal((await f.prepare()).r.status,409);
   delete f.app.env.OWNER_ADMIN_MODE;assert.equal((await f.app.request('/api/admin/overview',undefined,f.cookie)).status,503);
   assert.equal((await f.app.request('/api/auth/session',undefined,f.cookie)).status,503);
-  assert.equal((await f.app.request('/internal/admin',{user:uid,kind:'check'},f.cookie)).status,200); // public asset only
+  assert.equal((await f.app.request('/internal/admin',{user:uid,kind:'check'},f.cookie)).status,404); // Public Worker never exposes the authority internal endpoint.
   assert.equal(f.app.sql.prepare('SELECT count(*) n FROM owner_command_receipts').get().n,0);
  }finally{f.close();}
 });
@@ -166,3 +166,5 @@ test('a legacy authority cannot silently acquire grant powers from a new environ
   assert.equal((await f.prepare()).r.status,503);assert.equal((await f.request('session')).status,503);assert.deepEqual(f.owner.storage.values,before);
  }finally{f.close();}
 });
+
+test('coexisting administrator APIs do not expand the owner gateway POST allowlist',async()=>{const f=await grantFixture();try{await f.init();const {plan}=await f.prepare();assert.equal((await f.apply(f.approve(plan))).status,200);for(const name of ['0015_nopal_launch_subscriptions.sql','0016_nopal_customer_feedback.sql'])f.app.sql.exec(readFileSync(new URL('../migrations/'+name,import.meta.url),'utf8'));for(const path of ['/api/admin/overview','/api/admin/operations-overview','/api/admin/research-access'])assert.equal((await f.app.request(path,undefined,f.cookie)).status,200);const before=f.app.sql.prepare('SELECT count(*) n FROM admin_grant_events').get().n;for(const path of ['/api/admin/notifications','/api/admin/drafts/item','/api/admin/reviews/product/item','/api/admin/inquiries/item','/api/admin/research-access','/api/admin/customer-feedback/item'])assert.equal((await f.app.request(path,{action:'research_grant'},f.cookie)).status,404,path);assert.equal(f.app.sql.prepare('SELECT count(*) n FROM admin_grant_events').get().n,before);assert.equal(f.app.sql.prepare('SELECT count(*) n FROM research_access').get().n,0);assert.equal(f.app.sql.prepare('SELECT count(*) n FROM owner_action_receipts').get().n,0);}finally{f.close();}});

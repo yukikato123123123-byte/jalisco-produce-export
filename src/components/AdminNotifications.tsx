@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {accountRequest} from './AccountPages';
-import {Localized,useLanguage} from '../localization';
+import {LegacyLocalized as Localized} from '../legacyLocalization';
+import {useLanguage} from '../localization';
 import {WorkspaceIcon} from './WorkspaceIcon';
 import './admin-notifications.css';
 type Notification={id:number;user_id:string;name:string;email:string;role:string;created_at:string;state:string;read:number};

@@ -1,0 +1,6 @@
+import {AdminPage} from './AdminPage';
+import {lazy,Suspense} from 'react';
+const LegacyAdminPage=lazy(()=>import('./LegacyAdminPage').then(m=>({default:m.LegacyAdminPage})));
+import {Localized} from '../localization';
+const legacySections=new Set(['products','producers','buyers','accounts','readiness','security','grants','inquiries']);
+export function AdminWorkspaceRouter(){const params=new URLSearchParams(location.search),section=params.get('section')||'overview',preview=location.pathname==='/admin/preview';const legacy=preview||params.get('workspace')==='legacy'||(!params.has('workspace')&&(legacySections.has(section)||section.startsWith('reviews/')));if(preview&&location.origin!=='https://jalisco-auth-staging.yukikato123123123.workers.dev')return <Localized><main><h1>Page not available</h1></main></Localized>;return legacy?<><Localized><nav className="admin-workspace-switch" aria-label="Administrator workspaces"><a href="/admin?workspace=nopahua">NopaHua operations</a><a href="/admin?workspace=legacy">Legacy operations</a></nav></Localized><Suspense fallback={<Localized><p role="status">Loading records…</p></Localized>}><div className="legacy-admin"><LegacyAdminPage preview={preview}/></div></Suspense></>:<AdminPage/>;}

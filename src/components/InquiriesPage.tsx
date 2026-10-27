@@ -1,4 +1,4 @@
-import {Localized} from '../localization';
+import {LegacyLocalized as Localized} from '../legacyLocalization';
 import {useEffect,useState,useRef} from 'react';
 import {accountRequest} from './AccountPages';
 import {BuyerInquiry} from './BuyerInquiry';

@@ -17,7 +17,7 @@ const {URL}=globalThis;
 function json(path){const s=lstatSync(path);if(!s.isFile()||s.isSymbolicLink()||s.size>65536)throw Error('Unsafe review input.');return JSON.parse(readFileSync(path,'utf8'));}
 export async function checkRecovery({root=fileURLToPath(new URL('../',import.meta.url)),bundle,review}={}){
  const config=readConfig(resolve(root,'wrangler.staging.jsonc'));
- validateOptions({config:'wrangler.staging.jsonc',project:STAGING.project_ref,user:'51f007ac-f719-4219-81c8-94922fcacc1c',email:'zacharymaynard182@gmail.com',request:'00000000-0000-4000-8000-000000000001',action:'grant',reason:'Offline readiness check'},config);
+ validateOptions({config:'wrangler.staging.jsonc',project:STAGING.project_ref,user:'11111111-1111-4111-8111-111111111111',email:'administrator@example.test',request:'00000000-0000-4000-8000-000000000001',action:'grant',reason:'Offline readiness check'},config);
  const policy=json(resolve(root,'staging/admin-approval-policy.json')),previous=sha(canonical(policy));
  if(canonical(policy.scope)!==canonical(STAGING))throw Error('Preserved policy scope mismatch.');
  const key=inspectPublicKey(readFileSync(resolve(root,'staging/approval-public.pub'),'utf8'));

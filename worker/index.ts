@@ -1,20 +1,24 @@
-import {uploadImage,manageImages,imageFile,cleanupImages} from './productImages.ts';
+import {producer,publicItems} from './producer.ts';
+import {buyer} from './buyer.ts';
+import {publicProducers,publicBuyers} from './directory.ts';
+import {submitInquiry,readInquiries} from './inquiries.ts';
+import {adminPreview} from './adminPreview.ts';
+import {imageFile,cleanupImages,manageImages,uploadImage} from './productImages.ts';
+import {retiredPage,retiredImage,knownPage,unavailablePage} from './retiredRoutes.ts';
+import {researchPermission,researchSubmit,researchAggregate} from './research.ts';
+import {submitFeedback} from './nopalFeedback.ts';
+import {launchSubscription} from './nopalLaunch.ts';
 import { ownerPage } from './owner/ui.ts';
 import { ownerRoute } from './owner/router.ts';
 import type { OwnerNamespace } from './owner/router.ts';
 import {usesOwnerGateway,ownerAdmin,ownerAdminHint} from './owner/gateway.ts';
 export { OwnerAuthority } from './owner/authority.ts';
 import { administrator, hasAdministratorGrant } from './admin.ts';
-import {adminPreview} from './adminPreview.ts';
 import { verifiedRecoveryClaims } from './implicitRecovery.ts';
-import {submitInquiry,readInquiries} from './inquiries.ts';
-import { buyer } from './buyer.ts';
-import { producer, publicItems } from './producer.ts';
 import { Failure, ProviderFailure, provider } from './provider.ts';
 import { authenticationRevision, prepareUser, insertSession, currentSession, claimRecovery, finishRecovery } from './authState.ts';
 import type { Database } from './authState.ts';
 import { assertAuthEnvironment, isolatedStaging } from './environment.ts';
-import { publicProducers, publicBuyers } from './directory.ts';
 export interface Env { SUPABASE_STORAGE_SERVICE_ROLE_KEY?:string; OWNER_ADMIN_MODE?:string; OWNER_ROOT_PUBLIC_KEY?:string; OWNER_GRANT_ACTIVATION?:string; OWNER_AUTHORITY?: OwnerNamespace; AUTH_ENVIRONMENT?: string; DB: Database; ASSETS: { fetch(request: Request): Promise<Response> }; AUTH_ORIGIN: string; SUPABASE_URL: string; SUPABASE_PUBLISHABLE_KEY: string; SESSION_ENCRYPTION_KEY: string }
 type Profile = { full_name: string; company: string; country: string; role: 'producer' | 'buyer' };
 type User = { id: string; email: string; email_confirmed_at?: string; user_metadata?: Record<string, unknown> };
@@ -31,7 +35,7 @@ function cookie(env: Env, value: string, age: number) { return `${cookieName(env
 function sessionId(request: Request, env: Env) { return request.headers.get('Cookie')?.split(';').map(s => s.trim()).find(s => s.startsWith(`${cookieName(env)}=`))?.split('=')[1] ?? ''; }
 function email(value: unknown) { if (typeof value !== 'string' || value.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) throw new Failure(400, 'Enter a valid email address.'); return value.trim().toLowerCase(); }
 function password(value: unknown) { if (typeof value !== 'string' || value.length < 12 || value.length > 128) throw new Failure(400, 'Use a password between 12 and 128 characters.'); return value; }
-function profile(value: Record<string, unknown>): Profile { const result: Record<string, string> = {}; for (const name of ['full_name', 'company', 'country']) { if (typeof value[name] !== 'string' || !(value[name] as string).trim() || (value[name] as string).length > 120) throw new Failure(400, 'Enter your name, company or farm, and country (up to 120 characters each).'); result[name] = (value[name] as string).trim(); } if (!['producer', 'buyer'].includes(String(value.role))) throw new Failure(400, 'Choose Producer or Buyer.'); return { ...result, role: value.role } as Profile; }
+function profile(value: Record<string, unknown>): Profile { const result: Record<string, string> = {}; for (const name of ['full_name', 'company', 'country']) { if (typeof value[name] !== 'string' || !(value[name] as string).trim() || (value[name] as string).length > 120) throw new Failure(400, 'Check the existing account metadata (up to 120 characters per field).'); result[name] = (value[name] as string).trim(); } if (!['producer', 'buyer'].includes(String(value.role))) throw new Failure(400, 'Invalid existing account category.'); return { ...result, role: value.role } as Profile; }
 async function readSession(request: Request, env: Env) {
   const id = sessionId(request, env); if (!/^[a-f0-9]{64}$/.test(id)) throw new Failure(401, 'Please sign in to continue.');
   const session = await currentSession(env.DB, await sessionHash(id, env));
@@ -69,9 +73,19 @@ async function limitSessionReads(env: Env, sessionId: string) {
 export async function handle(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   if(url.pathname==='/admin/preview'||url.pathname==='/api/staging/admin-preview'||url.pathname.startsWith('/api/staging/admin-preview/'))return adminPreview(request,env);
+  if(retiredPage(url.pathname)||retiredImage(url.pathname))return unavailablePage(410);
+  if(!url.pathname.startsWith('/api/')&&!knownPage(url.pathname)&&!url.pathname.startsWith('/assets/')&&!url.pathname.startsWith('/images/')&&!['/owner','/owner/client.js','/favicon.ico'].includes(url.pathname))return unavailablePage(404);
+  if(url.pathname==='/onboarding')return new Response(null,{status:303,headers:{Location:'/account','Cache-Control':'no-store'}});
   if ((url.pathname === '/owner' || url.pathname === '/owner/client.js') && request.method === 'GET') return ownerPage(url.pathname);
   if (url.pathname.startsWith('/api/owner/')) return ownerRoute(request, env.OWNER_AUTHORITY);
+  if(url.pathname.startsWith('/research/nopahua')){
+    const headers={'Cache-Control':'no-store, private','X-Robots-Tag':'noindex, nofollow, noarchive','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'};
+    try{if(request.method!=='GET'||!['/research/nopahua','/research/nopahua/','/research/nopahua/results'].includes(url.pathname))throw new Failure(404,'Page not available');assertAuthEnvironment(env);const a=await readSession(request,env);if(a.session.purpose==='recovery')throw new Failure(403,'Complete password recovery before continuing.');await researchPermission(env.DB,a.user,new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,''),url.pathname.endsWith('/results'));const response=await env.ASSETS.fetch(request);const next=new Response(response.body,response);for(const [key,value] of Object.entries(headers))next.headers.set(key,value);return next;}
+    catch(error){const status=error instanceof Failure?error.status:503;return new Response('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>NopaHua · Acceso privado</title><body style="background:#101612;color:#eee7dc;font:18px system-ui;padding:8vw"><h1>NopaHua · Acceso privado / Private access</h1><p>Inicia sesión con tu cuenta existente y solicita acceso al administrador.</p><p>Sign in with your existing account and request access from the administrator.</p><a style="color:#d6ef83" href="/login">Iniciar sesión / Sign in</a><p><a style="color:#d6ef83" href="/research/nopahua">Volver a comprobar / Check access again</a></p></body></html>',{status,headers:{...headers,'Content-Type':'text/html; charset=utf-8'}});}
+  }
   if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
+  if(url.pathname==='/api/public/feedback')return submitFeedback(request,env);
+  if(url.pathname==='/api/public/launch-subscriptions')return launchSubscription(request,env);
   try {
     const imagePath=/^\/api\/product-images\/([^/]+)\/(thumb|full)$/.exec(url.pathname);
     if(request.method==='GET'&&imagePath)return await imageFile(env,imagePath[1],imagePath[2],async owner=>{
@@ -116,7 +130,7 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     }
     const path = url.pathname;
     if (request.method === 'POST' && path === '/api/auth/signup') {
-      const details = profile(body), address = email(body.email), secret = password(body.password);
+      const details=body.registration_type==='research'?{full_name:typeof body.full_name==='string'?body.full_name.trim().slice(0,120):''}:profile(body), address=email(body.email), secret=password(body.password);
       const redirect = `signup?redirect_to=${encodeURIComponent(`${env.AUTH_ORIGIN}/verify-email`)}`;
       try { await provider(env, redirect, 'POST', { email: address, password: secret, data: details }); }
       catch (error) { if (!(error instanceof ProviderFailure) || error.code !== 'account_existence') throw error; }
@@ -222,9 +236,18 @@ export async function handle(request: Request, env: Env): Promise<Response> {
       if(request.method==='GET')return json(await readInquiries(env.DB,url.searchParams,auth.user.id,path==='/api/inquiries'?undefined:path.slice('/api/inquiries/'.length)));
       throw new Failure(405,'Method not allowed.');
     }
+    if(path.startsWith('/api/research/')){
+      const project=new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,'');
+      if(!['/api/research/access','/api/research/responses','/api/research/results'].includes(path))throw new Failure(404,'Endpoint not found.');
+      await researchPermission(env.DB,auth.user,project,path==='/api/research/results');
+      if(path==='/api/research/access'&&request.method==='GET')return json({allowed:true,submitted:!!await env.DB.prepare('SELECT id FROM research_responses WHERE user_id=? AND project_ref=?').bind(auth.user.id,project).first()});
+      if(path==='/api/research/responses'&&request.method==='POST')return json(await researchSubmit(env.DB,auth.user,project,body),201);
+      if(path==='/api/research/results'&&request.method==='GET')return json(await researchAggregate(env.DB,project));
+      throw new Failure(405,'Method not allowed.');
+    }
     // Provider-verified subject + server-only owner grant. Metadata is never authority.
     if (path === '/api/admin' || path.startsWith('/api/admin/')) {
-      if(usesOwnerGateway(env))return await ownerAdmin(env,{kind:'request',user:auth.user.id,path,method:request.method,body,query:url.searchParams.toString()});
+      if(usesOwnerGateway(env)){const response=await ownerAdmin(env,{kind:'request',user:auth.user.id,path,method:request.method,body,query:url.searchParams.toString()});if(response.ok&&request.method==='GET'&&/^\/api\/admin\/customer-feedback(?:\/|$)/.test(path))return json({...await response.json() as Record<string,unknown>,can_manage:false});return response;}
       const result=await administrator(env.DB,auth.user.id,path,request.method,body,url.searchParams,new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,''));
       if(request.method==='POST'&&/^\/api\/admin\/drafts\/[^/]+$/.test(path)&&body.action==='draft_delete')try{await cleanupImages(env,auth.user.id);}catch{/* Durable image tombstones are retried by the existing cleanup job. */}
       return json(result);
@@ -248,4 +271,4 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     throw new Failure(404, 'Endpoint not found.');
   } catch (error) { return json({ error: error instanceof Failure ? error.message : 'Authentication is temporarily unavailable.', ...(isolatedStaging(env) && error instanceof ProviderFailure && error.code === 'email_rate_limited' ? { code: 'email_rate_limited' } : {}) }, error instanceof Failure ? error.status : 503, undefined, error instanceof Failure ? error.retryAfter : undefined); }
 }
-export default { fetch: handle, async scheduled(_event:unknown,env:Env){if(env.AUTH_ENVIRONMENT==='staging')await cleanupImages(env);} };
+export default {fetch:handle,async scheduled(_event:unknown,env:Env){if(env.AUTH_ENVIRONMENT==='staging')await cleanupImages(env);}};

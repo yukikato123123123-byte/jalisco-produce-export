@@ -15,7 +15,7 @@ import {readConfig} from './validate-deployment.mjs';
 
 const fail=()=>{throw Error('Setup rejected. Review the stage, protected key store, identity evidence and explicit confirmation.');};
 export function parseSetupArgs(args){
- const o={stage:'plan',email:'zacharymaynard182@gmail.com',user:'51f007ac-f719-4219-81c8-94922fcacc1c'};
+ const o={stage:'plan',email:'administrator@example.test',user:'11111111-1111-4111-8111-111111111111'};
  if(args[0]&&!args[0].startsWith('--'))o.stage=args.shift();
  const seen=new Set(),values=new Set(['email','user','directory','confirm','identity-ref','approval-ref','reason','request']);
  for(let i=0;i<args.length;i++){

@@ -2,18 +2,18 @@ import { createContext, useContext, useLayoutEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import {translate} from './i18n';
 import { localizeNode } from './localizeNode';
-import { loadLanguage, saveLanguage } from './presentation';
+import { loadLanguage, saveLanguage, languageStorageKey } from './presentation';
 import type { Language } from './presentation';
 
 const LanguageContext = createContext<{ language: Language; setLanguage: (value: Language) => void }>({ language: 'en', setLanguage: () => {} });
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>(() => { try { return loadLanguage(window.localStorage); } catch { return 'en'; } });
+  const [language, setLanguage] = useState<Language>(() => { try { return window.location.pathname.startsWith('/research/nopahua')&&!window.localStorage.getItem(languageStorageKey)?'es':loadLanguage(window.localStorage); } catch { return 'en'; } });
   useLayoutEffect(() => {
     document.documentElement.lang = language === 'es' ? 'es-MX' : 'en';
-    document.title = language === 'es' ? 'Jalisco Produce Export · Origen y conexión' : 'Jalisco Produce Export · Origin and connection';
+    document.title = language === 'es' ? 'NopaHua · Concepto e investigación' : 'NopaHua · Concept and research';
     const fields=()=>document.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement>('input,select,textarea');
     fields().forEach(field=>field.setCustomValidity(''));
-    const clear=(event:Event)=>{const field=event.target;if(field instanceof HTMLInputElement||field instanceof HTMLSelectElement||field instanceof HTMLTextAreaElement)field.setCustomValidity('');};
+    const clear=(event:Event)=>{const field=event.target;if(field instanceof HTMLInputElement||field instanceof HTMLSelectElement||field instanceof HTMLTextAreaElement){field.setCustomValidity('');if(field instanceof HTMLInputElement&&field.type==='radio'&&field.form)for(const member of Array.from(field.form.elements))if(member instanceof HTMLInputElement&&member.type==='radio'&&member.name===field.name)member.setCustomValidity('');}};
     const invalid=(event:Event)=>{const field=event.target;if(!(field instanceof HTMLInputElement||field instanceof HTMLSelectElement||field instanceof HTMLTextAreaElement))return;const v=field.validity;const message=v.valueMissing?'Please complete this field.':v.typeMismatch?'Enter a valid email address.':v.tooShort?'The value is too short.':v.rangeUnderflow||v.rangeOverflow?'Enter a value within the allowed range.':v.stepMismatch?'Use the required numeric precision.':'Check the field format.';field.setCustomValidity(translate(message,language));};
     document.addEventListener('invalid',invalid,true);document.addEventListener('input',clear,true);document.addEventListener('change',clear,true);
     try { saveLanguage(language, window.localStorage); } catch { /* Storage access itself can be blocked. */ }

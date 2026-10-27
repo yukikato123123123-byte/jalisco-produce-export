@@ -1,6 +1,6 @@
 import type {Database} from './authState.ts';
 import {Failure} from './provider.ts';
-import {text} from './producer.ts';
+import {text} from './fields.ts';
 export async function registrationNotifications(db:Database,admin:string,project:string,method:string,body:Record<string,unknown>,params:URLSearchParams){
  if(method==='POST'){
   const through=body.through,id=body.id;

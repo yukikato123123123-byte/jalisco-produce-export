@@ -96,3 +96,5 @@ test('only staging routes its read-only preview through the Worker gate',()=>{
  const p=approvedFixture('production');p.assets.run_worker_first=['/api/*','/admin/preview'];
  assert.ok(validateDeployment(p,'production').includes('API requests must run the Worker first.'));
 });
+
+test('staging private research HTML must pass through Worker authorization',()=>{const c=approvedFixture('staging');c.assets.run_worker_first=c.assets.run_worker_first.filter(p=>p!=='/*');assert.ok(validateDeployment(c,'staging').includes('API requests must run the Worker first.'));});

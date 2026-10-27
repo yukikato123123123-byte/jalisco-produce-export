@@ -93,7 +93,7 @@ identity checks. These tests never enroll a real owner or apply a remote grant.
 
 ## Complete first-enrollment workflow (not executed)
 
-The target email is `zacharymaynard182@gmail.com`; no remembered candidate UUID
+The target email is `administrator@example.test`; no remembered candidate UUID
 is treated as verified. The project manager may perform all roles. Key preparation,
 trust enrollment, approval signing and actual account grant remain separate
 explicit decisions. None automatically completes the next step.
@@ -106,7 +106,7 @@ explicit decisions. None automatically completes the next step.
 
    ```bash
    node scripts/admin-key-prepare.mjs \
-     --email zacharymaynard182@gmail.com \
+     --email administrator@example.test \
      --directory /ABSOLUTE/OWNER_ONLY_EXTERNAL_PARENT/new-staging-approval
    ```
 
@@ -149,7 +149,7 @@ explicit decisions. None automatically completes the next step.
    ```sql
    SELECT id::text, email, email_confirmed_at, banned_until, deleted_at
    FROM auth.users
-   WHERE email = 'zacharymaynard182@gmail.com'
+   WHERE email = 'administrator@example.test'
    LIMIT 2;
    ```
 

@@ -31,8 +31,8 @@
     "smtp_credentials": "secure-owner-connection-only-not-this-file",
     "external_forwarding": false,
     "allowed_recipients": [
-      "zacharymaynard182@gmail.com",
-      "yukikato123123123@gmail.com"
+      "administrator@example.test",
+      "operator@example.test"
     ],
     "maximum_initial_test_users": 2,
     "maximum_initial_test_messages": 6,

@@ -1,0 +1,14 @@
+.admin-notifications{position:relative;}
+.admin-notifications>button{display:inline-flex;align-items:center;gap:6px;}
+.account-card.admin-notification-panel{position:absolute;right:0;top:100%;z-index:20;width:min(420px,calc(100vw - 48px));max-height:70vh;overflow:auto;margin:8px 0;padding:20px;}
+.admin-notification-panel h3{font-size:18px;}
+.admin-notification-panel p{font-size:12px;}
+.admin-notification-list{list-style:none;padding:0;margin:12px 0;}
+.admin-notification-list li{padding:12px 0;border-bottom:1px solid var(--border);}
+.admin-notification-list li>span,.admin-notification-list time{display:block;font-size:12px;overflow-wrap:anywhere;}
+.admin-notification-panel button{font-size:12px;margin:4px 4px 4px 0;}
+@media(max-width:700px){.account-card.admin-notification-panel{position:fixed;top:90px;left:16px;right:16px;width:auto;}}
+@media(max-width:700px){
+ .admin-notifications>button{width:auto;padding:8px;white-space:nowrap;}
+ .admin-header-actions:has(>.admin-notifications)>.button-secondary{min-width:120px;}
+}

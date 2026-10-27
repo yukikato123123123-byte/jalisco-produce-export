@@ -1,6 +1,6 @@
 import {useEffect,useRef} from 'react';
 import type {ReactNode} from 'react';
-import {Localized} from '../localization';
+import {LegacyLocalized as Localized} from '../legacyLocalization';
 
 /** Inline review workspace. Keeps the existing page URL and normal Back navigation. */
 export function RecordDetailPanel({title,onClose,children}:{title:ReactNode;onClose:()=>void;children:ReactNode}){

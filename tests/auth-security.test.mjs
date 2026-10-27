@@ -123,7 +123,8 @@ test('stateful provider-contract OTP expiry, reuse and purpose checks fail close
     assert.equal((await f.request('/api/auth/verify', { ...base, code: expired, type: 'signup' })).status, 400);
   } finally { f.close(); }
 });
-test('per-session read limit bounds provider calls without caching identity or revocation', async () => {
+test('per-session read limit bounds provider calls without caching identity or revocation', async t => {
+  const now=Date.now();t.mock.method(Date,'now',()=>now);
   const f = fixture();
   try {
     const c = await f.login(); const before = f.upstream.stats.userChecks;

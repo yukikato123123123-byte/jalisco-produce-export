@@ -1,0 +1,20 @@
+.nopal-operations .admin-language-menu{display:grid;gap:4px;max-width:170px;min-width:110px;font-size:11px;line-height:1.4}.nopal-operations .admin-language-menu select{width:100%;min-height:36px;padding:6px 10px;font:14px/1.4 system-ui,sans-serif;color:var(--ops-text,#f1f0e9);background:var(--ops-panel,#17211b);border:1px solid var(--ops-line,#56624e);border-radius:2px}.nopal-operations .admin-language-menu select:focus-visible{outline:2px solid #d6ef83;outline-offset:3px}.nopal-operations .ops-topbar{flex-wrap:wrap}.nopal-operations :is(button,label,p,h1,h2,h3,h4){overflow-wrap:anywhere}.nopal-operations{font-family:system-ui,'Noto Sans Myanmar','Myanmar Text',sans-serif}@media(max-width:450px){.nopal-operations .admin-language-menu{max-width:140px;min-width:105px}.nopal-operations .ops-topbar{gap:12px}}
+
+@font-face{font-family:'NopaHuaAdminKO';src:url('/assets/admin-languages/ko-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+1100-11FF,U+3130-318F,U+AC00-D7A3;}
+@font-face{font-family:'NopaHuaAdminKO';src:url('/assets/admin-languages/ko-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap;unicode-range:U+1100-11FF,U+3130-318F,U+AC00-D7A3;}
+.nopal-operations:lang(ko){font-family:'NopaHuaAdminKO',system-ui,sans-serif}
+@font-face{font-family:'NopaHuaAdminMY';src:url('/assets/admin-languages/my-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+1000-109F,U+AA60-AA7F,U+A9E0-A9FF;}
+@font-face{font-family:'NopaHuaAdminMY';src:url('/assets/admin-languages/my-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap;unicode-range:U+1000-109F,U+AA60-AA7F,U+A9E0-A9FF;}
+.nopal-operations:lang(my){font-family:'NopaHuaAdminMY',system-ui,sans-serif}
+@font-face{font-family:'NopaHuaAdminJA';src:url('/assets/admin-languages/ja-400.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;unicode-range:U+3000-30FF,U+3400-9FFF,U+FF00-FFEF;}
+@font-face{font-family:'NopaHuaAdminJA';src:url('/assets/admin-languages/ja-600.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap;unicode-range:U+3000-30FF,U+3400-9FFF,U+FF00-FFEF;}
+.nopal-operations:lang(ja){font-family:'NopaHuaAdminJA',system-ui,sans-serif}
+/* Existing editorial headings declare a serif face explicitly; give translated
+   scripts a glyph-complete face without affecting English/Spanish typography. */
+.nopal-operations:lang(ko) .admin-main :is(h1,h2,h3,h4,blockquote,.eyebrow){font-family:'NopaHuaAdminKO',system-ui,sans-serif}
+.nopal-operations:lang(my) .admin-main :is(h1,h2,h3,h4,blockquote,.eyebrow){font-family:'NopaHuaAdminMY',system-ui,sans-serif}
+.nopal-operations:lang(ja) .admin-main :is(h1,h2,h3,h4,blockquote,.eyebrow){font-family:'NopaHuaAdminJA',system-ui,sans-serif}
+.nopal-operations.account-page:lang(ko) .admin-content.account-card .admin-section-heading h2{font-family:'NopaHuaAdminKO',system-ui,sans-serif}
+.nopal-operations.account-page:lang(my) .admin-content.account-card .admin-section-heading h2{font-family:'NopaHuaAdminMY',system-ui,sans-serif}
+.nopal-operations.account-page:lang(ja) .admin-content.account-card .admin-section-heading h2{font-family:'NopaHuaAdminJA',system-ui,sans-serif}
+.nopal-operations .ops-settings>.admin-language-menu{display:grid;max-width:170px}

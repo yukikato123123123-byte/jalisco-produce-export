@@ -1,0 +1,62 @@
+{
+  "ko": {
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanskr/NotoSansKR%5Bwght%5D.ttf",
+    "source_sha256": "194018e6b2b293a7964f037b25c0249ce1418bc9ab3c971060a03aa57861e252",
+    "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanskr/OFL.txt",
+    "subset": "Static administrator UI glyphs only; renamed derivative family",
+    "files": [
+      {
+        "file": "ko-400.woff2",
+        "weight": 400,
+        "bytes": 26908,
+        "sha256": "0fd49aaff4975e41d11ac0545a4295d978599808f310c38da3d6d802a9469dfc"
+      },
+      {
+        "file": "ko-600.woff2",
+        "weight": 600,
+        "bytes": 27208,
+        "sha256": "fe52bdccdf8860dbb61f0ace7dd952111e89d84c654c46cb36687570b89f4aee"
+      }
+    ]
+  },
+  "my": {
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosansmyanmar/NotoSansMyanmar%5Bwdth%2Cwght%5D.ttf",
+    "source_sha256": "7abbbfbe2514105d7ce94937aee3feb2ba89b73a256c8b77b5866bd9b83e32ec",
+    "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosansmyanmar/OFL.txt",
+    "subset": "Static administrator UI glyphs only; renamed derivative family",
+    "files": [
+      {
+        "file": "my-400.woff2",
+        "weight": 400,
+        "bytes": 42696,
+        "sha256": "336a38af2eb8e4d399f668386a74fedb3b896583a7eae7d836c5b49f6637e542"
+      },
+      {
+        "file": "my-600.woff2",
+        "weight": 600,
+        "bytes": 45348,
+        "sha256": "4e195f34fa967d2701665a4373839636a1096b372791b4e3db47066dfae6e674"
+      }
+    ]
+  },
+  "ja": {
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosansjp/NotoSansJP%5Bwght%5D.ttf",
+    "source_sha256": "c2f3b4d463500a2ddcd3849cded1fceeb9fd6d1c32e6cbecd568453ba50fc68f",
+    "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosansjp/OFL.txt",
+    "subset": "Static administrator UI glyphs only; renamed derivative family",
+    "files": [
+      {
+        "file": "ja-400.woff2",
+        "weight": 400,
+        "bytes": 88008,
+        "sha256": "6b04ce1f5d5ae1edcede5654939638acbe5c8946c701879cdfeeea116126cbba"
+      },
+      {
+        "file": "ja-600.woff2",
+        "weight": 600,
+        "bytes": 87956,
+        "sha256": "4e1686d0058725026ce663c41cbef65edc4e28c74842302e38b5c7221f82a0e4"
+      }
+    ]
+  }
+}

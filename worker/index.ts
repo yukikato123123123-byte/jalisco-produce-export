@@ -1,4 +1,4 @@
-import {applicantsAdmin,recordApplicant,recordSignupApplicant} from './researchApplicants.ts';
+import {applicantsAdmin,recordApplicant,recordSignupApplicant,ResearchAccountFailure} from './researchApplicants.ts';
 import {producer,publicItems} from './producer.ts';
 import {buyer} from './buyer.ts';
 import {publicProducers,publicBuyers} from './directory.ts';
@@ -275,6 +275,6 @@ export async function handle(request: Request, env: Env): Promise<Response> {
       return json(await buyer(env.DB, auth.user.id, auth.profile, path, request.method, body, url.searchParams));
     }
     throw new Failure(404, 'Endpoint not found.');
-  } catch (error) { return json({ error: error instanceof Failure ? error.message : 'Authentication is temporarily unavailable.', ...(isolatedStaging(env) && error instanceof ProviderFailure && error.code === 'email_rate_limited' ? { code: 'email_rate_limited' } : {}) }, error instanceof Failure ? error.status : 503, undefined, error instanceof Failure ? error.retryAfter : undefined); }
+  } catch (error) { return json({ error: error instanceof Failure ? error.message : 'Authentication is temporarily unavailable.', ...(error instanceof ResearchAccountFailure ? {verificationStatus:error.verificationStatus} : {}), ...(isolatedStaging(env) && error instanceof ProviderFailure && error.code === 'email_rate_limited' ? { code: 'email_rate_limited' } : {}) }, error instanceof Failure ? error.status : 503, undefined, error instanceof Failure ? error.retryAfter : undefined); }
 }
 export default {fetch:handle,async scheduled(_event:unknown,env:Env){if(env.AUTH_ENVIRONMENT==='staging')await cleanupImages(env);}};

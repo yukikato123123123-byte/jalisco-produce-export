@@ -7,7 +7,8 @@ type AuthUser={id:string;email:string;created_at?:string;email_confirmed_at?:str
 type Environment={DB:Database;SUPABASE_URL:string;SUPABASE_STORAGE_SERVICE_ROLE_KEY?:string};
 export class ResearchAccountFailure extends Failure {
  readonly verificationStatus:number;
- constructor(status:number){super(503,'Research account verification is unavailable.');this.verificationStatus=status;}
+ readonly verificationReason:string;
+ constructor(status:number,reason='upstream_rejected'){super(503,'Research account verification is unavailable.');this.verificationStatus=status;this.verificationReason=reason;}
 }
 const address=(v:unknown)=>typeof v==='string'&&v.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?v.trim().toLowerCase():null;
 export async function recordApplicant(db:Database,user:AuthUser,project:string,source:'signup'|'self'|'administrator',actor:string){
@@ -21,12 +22,14 @@ export async function recordSignupApplicant(env:Environment,payload:Record<strin
  await recordApplicant(env.DB,user,new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,''),'signup',user.id);
 }
 async function authAdmin(env:Environment,path:string){
- if(!env.SUPABASE_STORAGE_SERVICE_ROLE_KEY)throw new ResearchAccountFailure(0);
+ if(!env.SUPABASE_STORAGE_SERVICE_ROLE_KEY)throw new ResearchAccountFailure(0,'credential_missing');
+ let headers:Headers;
+ try{headers=new Headers({apikey:env.SUPABASE_STORAGE_SERVICE_ROLE_KEY,Authorization:'Bearer '+env.SUPABASE_STORAGE_SERVICE_ROLE_KEY});}catch{throw new ResearchAccountFailure(0,'credential_header_invalid');}
  let status=0;
  try{
-  const r=await fetch(env.SUPABASE_URL+'/auth/v1/admin/'+path,{headers:{apikey:env.SUPABASE_STORAGE_SERVICE_ROLE_KEY,Authorization:'Bearer '+env.SUPABASE_STORAGE_SERVICE_ROLE_KEY},redirect:'error',signal:AbortSignal.timeout(10000)});
+  const r=await fetch(env.SUPABASE_URL+'/auth/v1/admin/'+path,{headers,redirect:'error',signal:AbortSignal.timeout(10000)});
   status=r.status;if(!r.ok)throw new ResearchAccountFailure(status);return await r.json();
- }catch(error){if(error instanceof ResearchAccountFailure)throw error;throw new ResearchAccountFailure(status);}
+ }catch(error){if(error instanceof ResearchAccountFailure)throw error;throw new ResearchAccountFailure(status,status?'invalid_response':error instanceof Error&&['TimeoutError','AbortError'].includes(error.name)?'transport_timeout':'transport_error');}
 }
 export async function applicantsAdmin(env:Environment,actor:string,project:string,method:string,body:Record<string,unknown>,params:URLSearchParams){
  if(!await hasAdministratorGrant(env.DB,actor,project))throw new Failure(403,'Administrator access is not configured for this account. A trusted owner grant is required.');

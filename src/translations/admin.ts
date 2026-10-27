@@ -1,20 +1,10 @@
 // Administrator-only UI catalog. Public EN/ES dictionaries are unchanged.
-export const adminTranslations:Record<string,{es?:string;ko:string;my:string;ja:string}>={"Legacy operations":{"es":"Operaciones anteriores","ko":"기존 운영 관리","my":"မူလလုပ်ငန်း စီမံခန့်ခွဲမှု","ja":"従来の運営管理"},"All languages":{"es":"Todos los idiomas","ko":"모든 언어","my":"ဘာသာစကားအားလုံး","ja":"すべての言語"},"English":{"es": "Inglés", "ko": "영어", "my": "အင်္ဂလိပ်", "ja": "英語"},"Spanish":{"es": "Español", "ko": "스페인어", "my": "စပိန်", "ja": "スペイン語"},
+export const adminTranslations:Record<string,{es?:string;ko:string;my:string;ja:string}>={"Status":{"es":"Estado","ko":"상태","my":"အခြေအနေ","ja":"状態"},"Research Applicants":{"es": "Solicitantes de investigación", "ko": "시장조사 가입자", "my": "သုတေသနလျှောက်ထားသူများ", "ja": "調査申込者"},"Research applicant saved.":{"es": "Solicitante guardado.", "ko": "시장조사 가입자를 저장했습니다.", "my": "လျှောက်ထားသူကို သိမ်းဆည်းပြီးပါပြီ။", "ja": "調査申込者を保存しました。"},"Only research applicants are listed. Other authentication accounts are not automatically included.":{"es": "Solo se muestran solicitantes de investigación. No se incluyen automáticamente otras cuentas.", "ko": "시장조사 신청자만 표시합니다. 다른 계정은 자동으로 포함하지 않습니다.", "my": "သုတေသနလျှောက်ထားသူများကိုသာ ပြသသည်။ အခြားအကောင့်များ အလိုအလျောက် မပါဝင်ပါ။", "ja": "調査申込者のみ表示します。他のアカウントは自動で含まれません。"},"Existing applicant email":{"es": "Correo del solicitante existente", "ko": "기존 신청자 이메일", "my": "ရှိပြီးသားလျှောက်ထားသူ၏ အီးမေးလ်", "ja": "既存申込者のメール"},"Register existing applicant":{"es": "Vincular solicitante existente", "ko": "기존 신청자 연결", "my": "ရှိပြီးသားလျှောက်ထားသူကို ချိတ်ဆက်ရန်", "ja": "既存申込者を登録"},"Confirm that this existing account requested research participation. No account or access grant is created by linking it.":{"es": "Confirma que esta cuenta solicitó participar. Vincularla no crea una cuenta ni concede acceso.", "ko": "이 계정이 시장조사 참여를 신청했는지 확인하세요. 연결만으로 계정이나 접근 권한이 생성되지 않습니다.", "my": "ဤအကောင့်က သုတေသနပါဝင်ရန် လျှောက်ထားကြောင်း အတည်ပြုပါ။ ချိတ်ဆက်ခြင်းသည် အကောင့် သို့မဟုတ် ခွင့်ပြုချက် မဖန်တီးပါ။", "ja": "このアカウントの参加申請を確認してください。登録だけでアカウントやアクセス権は作成されません。"},"No research applicants match this view.":{"es": "No hay solicitantes que coincidan.", "ko": "조건에 맞는 시장조사 가입자가 없습니다.", "my": "ကိုက်ညီသော လျှောက်ထားသူ မရှိပါ။", "ja": "条件に一致する申込者はいません。"},"Account created":{"es": "Creación de cuenta", "ko": "계정 생성일", "my": "အကောင့်ဖန်တီးချိန်", "ja": "アカウント作成日時"},"Survey submitted":{"es": "Encuesta enviada", "ko": "설문 제출 여부", "my": "စစ်တမ်းတင်သွင်းပြီး", "ja": "回答提出済み"},"Processed at":{"es": "Fecha de decisión", "ko": "처리 일시", "my": "စီမံဆောင်ရွက်ချိန်", "ja": "処理日時"},"Approve":{"es": "Aprobar", "ko": "승인", "my": "ခွင့်ပြုရန်", "ja": "承認"},"Reject or revoke":{"es": "Rechazar o revocar", "ko": "거부 또는 회수", "my": "ငြင်းပယ်ရန် သို့မဟုတ် ရုပ်သိမ်းရန်", "ja": "却下・取り消し"},"Your research application is saved. Administrator approval is required.":{"es": "Tu solicitud está guardada. Se requiere aprobación del administrador.", "ko": "시장조사 신청이 저장되었습니다. 관리자 승인이 필요합니다.", "my": "လျှောက်လွှာကို သိမ်းဆည်းပြီးပါပြီ။ စီမံခန့်ခွဲသူ၏ ခွင့်ပြုချက် လိုအပ်သည်။", "ja": "調査申請を保存しました。管理者の承認が必要です。"},"Request research access":{"es": "Solicitar acceso a la investigación", "ko": "시장조사 참여 신청", "my": "သုတေသနဝင်ရောက်ခွင့် လျှောက်ရန်", "ja": "調査参加を申請"},"Research application could not be saved. Sign in and retry your application.":{"es": "No se pudo guardar la solicitud. Inicia sesión e inténtalo de nuevo.", "ko": "신청을 저장하지 못했습니다. 로그인 후 다시 신청하세요.", "my": "လျှောက်လွှာ မသိမ်းနိုင်ပါ။ ဝင်ရောက်ပြီး ထပ်မံကြိုးစားပါ။", "ja": "申請を保存できません。ログインして再申請してください。"},"Research account verification is unavailable.":{"es": "La verificación de cuentas no está disponible.", "ko": "연구 계정을 확인할 수 없습니다.", "my": "သုတေသနအကောင့်ကို မစစ်ဆေးနိုင်ပါ။", "ja": "調査アカウントを確認できません。"},"No existing account was found.":{"es": "No se encontró una cuenta existente.", "ko": "기존 계정을 찾을 수 없습니다.", "my": "ရှိပြီးသားအကောင့် မတွေ့ပါ။", "ja": "既存のアカウントが見つかりません。"},"Research applicant not found.":{"es": "No se encontró al solicitante.", "ko": "시장조사 가입자를 찾을 수 없습니다.", "my": "လျှောက်ထားသူ မတွေ့ပါ။", "ja": "調査申込者が見つかりません。"},"Research account identity changed. Review before retrying.":{"es": "La identidad cambió. Revísala antes de reintentar.", "ko": "계정 식별 정보가 바뀌었습니다. 확인 후 다시 시도하세요.", "my": "အကောင့်အချက်အလက် ပြောင်းလဲသွားသည်။ စစ်ဆေးပြီး ထပ်ကြိုးစားပါ။", "ja": "アカウント情報が変わりました。確認して再試行してください。"},"Multiple research permissions exist. Review Research Access before changing this applicant.":{"es": "Hay varios permisos. Revisa el acceso de investigación antes de cambiar este solicitante.", "ko": "여러 접근 권한이 있습니다. Research Access에서 확인한 뒤 변경하세요.", "my": "ခွင့်ပြုချက်များစွာ ရှိနေသည်။ မပြောင်းမီ သုတေသနဝင်ရောက်ခွင့်ကို စစ်ဆေးပါ။", "ja": "複数の権限があります。調査アクセスを確認してから変更してください。"},"Legacy operations":{"es":"Operaciones anteriores","ko":"기존 운영 관리","my":"မူလလုပ်ငန်း စီမံခန့်ခွဲမှု","ja":"従来の運営管理"},"All languages":{"es":"Todos los idiomas","ko":"모든 언어","my":"ဘာသာစကားအားလုံး","ja":"すべての言語"},"English":{"es": "Inglés", "ko": "영어", "my": "အင်္ဂလိပ်", "ja": "英語"},"Spanish":{"es": "Español", "ko": "스페인어", "my": "စပိန်", "ja": "スペイン語"},
 "Survey response trend":{"es": "Evolución de respuestas", "ko": "설문 응답 추이", "my": "စစ်တမ်းဖြေဆိုမှု လမ်းကြောင်း", "ja": "回答数の推移"},"Period":{"es": "Período", "ko": "기간", "my": "ကာလ", "ja": "期間"},"Last 7 days":{"es": "Últimos 7 días", "ko": "최근 7일", "my": "ပြီးခဲ့သည့် ၇ ရက်", "ja": "過去7日間"},"Last 30 days":{"es": "Últimos 30 días", "ko": "최근 30일", "my": "ပြီးခဲ့သည့် ရက် ၃၀", "ja": "過去30日間"},"Last 90 days":{"es": "Últimos 90 días", "ko": "최근 90일", "my": "ပြီးခဲ့သည့် ရက် ၉၀", "ja": "過去90日間"},"Chart data":{"es": "Datos del gráfico", "ko": "차트 데이터", "my": "ဇယားအချက်အလက်", "ja": "グラフのデータ"},"No research responses in this period.":{"es": "No hay respuestas en este período.", "ko": "이 기간의 설문 응답이 없습니다.", "my": "ဤကာလအတွင်း စစ်တမ်းဖြေဆိုမှု မရှိပါ။", "ja": "この期間の回答はありません。"},"Responses by language":{"es": "Respuestas por idioma", "ko": "언어별 응답", "my": "ဘာသာစကားအလိုက် ဖြေဆိုမှုများ", "ja": "言語別の回答"},"View all":{"es": "Ver todo", "ko": "모두 보기", "my": "အားလုံးကြည့်ရန်", "ja": "すべて表示"},"No records found.":{"es": "No se encontraron registros.", "ko": "기록이 없습니다.", "my": "မှတ်တမ်း မတွေ့ပါ။", "ja": "記録がありません。"},"Last updated":{"es": "Última actualización", "ko": "마지막 갱신", "my": "နောက်ဆုံး ပြင်ဆင်ချိန်", "ja": "最終更新"},"Confirm permission change":{"es": "Confirmar cambio de permiso", "ko": "권한 변경 확인", "my": "ခွင့်ပြုချက်ပြောင်းလဲမှု အတည်ပြုရန်", "ja": "権限の変更を確認"},"Confirm":{"es": "Confirmar", "ko": "확인", "my": "အတည်ပြုရန်", "ja": "確認"},
   "Overview": {
     "ko": "개요",
     "my": "အနှစ်ချုပ်",
     "ja": "概要"
-  },
-  "Product concept": {
-    "ko": "제품 콘셉트",
-    "my": "ထုတ်ကုန်အယူအဆ",
-    "ja": "製品コンセプト"
-  },
-  "Origin": {
-    "ko": "기원",
-    "my": "မူလအကြောင်း",
-    "ja": "原点"
   },
   "Contact & Feedback": {
     "ko": "문의 및 피드백",
@@ -606,121 +596,6 @@ export const adminTranslations:Record<string,{es?:string;ko:string;my:string;ja:
     "my": "ယခင်အကြောင်းအရာ သုံးသပ်ခြင်း",
     "ja": "過去のコンテンツ確認"
   },
-  "PUBLIC BRAND CONTENT": {
-    "ko": "공개 브랜드 콘텐츠",
-    "my": "အများပြည်သူအမှတ်တံဆိပ်အကြောင်းအရာ",
-    "ja": "公開ブランドコンテンツ"
-  },
-  "NopaHua product concept": {
-    "ko": "NopaHua 제품 콘셉트",
-    "my": "NopaHua ထုတ်ကုန်အယူအဆ",
-    "ja": "NopaHua 製品コンセプト"
-  },
-  "The ritual, in three moments": {
-    "ko": "세 순간으로 만나는 리추얼",
-    "my": "အဆင့်သုံးဆင့် အတွေ့အကြုံ",
-    "ja": "3つの瞬間で構成するリチュアル"
-  },
-  "Origin and material": {
-    "ko": "기원과 소재",
-    "my": "မူလနှင့်ပစ္စည်း",
-    "ja": "原点と素材"
-  },
-  "Published from the existing code-managed content. Editing requires a reviewed code change; this screen does not save website content.": {
-    "ko": "기존 코드에서 관리하는 콘텐츠입니다. 편집하려면 코드 검토가 필요하며 이 화면에서는 웹사이트 콘텐츠를 저장하지 않습니다.",
-    "my": "လက်ရှိကုဒ်ဖြင့် စီမံထားသည့်အကြောင်းအရာဖြစ်သည်။ ပြင်ရန် ကုဒ်စစ်ဆေးမှုလိုအပ်ပြီး ဤစာမျက်နှာမှ ဝက်ဘ်ဆိုက်အကြောင်းအရာ မသိမ်းပါ။",
-    "ja": "既存のコードで管理されるコンテンツです。編集にはコードレビューが必要で、この画面からサイトの内容は保存できません。"
-  },
-  "Read-only source": {
-    "ko": "읽기 전용 소스",
-    "my": "ဖတ်ရှုရန်သာဖြစ်သည့် မူရင်း",
-    "ja": "読み取り専用のソース"
-  },
-  "Powder texture study; not a photograph of a finished product": {
-    "ko": "파우더 질감 연구 이미지이며 완제품 사진이 아닙니다",
-    "my": "အမှုန့်မျက်နှာပြင် လေ့လာပုံသာဖြစ်ပြီး ထုတ်ကုန်အပြီးသတ်ဓာတ်ပုံ မဟုတ်ပါ",
-    "ja": "パウダーの質感を研究した画像で、完成品の写真ではありません"
-  },
-  "COMING SOON": {
-    "ko": "출시 예정",
-    "my": "မကြာမီ မိတ်ဆက်မည်",
-    "ja": "近日公開"
-  },
-  "Concept visualization. No confirmed formula, price or launch date.": {
-    "ko": "콘셉트 이미지입니다. 제형·가격·출시일은 확정되지 않았습니다.",
-    "my": "အယူအဆပုံရိပ်သာ ဖြစ်သည်။ ဖော်မြူလာ၊ စျေးနှုန်းနှင့် မိတ်ဆက်ရက် မအတည်ပြုရသေးပါ။",
-    "ja": "コンセプト画像です。処方、価格、発売日は未確定です。"
-  },
-  "Formula": {
-    "ko": "제형",
-    "my": "ဖော်မြူလာ",
-    "ja": "処方"
-  },
-  "Ingredients": {
-    "ko": "성분",
-    "my": "ပါဝင်ပစ္စည်းများ",
-    "ja": "成分"
-  },
-  "Directions": {
-    "ko": "사용 방법",
-    "my": "အသုံးပြုပုံ",
-    "ja": "使用方法"
-  },
-  "Launch date": {
-    "ko": "출시일",
-    "my": "မိတ်ဆက်ရက်",
-    "ja": "発売日"
-  },
-  "Price": {
-    "ko": "가격",
-    "my": "စျေးနှုန်း",
-    "ja": "価格"
-  },
-  "INFORMATION PENDING": {
-    "ko": "정보 확인 중",
-    "my": "အချက်အလက် စောင့်ဆိုင်းဆဲ",
-    "ja": "情報確認中"
-  },
-  "Open public product concept": {
-    "ko": "공개 제품 콘셉트 열기",
-    "my": "အများပြည်သူထုတ်ကုန်အယူအဆ ဖွင့်ရန်",
-    "ja": "公開製品コンセプトを開く"
-  },
-  "Published concept": {
-    "ko": "공개된 콘셉트",
-    "my": "ထုတ်ပြန်ထားသည့် အယူအဆ",
-    "ja": "公開中のコンセプト"
-  },
-  "Two elements. A new perspective.": {
-    "ko": "두 요소. 새로운 관점.",
-    "my": "ဒြပ်စင်နှစ်ခု။ အမြင်သစ်တစ်ခု။",
-    "ja": "2つの要素。新たな視点。"
-  },
-  "The current story explores water, powder, texture and transformation. It does not establish verified ingredients, sourcing, certification or cosmetic performance.": {
-    "ko": "현재 스토리는 물·파우더·질감·변화를 탐구합니다. 성분·공급지·인증·화장품 효능을 입증하지는 않습니다.",
-    "my": "လက်ရှိအကြောင်းအရာသည် ရေ၊ အမှုန့်၊ မျက်နှာပြင်နှင့် ပြောင်းလဲမှုကို လေ့လာသည်။ ပါဝင်ပစ္စည်း၊ ရင်းမြစ်၊ အသိအမှတ်ပြုလက်မှတ် သို့မဟုတ် အလှကုန်အာနိသင်ကို အတည်မပြုပါ။",
-    "ja": "現在のストーリーは水、パウダー、質感、変化を探究しています。成分、調達元、認証、化粧品の効果を裏付けるものではありません。"
-  },
-  "Brand history": {
-    "ko": "브랜드 기원",
-    "my": "အမှတ်တံဆိပ်သမိုင်း",
-    "ja": "ブランドの歩み"
-  },
-  "Mexico and nopal": {
-    "ko": "멕시코와 노팔",
-    "my": "မက္ကဆီကိုနှင့် နိုပယ်",
-    "ja": "メキシコとノパル"
-  },
-  "Raw materials": {
-    "ko": "원료",
-    "my": "ကုန်ကြမ်းများ",
-    "ja": "原材料"
-  },
-  "This is a visual concept. No finished cosmetic product is represented.": {
-    "ko": "시각적 콘셉트이며 완제품을 나타내지 않습니다.",
-    "my": "ရုပ်ပုံအယူအဆသာ ဖြစ်ပြီး အပြီးသတ်အလှကုန်ကို မဖော်ပြပါ။",
-    "ja": "ビジュアルコンセプトであり、完成した化粧品を示すものではありません。"
-  },
   "Not provided": {
     "ko": "정보 없음",
     "my": "မဖော်ပြထားပါ",
@@ -1275,11 +1150,6 @@ export const adminTranslations:Record<string,{es?:string;ko:string;my:string;ja:
     "ko": "목록 데이터를 사용할 수 없습니다.",
     "my": "စာရင်းအချက်အလက် မရရှိနိုင်ပါ။",
     "ja": "一覧データを利用できません。"
-  },
-  "Ritual": {
-    "ko": "리추얼",
-    "my": "အဆင့်လိုက်အတွေ့အကြုံ",
-    "ja": "リチュアル"
   },
   "of": {
     "ko": "전체",

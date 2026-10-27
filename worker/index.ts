@@ -1,3 +1,4 @@
+import {applicantsAdmin,recordApplicant,recordSignupApplicant} from './researchApplicants.ts';
 import {producer,publicItems} from './producer.ts';
 import {buyer} from './buyer.ts';
 import {publicProducers,publicBuyers} from './directory.ts';
@@ -73,6 +74,7 @@ async function limitSessionReads(env: Env, sessionId: string) {
 export async function handle(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   if(url.pathname==='/admin/preview'||url.pathname==='/api/staging/admin-preview'||url.pathname.startsWith('/api/staging/admin-preview/'))return adminPreview(request,env);
+  if(['/research','/research/'].includes(url.pathname)&&request.method==='GET')return new Response(null,{status:302,headers:{Location:'/research/nopahua'+url.search,'Cache-Control':'no-store'}});
   if(retiredPage(url.pathname)||retiredImage(url.pathname))return unavailablePage(410);
   if(!url.pathname.startsWith('/api/')&&!knownPage(url.pathname)&&!url.pathname.startsWith('/assets/')&&!url.pathname.startsWith('/images/')&&!['/owner','/owner/client.js','/favicon.ico'].includes(url.pathname))return unavailablePage(404);
   if(url.pathname==='/onboarding')return new Response(null,{status:303,headers:{Location:'/account','Cache-Control':'no-store'}});
@@ -130,9 +132,9 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     }
     const path = url.pathname;
     if (request.method === 'POST' && path === '/api/auth/signup') {
-      const details=body.registration_type==='research'?{full_name:typeof body.full_name==='string'?body.full_name.trim().slice(0,120):''}:profile(body), address=email(body.email), secret=password(body.password);
+      const details=body.registration_type==='research'?{full_name:typeof body.full_name==='string'?body.full_name.trim().slice(0,120):'',registration_type:'research'}:profile(body), address=email(body.email), secret=password(body.password);
       const redirect = `signup?redirect_to=${encodeURIComponent(`${env.AUTH_ORIGIN}/verify-email`)}`;
-      try { await provider(env, redirect, 'POST', { email: address, password: secret, data: details }); }
+      try { const result=await provider(env, redirect, 'POST', { email: address, password: secret, data: details });if(body.registration_type==='research')await recordSignupApplicant(env,result); }
       catch (error) { if (!(error instanceof ProviderFailure) || error.code !== 'account_existence') throw error; }
       return json({ message: generic });
     }
@@ -195,6 +197,8 @@ export async function handle(request: Request, env: Env): Promise<Response> {
       const revision = await authenticationRevision(env.DB);
       const payload = await provider(env, verifying ? 'verify' : 'token?grant_type=password', 'POST', verifying ? { email: address, token: body.code, type: body.type } : { email: address, password: password(body.password) });
       const nextCookie = await createSession(payload, verifying && body.type === 'recovery' ? 'recovery' : 'normal', env, revision, address);
+      const researchUser=payload.user as {id:string;email:string;created_at?:string;email_confirmed_at?:string;user_metadata?:Record<string,unknown>}|undefined;
+      if(!verifying||body.type!=='recovery'){if(researchUser?.user_metadata?.registration_type==='research')await recordApplicant(env.DB,researchUser,new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,''),'signup',researchUser.id);}
       const previous = sessionId(request, env); if (previous) await env.DB.prepare('DELETE FROM sessions WHERE id = ?').bind(await sessionHash(previous, env)).run();
       return json({ ok: true }, 200, nextCookie);
     }
@@ -231,6 +235,7 @@ export async function handle(request: Request, env: Env): Promise<Response> {
       return json({ ok: true }, 200, cookie(env, '', 0));
     }
     if (auth.session.purpose === 'recovery') throw new Failure(403, 'Complete password recovery before continuing.');
+    if(path==='/api/research/application'){if(request.method!=='POST')throw new Failure(405,'Method not allowed.');await recordApplicant(env.DB,auth.user,new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,''),'self',auth.user.id);return json({saved:true});}
     if(path==='/api/inquiries'||path.startsWith('/api/inquiries/')){
       if(path==='/api/inquiries'&&request.method==='POST')return json(await submitInquiry(env.DB,auth.user,body),201);
       if(request.method==='GET')return json(await readInquiries(env.DB,url.searchParams,auth.user.id,path==='/api/inquiries'?undefined:path.slice('/api/inquiries/'.length)));
@@ -248,6 +253,7 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     // Provider-verified subject + server-only owner grant. Metadata is never authority.
     if (path === '/api/admin' || path.startsWith('/api/admin/')) {
       if(usesOwnerGateway(env)){const response=await ownerAdmin(env,{kind:'request',user:auth.user.id,path,method:request.method,body,query:url.searchParams.toString()});if(response.ok&&request.method==='GET'&&/^\/api\/admin\/customer-feedback(?:\/|$)/.test(path))return json({...await response.json() as Record<string,unknown>,can_manage:false});return response;}
+      if(path==='/api/admin/research-applicants')return json(await applicantsAdmin(env,auth.user.id,new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,''),request.method,body,url.searchParams));
       const result=await administrator(env.DB,auth.user.id,path,request.method,body,url.searchParams,new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,''));
       if(request.method==='POST'&&/^\/api\/admin\/drafts\/[^/]+$/.test(path)&&body.action==='draft_delete')try{await cleanupImages(env,auth.user.id);}catch{/* Durable image tombstones are retried by the existing cleanup job. */}
       return json(result);

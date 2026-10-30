@@ -1,0 +1,28 @@
+import {test,expect} from '@playwright/test';
+import {translateAdmin} from '../../src/adminI18n';
+import {surveyQuestions} from '../../shared/researchSurvey';
+import {translate} from '../../src/i18n';
+const stored=Array.from({length:13},(_,i)=>({id:'isolated-chart-'+i,interest:4,clarity:3,preference:i%2?'powder':'liquid',language:i%2?'en':'es',created_at:`2026-10-${i<7?'01':'02'}T12:00:00Z`,comment:'<b>Isolated original text '+i+'</b>'}));
+for(const width of [375,1440])for(const language of ['en','es'] as const)test(`DB-shaped chart aggregates, filters, zero state and original table ${width} ${language}`,async({page})=>{
+ await page.setViewportSize({width,height:1000});await page.addInitScript(lang=>localStorage.setItem('nopahua.admin.language',lang),language);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ let held:import('@playwright/test').Route|undefined;let holdNext=false;
+ await page.route('**/api/admin/**',async r=>{const url=new URL(r.request().url());if(!url.pathname.endsWith('/research-responses'))return r.fulfill({json:{items:[],total:0,page:1,totalPages:1,pageSize:10}});
+ if(holdNext){holdNext=false;held=r;return;}
+ const records=stored.filter(v=>(!url.searchParams.get('language')||v.language===url.searchParams.get('language'))&&(!url.searchParams.get('from')||v.created_at.slice(0,10)>=url.searchParams.get('from')!)&&(!url.searchParams.get('to')||v.created_at.slice(0,10)<=url.searchParams.get('to')!));
+ const pageNumber=Number(url.searchParams.get('page')||1),writtenPage=Number(url.searchParams.get('writtenPage')||1);const trend=[...new Set(records.map(v=>v.created_at.slice(0,10)))].map(date=>({date,count:records.filter(v=>v.created_at.startsWith(date)).length}));
+ const aggregate={total:records.length,trend,questions:[...new Set(records.map(v=>v.preference))].map(value=>({key:'preference',value,count:records.filter(v=>v.preference===value).length})),answered:[{key:'preference',count:records.length},{key:'comment',count:records.length}]};
+ await r.fulfill({json:{items:records.slice((pageNumber-1)*10,pageNumber*10),page:pageNumber,pageSize:10,total:records.length,totalPages:Math.max(1,Math.ceil(records.length/10)),aggregate,written:{items:records.slice((writtenPage-1)*10,writtenPage*10).map(v=>({id:v.id+':comment',response_id:v.id,question:'comment',text:v.comment,created_at:v.created_at,language:v.language})),page:writtenPage,pageSize:10,total:records.length,totalPages:Math.max(1,Math.ceil(records.length/10))}}});
+ });
+ await page.goto('/admin?section=research-results');const t=(s:string)=>translateAdmin(s,language);await expect(page.getByTestId('survey-valid-total')).toHaveText('13');await expect(page.locator('.survey-question-chart')).toHaveCount(11);await expect(page.locator('.survey-stack-row')).toHaveCount(11);
+ for(const q of surveyQuestions)await expect(page.locator('.survey-question-chart[data-question="'+q.key+'"] h3')).toContainText(translate(q.title,language));
+ const preference=page.locator('.survey-question-chart[data-question=preference]');await expect(preference.locator('[data-option=powder]')).toContainText('6 (46.2%)');await expect(preference.locator('[data-option=liquid]')).toHaveAttribute('data-count','7');await expect(page.locator('.survey-donut')).toHaveCount(1);
+ await page.locator('.survey-trend summary').click();await expect(page.locator('.survey-trend tbody tr')).toHaveCount(2);await expect(page.locator('.survey-trend tbody')).toContainText('7');
+ await expect(page.locator('.survey-written-table tbody')).toContainText('<b>Isolated original text 0</b>');await expect(page.locator('.survey-written-table tbody b')).toHaveCount(0);
+ // Individual list and written-table pages never change the full filtered chart aggregate.
+ await page.locator('.ops-survey-results>.admin-pagination').getByRole('button',{name:t('Go to page')+' 2',exact:true}).click();await expect(page.locator('.ops-data-cards>li')).toHaveCount(3);await expect(page.getByTestId('survey-valid-total')).toHaveText('13');
+ await page.locator('.survey-written-table .admin-pagination').getByRole('button',{name:t('Go to page')+' 2',exact:true}).click();await expect(page.locator('.survey-written-table tbody tr')).toHaveCount(3);await expect(page.getByTestId('survey-valid-total')).toHaveText('13');
+ await page.getByLabel(t('Language'),{exact:true}).selectOption('en');await expect(page.getByTestId('survey-valid-total')).toHaveText('6');await expect(page.locator('.survey-written-table tbody tr')).toHaveCount(6);await expect(preference.locator('[data-option=powder]')).toContainText('6 (100%)');
+ holdNext=true;await page.getByLabel(t('From date'),{exact:true}).fill('2026-11-01');await expect(page.locator('.survey-visualizations')).toHaveCount(0);await expect(page.locator('.ops-survey-results')).toHaveAttribute('aria-busy','true');await expect.poll(()=>Boolean(held)).toBe(true);await held!.fulfill({json:{items:[],page:1,pageSize:10,total:0,totalPages:1,aggregate:{total:0,trend:[],questions:[],answered:[]},written:{items:[],page:1,pageSize:10,total:0,totalPages:1}}});
+ await expect(page.getByTestId('survey-valid-total')).toHaveText('0');await expect(page.locator('.survey-question-chart')).toHaveCount(11);await expect(page.locator('.survey-bars li').first()).toContainText('0 (0%)');await expect(page.locator('.survey-visualizations')).not.toContainText('NaN');await expect(page.locator('.survey-visualizations')).not.toContainText('Infinity');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect(errors).toEqual([]);await page.screenshot({path:`/tmp/nopal-charts-empty-${width}-${language}.png`,fullPage:true});
+});

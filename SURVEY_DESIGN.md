@@ -18,7 +18,7 @@ Staging `?verification=1` visibly labels the survey as verification. Its submiss
 
 ## Administrator results and security
 
-GET `/api/admin/research-responses` uses the unchanged provider session, recovery restrictions, administrator grant verification and Owner gateway routing. It combines the two immutable response sources. Pagination and full-dataset question statistics share one materialized D1 snapshot. It returns at most ten full records per page, overall count, per-option counts and per-question answered counts. Percentages use that question's answered count (multiple-choice totals may exceed 100%). Optional written answers appear in each response's full questionnaire with the submission time and EN/ES language.
+GET `/api/admin/research-responses` uses the unchanged provider session, recovery restrictions, administrator grant verification and Owner gateway routing. It combines the two immutable response sources. Pagination and full-dataset question statistics share one materialized D1 snapshot. It returns at most ten full records per page, overall count, per-option counts and per-question answered counts. Percentages use all responses matching the filters (multiple-choice totals may exceed 100%). Optional written answers appear in each response's full questionnaire with the submission time and EN/ES language.
 
 Supported filters: `page`, `from`, `to` (UTC calendar dates), `language=en|es`, `sort=asc|desc`, `tests=0|1`. Default is newest first and non-test responses only. Question-specific counts include all filtered stored responses, not just the visible page. Historical questionnaires show their original answers and an earlier-questionnaire label. Empty and error states do not use sample data.
 
@@ -40,3 +40,12 @@ Deploy only the existing `wrangler.staging.jsonc` target. Apply **only 0020** th
 - Live ordinary account: session verified without administrator grant, results request 403. Logged-out request: 401. Existing administrator login and results read: successful. Public and administrator detail views had no horizontal overflow at 375px or desktop.
 - Original two response rows, one administrator grant and all 74 pre-existing trigger definitions retained their exact pre-deployment hashes. No original response, grant, secret, Supabase setting or production deployment was changed.
 - The live verification script takes owner-only existing session files. It writes no credentials to Git and logs out its supplied verification sessions when complete. Its intentional test records remain retained and clearly separated from real statistics.
+
+
+## Administrator graph extension
+
+The same materialized D1 snapshot now includes UTC daily response counts and an independently paginated written-answer table (`writtenPage`). Changing the individual response page or the written-answer page does not change full-filter statistics. The response bodies, schema and administrator checks are unchanged; no migration is needed.
+
+The results UI renders a date trend with an accessible data table, per-question count/percentage bars, a format-preference donut and count-scaled stacked comparisons with complete question/choice legends. All eleven questions remain visible even with no answers. Written questions show answered/missing distributions plus the original text table; they do not acquire fabricated choices. Percentages use the full filtered response total, with a zero denominator rendered as 0%. Historical unasked questions remain missing. Multi-select selection counts can exceed response totals and the UI explains this explicitly.
+
+Every displayed count comes from the existing administrator API; dates, language, verification status and both paginations share the same filtered record set. Stale charts are hidden while a new filter query is pending. EN/ES labels, numeric text accompanying colors, wrapped legends, keyboard-accessible chart-data disclosure and mobile original-text cards preserve the existing visual style. Browser charts are native SVG/CSS and add no third-party dependencies or secret values.

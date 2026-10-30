@@ -38,6 +38,8 @@ try{
   }
   await expect(page.locator('.research-review li')).toHaveCount(11);
   await page.getByRole('button',{name:t('Edit question')+' 9',exact:true}).click();await expect(page.locator('input[value="50_99"]')).toBeChecked();await page.getByRole('button',{name:t('Return to review'),exact:true}).click();
+  // Respect the server-issued minimum review duration even on fast automation hosts.
+  await page.waitForTimeout(3100);
   await page.locator('input[name=consent]').check();
   const savedResponse=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/public/nopal-survey'&&r.request().method()==='POST');
   await page.getByRole('button',{name:t('Save research response'),exact:true}).click();const saved=await savedResponse;check(`server confirmed save ${width}`,saved.status()===201&&(await saved.json()).saved===true);
@@ -56,5 +58,10 @@ try{
  await expect(page.locator('.ops-data-cards')).toContainText(marker);
  for(const width of [375,1440]){await page.setViewportSize({width,height:1000});const details=page.locator('.ops-data-cards details').first();if(await details.getAttribute('open')===null)await details.locator('summary').click();await expect(details.locator('dl>div')).toHaveCount(11);check(`admin detail no overflow ${width}`,await page.evaluate(()=>globalThis.document.documentElement.scrollWidth<=globalThis.innerWidth));await page.screenshot({path:`/tmp/jalisco-nopal-admin-verified-${width}.png`,fullPage:true});}
  await context.close();
+ for(const [role,cookie] of [['ordinary',ordinaryCookie],['administrator',adminCookie]]){
+  const logout=await fetch(origin+'/api/auth/logout',{method:'POST',headers:{Cookie:cookie,Origin:origin,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(20000)});
+  check(role+' verification session logged out',logout.status===200);
+  check(role+' results denied after logout',(await api('/api/admin/research-responses',cookie)).status===401);
+ }
  const report={result:'PASS',origin,realResponses:baseline,newVerificationResponses:stored.length,verificationResponseIds:stored.map(v=>v.id),checks};writeFileSync('/tmp/jalisco-nopal-live-report.json',JSON.stringify(report,null,2),{mode:0o600});console.log(JSON.stringify(report,null,2));
 }finally{await browser.close();}

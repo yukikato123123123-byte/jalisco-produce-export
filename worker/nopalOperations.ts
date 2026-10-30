@@ -21,7 +21,7 @@ async function readOperations(db:Database,section:string,method:string,params:UR
  if(section==='origin')return {content:nopalOrigin,source:'src/nopalContent.ts',read_only:true};
  if(section==='settings')return {preference_scope:'browser',email_service:'not_configured'};
  if(section==='operations-overview'){
-  const result=await db.prepare("SELECT json_object('responses',(SELECT count(*) FROM research_responses WHERE project_ref=?),'research_access',(SELECT count(*) FROM research_access WHERE project_ref=? AND state='allowed'),'customer_feedback',(SELECT count(*) FROM nopal_feedback),'launch_list',(SELECT count(*) FROM nopal_launch_subscriptions)) AS data").bind(project,project).first<{data:string}>();if(!result)throw new Failure(503,'Brand operations data is unavailable.');
+  const result=await db.prepare("SELECT json_object('responses',((SELECT count(*) FROM research_responses WHERE project_ref=? AND NOT(comment LIKE 'STAGING VERIFICATION%' AND lower(comment) LIKE '%synthetic%'))+(SELECT count(*) FROM public_research_responses WHERE project_ref=? AND is_test=0)),'research_access',(SELECT count(*) FROM research_access WHERE project_ref=? AND state='allowed'),'customer_feedback',(SELECT count(*) FROM nopal_feedback),'launch_list',(SELECT count(*) FROM nopal_launch_subscriptions)) AS data").bind(project,project,project).first<{data:string}>();if(!result)throw new Failure(503,'Brand operations data is unavailable.');
   const {items:recent,...recentPagination}=await activityPage(db,params,project);return {counts:JSON.parse(result.data),email_service:'not_configured',recent,recentPagination};
  }
  const {page,q,status,from,to}=filters(params);

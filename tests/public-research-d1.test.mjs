@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {createRequire} from 'node:module';
+import {migrations} from './helpers/auth-fixture.mjs';import {publicResearch} from '../worker/publicResearch.ts';import {researchAdmin} from '../worker/research.ts';
+import {QUESTIONNAIRE_VERSION,CONSENT_VERSION} from '../shared/researchSurvey.ts';
+const {Request,URL,URLSearchParams}=globalThis,require=createRequire(new URL('../node_modules/wrangler/package.json',import.meta.url));const {Miniflare,convertV4MiniflareOptions}=require('miniflare');
+test('real D1 public response, idempotency, test isolation and eleven-question SQL aggregates',{timeout:30000},async()=>{
+ const mf=new Miniflare(convertV4MiniflareOptions({cf:false,telemetry:{enabled:false},modules:true,compatibilityDate:'2026-10-21',script:'export default {fetch(){return new Response("isolated")}}',d1Databases:['DB']}));
+ try{const db=await mf.getD1Database('DB');for(const migration of migrations)for(const sql of migration.replace(/--[^\n]*/g,'').match(/\s*CREATE TRIGGER[\s\S]*?END;|[^;]+;/g))await db.prepare(sql).run();
+ const origin='https://app.example.test',env={DB:db,AUTH_ORIGIN:origin,AUTH_ENVIRONMENT:'staging',SUPABASE_URL:'https://auth.example.test',SESSION_ENCRYPTION_KEY:'ab'.repeat(32)};
+ const body={questionnaireVersion:QUESTIONNAIRE_VERSION,consentVersion:CONSENT_VERSION,consent:true,interest:4,clarity:3,nameImpression:'neutral',preference:'powder',mostInteresting:'visuals',informationNeeded:'Synthetic D1 information',comment:'Synthetic D1 reflection',servings:'seven',price:'50_99',purchaseIntent:'probably',situations:['home','trips'],language:'es'};
+ const request=(values,cookie)=>publicResearch(new Request(origin+'/api/public/nopal-survey',{method:values?'POST':'GET',headers:{...(values?{Origin:origin,'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},...(values?{body:JSON.stringify(values)}:{})}),env);
+ for(const verification of [false,true]){const challenge=await request();const cookie=challenge.headers.get('set-cookie').split(';')[0];await db.prepare("UPDATE auth_limits SET expires=expires-4000 WHERE id LIKE 'survey:%'").run();assert.equal((await request({...body,verification},cookie)).status,201);assert.equal((await request({...body,verification},cookie)).status,200);assert.equal((await(await request(undefined,cookie)).json()).submitted,true);}
+ const results=await researchAdmin(db,'admin-fixture','auth.example.test','/api/admin/research-responses','GET',{},new URLSearchParams());assert.equal(results.total,1);assert.equal(results.aggregate.total,1);assert.equal(results.aggregate.answered.length,11);assert.equal(results.aggregate.questions.find(q=>q.key==='situations'&&q.value==='home').count,1);assert.equal(results.items[0].answers.informationNeeded,body.informationNeeded);
+ const tests=await researchAdmin(db,'admin-fixture','auth.example.test','/api/admin/research-responses','GET',{},new URLSearchParams('tests=1'));assert.equal(tests.total,1);assert.equal(tests.items[0].is_test,1);
+ await assert.rejects(()=>db.prepare('DELETE FROM public_research_responses').run(),/retained/);
+ }finally{await mf.dispose();}
+});

@@ -23,3 +23,11 @@
 .ops-redesign .ops-recent-list p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
 /* Status badges must inherit the administrator's script-complete language face. */
 .nopal-operations.ops-redesign .ops-state{font-family:inherit;font-size:11px}
+
+/* Full questionnaires and arbitrary respondent text remain readable on small screens. */
+.ops-survey-results {min-width:0;overflow-wrap:anywhere}
+.ops-survey-results .ops-surface {min-width:0;padding:18px}
+.ops-survey-results details dl {grid-template-columns:minmax(0,1fr)}
+.ops-survey-results details dd {white-space:pre-wrap}
+
+.ops-question-stats {display:grid;gap:14px;margin:20px 0}

@@ -6,7 +6,8 @@ import {submitInquiry,readInquiries} from './inquiries.ts';
 import {adminPreview} from './adminPreview.ts';
 import {imageFile,cleanupImages,manageImages,uploadImage} from './productImages.ts';
 import {retiredPage,retiredImage,knownPage,unavailablePage} from './retiredRoutes.ts';
-import {researchPermission,researchSubmit,researchAggregate} from './research.ts';
+import {researchPermission,researchSubmit} from './research.ts';
+import {publicResearch} from './publicResearch.ts';
 import {submitFeedback} from './nopalFeedback.ts';
 import {launchSubscription} from './nopalLaunch.ts';
 import { ownerPage } from './owner/ui.ts';
@@ -80,11 +81,12 @@ export async function handle(request: Request, env: Env): Promise<Response> {
   if(url.pathname==='/onboarding')return new Response(null,{status:303,headers:{Location:'/account','Cache-Control':'no-store'}});
   if ((url.pathname === '/owner' || url.pathname === '/owner/client.js') && request.method === 'GET') return ownerPage(url.pathname);
   if (url.pathname.startsWith('/api/owner/')) return ownerRoute(request, env.OWNER_AUTHORITY);
-  if(url.pathname.startsWith('/research/nopahua')){
-    const headers={'Cache-Control':'no-store, private','X-Robots-Tag':'noindex, nofollow, noarchive','Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'};
-    try{if(request.method!=='GET'||!['/research/nopahua','/research/nopahua/','/research/nopahua/results'].includes(url.pathname))throw new Failure(404,'Page not available');assertAuthEnvironment(env);const a=await readSession(request,env);if(a.session.purpose==='recovery')throw new Failure(403,'Complete password recovery before continuing.');await researchPermission(env.DB,a.user,new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,''),url.pathname.endsWith('/results'));const response=await env.ASSETS.fetch(request);const next=new Response(response.body,response);for(const [key,value] of Object.entries(headers))next.headers.set(key,value);return next;}
-    catch(error){const status=error instanceof Failure?error.status:503;return new Response('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>NopaHua · Acceso privado</title><body style="background:#101612;color:#eee7dc;font:18px system-ui;padding:8vw"><h1>NopaHua · Acceso privado / Private access</h1><p>Inicia sesión con tu cuenta existente y solicita acceso al administrador.</p><p>Sign in with your existing account and request access from the administrator.</p><a style="color:#d6ef83" href="/login">Iniciar sesión / Sign in</a><p><a style="color:#d6ef83" href="/research/nopahua">Volver a comprobar / Check access again</a></p></body></html>',{status,headers:{...headers,'Content-Type':'text/html; charset=utf-8'}});}
+  if(['/research/nopahua','/research/nopahua/'].includes(url.pathname)&&request.method==='GET'){
+    const response=await env.ASSETS.fetch(request);const next=new Response(response.body,response);
+    next.headers.set('Cache-Control','no-store');next.headers.set('X-Robots-Tag','noindex, nofollow, noarchive');return next;
   }
+  if(url.pathname.startsWith('/research/nopahua'))return new Response('Results are restricted to administrators.',{status:403,headers:{'Cache-Control':'no-store'}});
+  if(url.pathname==='/api/public/nopal-survey')return publicResearch(request,env);
   if (!url.pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
   if(url.pathname==='/api/public/feedback')return submitFeedback(request,env);
   if(url.pathname==='/api/public/launch-subscriptions')return launchSubscription(request,env);
@@ -244,10 +246,10 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     if(path.startsWith('/api/research/')){
       const project=new URL(env.SUPABASE_URL).hostname.replace(/\.supabase\.co$/,'');
       if(!['/api/research/access','/api/research/responses','/api/research/results'].includes(path))throw new Failure(404,'Endpoint not found.');
-      await researchPermission(env.DB,auth.user,project,path==='/api/research/results');
+      if(path==='/api/research/results')throw new Failure(403,'Results are restricted to administrators.');
+      await researchPermission(env.DB,auth.user,project);
       if(path==='/api/research/access'&&request.method==='GET')return json({allowed:true,submitted:!!await env.DB.prepare('SELECT id FROM research_responses WHERE user_id=? AND project_ref=?').bind(auth.user.id,project).first()});
       if(path==='/api/research/responses'&&request.method==='POST')return json(await researchSubmit(env.DB,auth.user,project,body),201);
-      if(path==='/api/research/results'&&request.method==='GET')return json(await researchAggregate(env.DB,project));
       throw new Failure(405,'Method not allowed.');
     }
     // Provider-verified subject + server-only owner grant. Metadata is never authority.

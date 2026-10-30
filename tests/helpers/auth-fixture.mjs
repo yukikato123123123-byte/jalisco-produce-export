@@ -2,7 +2,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
 import { handle } from '../../worker/index.ts';
 const { Request, Response, URL, crypto } = globalThis;
-export const migrations = ['0001_auth.sql', '0002_limits_index.sql', '0003_auth_generations.sql', '0004_producer_workspace.sql', '0005_buyer_center.sql', '0006_buyer_publication.sql', '0007_admin_operations.sql', '0008_admin_grant_events.sql','0010_inquiries.sql','0011_inquiry_workflow.sql','0012_registration_reviews.sql','0013_product_images.sql','0014_admin_notifications_drafts.sql','0017_nopahua_research.sql','0018_research_applicants.sql'].map(name => readFileSync(new URL('../../migrations/' + name, import.meta.url), 'utf8'));
+export const migrations = ['0001_auth.sql', '0002_limits_index.sql', '0003_auth_generations.sql', '0004_producer_workspace.sql', '0005_buyer_center.sql', '0006_buyer_publication.sql', '0007_admin_operations.sql', '0008_admin_grant_events.sql','0010_inquiries.sql','0011_inquiry_workflow.sql','0012_registration_reviews.sql','0013_product_images.sql','0014_admin_notifications_drafts.sql','0017_nopahua_research.sql','0018_research_applicants.sql','0019_research_questionnaire.sql','0020_public_nopal_survey.sql'].map(name => readFileSync(new URL('../../migrations/' + name, import.meta.url), 'utf8'));
 export function deferred() { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; }
 export const details = { full_name: 'Test Person', company: 'Test Farm', country: 'Mexico', role: 'producer' };
 export function statefulProvider() {
